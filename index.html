@@ -5,11 +5,16 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="./node_modules/jquery/dist/jquery.slim.min.js"></script>
+    <script src="./node_modules/popper.js/dist/popper.min.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <title>Google Drive</title>
   </head>
   <body>
     <button id="authorize">authorize</button>
     <input type="text" id="key" placeholder="key">
+    <select multiple class="form-control" id="result"></select>
     <script src="./renderer.js"></script>
   </body>
 </html>

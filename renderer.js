@@ -66,12 +66,14 @@ function listFiles(auth) {
         if (err) return console.log('The API returned an error: ' + err);
         const files = res.data.files;
         if (files.length) {
-            console.log('My Drive(root):');
             files.map((file) => {
-                console.log(`${file.name} (${file.id})`);
+                document.getElementById('result').innerHTML += `<option value='${file.id}'>` + file.name + "</option>"
             });
         } else {
             console.log('No files found.');
         }
     });
 }
+document.getElementById('result').addEventListener('change', function () {
+    console.log(this.value)
+})
