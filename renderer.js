@@ -59,7 +59,6 @@ function listFiles(auth) {
     const drive = google.drive({version: 'v3', auth});
     drive.files.list({
         q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
-        fields: '*',
         spaces: 'drive',
         fields: 'nextPageToken, files(id, name)',
     }, (err, res) => {
