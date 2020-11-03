@@ -1,7 +1,9 @@
 const fs = require('fs');
-const readline = require('readline');
 const {google} = require('googleapis');
+const { file } = require('googleapis/build/src/apis/file');
 const shell = require('electron').shell
+var drive = null
+var oAuth2Client = null
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
@@ -21,7 +23,7 @@ document.getElementById('authorize').addEventListener('click', function (){
 
 function authorize(credentials, callback) {
     const {client_secret, client_id, redirect_uris} = credentials.installed;
-    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+    oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
     // Check if we have previously stored a token.
     fs.readFile(TOKEN_PATH, (err, token) => {
@@ -56,7 +58,7 @@ function getAccessToken(oAuth2Client, callback) {
 }
 
 function listFiles(auth) {
-    const drive = google.drive({version: 'v3', auth});
+    drive = google.drive({version: 'v3', auth});
     drive.files.list({
         q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
         spaces: 'drive',
@@ -74,5 +76,22 @@ function listFiles(auth) {
     });
 }
 document.getElementById('result').addEventListener('change', function () {
-    console.log(this.value)
+    fileID = this.value
+    drive.files.list({
+        q: `'${fileID}' in parents and mimeType='application/vnd.google-apps.folder'`,
+        spaces: 'drive',
+        fileId: fileID,
+        fields: 'nextPageToken, files(id, name)',
+    }, (err, res) => {
+        if (err) return console.log('The API returned an error: ' + err);
+        const files = res.data.files;
+        if (files.length) {
+            document.getElementById('result').innerHTML = ""
+            files.map((file) => {
+                document.getElementById('result').innerHTML += `<option value='${file.id}'>` + file.name + "</option>"
+            });
+        } else {
+            console.log('No files found.');
+        }
+    });
 })
