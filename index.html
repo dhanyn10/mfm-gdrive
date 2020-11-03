@@ -6,15 +6,26 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./style.css">
     <script src="./node_modules/jquery/dist/jquery.slim.min.js"></script>
     <script src="./node_modules/popper.js/dist/popper.min.js"></script>
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <title>Google Drive</title>
   </head>
   <body>
-    <button id="authorize">authorize</button>
-    <input type="text" id="key" placeholder="key">
-    <select multiple class="form-control" id="result"></select>
+    <div class="container-fluid mt-4 mb-4">
+      <div class="form-group row">
+        <div class="col-sm-4">
+          <button class="btn btn-primary" id="authorize">authorize</button>
+        </div>
+        <div class="col-sm-8">
+          <input class="form-control form-control-sm" type="text" id="key" placeholder="key">
+        </div>
+      </div>
+      <div class="form-group">
+        <select multiple class="form-control custom-multiple" id="result"></select>
+      </div>
+    </div>
     <script src="./renderer.js"></script>
   </body>
 </html>
