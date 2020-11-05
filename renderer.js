@@ -4,6 +4,7 @@ const { file } = require('googleapis/build/src/apis/file');
 const shell = require('electron').shell
 var drive = null
 var oAuth2Client = null
+var arrparents = []
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
@@ -59,6 +60,7 @@ function getAccessToken(oAuth2Client, callback) {
 
 function listFiles(auth) {
     drive = google.drive({version: 'v3', auth});
+    arrparents.push('root')
     drive.files.list({
         q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
         spaces: 'drive',
@@ -67,6 +69,7 @@ function listFiles(auth) {
         if (err) return console.log('The API returned an error: ' + err);
         const files = res.data.files;
         if (files.length) {
+            document.getElementById('result').innerHTML = ""
             files.map((file) => {
                 document.getElementById('result').innerHTML += `<option value='${file.id}'>` + file.name + "</option>"
             });
@@ -85,9 +88,17 @@ document.getElementById('result').addEventListener('change', function () {
     }, (err, res) => {
         if (err) return console.log('The API returned an error: ' + err);
         const files = res.data.files;
+        var displayupfolder = false
+        if(fileID != arrparents[0])
+            displayupfolder = true
         if (files.length) {
             document.getElementById('result').innerHTML = ""
             files.map((file) => {
+                if(displayupfolder == true)
+                {
+                    document.getElementById('result').innerHTML = `<option value='${arrparents[0]}'> return to root </option>`
+                    displayupfolder = false
+                }
                 document.getElementById('result').innerHTML += `<option value='${file.id}'>` + file.name + "</option>"
             });
         } else {
