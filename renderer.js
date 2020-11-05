@@ -14,6 +14,7 @@ const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
 const TOKEN_PATH = 'token.json';
 
 document.getElementById('authorize').addEventListener('click', function (){
+    arrparents = []
     // Load client secrets from a local file.
     fs.readFile('credentials.json', (err, content) => {
         if (err) return console.log('Error loading client secret file:', err);
@@ -79,30 +80,43 @@ function listFiles(auth) {
     });
 }
 document.getElementById('result').addEventListener('change', function () {
-    fileID = this.value
+    folderID = this.value
+    var prevfolder
+    if(folderID == 'upfolder')
+    {
+        console.log(arrparents.length)
+        prevfolder = (arrparents.length)-2
+        folderID = arrparents[prevfolder]
+        arrparents.pop()
+    }
     drive.files.list({
-        q: `'${fileID}' in parents and mimeType='application/vnd.google-apps.folder'`,
+        q: `'${folderID}' in parents and mimeType='application/vnd.google-apps.folder'`,
         spaces: 'drive',
-        fileId: fileID,
+        fileId: folderID,
         fields: 'nextPageToken, files(id, name)',
     }, (err, res) => {
         if (err) return console.log('The API returned an error: ' + err);
         const files = res.data.files;
         var displayupfolder = false
-        if(fileID != arrparents[0])
+        if(folderID != "root")
+        {
             displayupfolder = true
+            if(folderID != arrparents[prevfolder])
+                arrparents.push(folderID)
+        }
         if (files.length) {
             document.getElementById('result').innerHTML = ""
             files.map((file) => {
                 if(displayupfolder == true)
                 {
-                    document.getElementById('result').innerHTML = `<option value='${arrparents[0]}'> return to root </option>`
+                    document.getElementById('result').innerHTML = `<option value='upfolder'>...</option>`
                     displayupfolder = false
                 }
                 document.getElementById('result').innerHTML += `<option value='${file.id}'>` + file.name + "</option>"
             });
         } else {
-            console.log('No files found.');
+            console.log('No more folders inside here');
+            arrparents.pop()
         }
     });
 })
