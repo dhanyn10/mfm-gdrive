@@ -79,13 +79,13 @@ function listFiles(auth) {
             files.map((file) => {
                 opthtml += `<option value='${file.id}'>` + file.name + "</option>"
             })
-            document.getElementById('result').innerHTML = opthtml
+            document.getElementById('folders').innerHTML = opthtml
         } else {
             console.log('No files found.')
         }
     });
 }
-document.getElementById('result').addEventListener('change', function () {
+document.getElementById('folders').addEventListener('change', function () {
     folderID = this.value
     var prevfolder
     if(folderID == 'upfolder')
@@ -120,10 +120,35 @@ document.getElementById('result').addEventListener('change', function () {
                 }
                 opthtml += `<option value='${file.id}'>` + file.name + "</option>"
             })
-            document.getElementById('result').innerHTML = opthtml
+            document.getElementById('folders').innerHTML = opthtml
         } else {
             console.log('No more folders inside here')
             arrparents.pop()
+        }
+    })
+    drive.files.list({
+        q: `'${folderID}' in parents`,
+        spaces: 'drive',
+        fileId: folderID,
+        fields: 'nextPageToken, files(id, name)',
+    }, (err, res) => {
+        if(err)
+        {
+            console.log("error: ",err)
+        }
+        else
+        {
+            const files = res.data.files
+            if (files.length) {
+                var opthtml = ""
+                files.map((file) => {
+                    opthtml += `<option value='${file.id}'>` + file.name + "</option>"
+                })
+                document.getElementById('gdrive-files').innerHTML = opthtml
+            } else {
+                console.log('No more folders inside here')
+                arrparents.pop()
+            }
         }
     })
 })
