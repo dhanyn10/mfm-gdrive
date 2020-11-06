@@ -168,7 +168,6 @@ document.getElementById('select-all').addEventListener('click', function() {
     }
     else
     {
-        
         for(fl = 0; fl < filenames.length; fl++)
         {
             filenames[fl].checked = false
