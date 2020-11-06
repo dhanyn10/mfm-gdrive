@@ -122,8 +122,8 @@ document.getElementById('result').addEventListener('change', function () {
             })
             document.getElementById('result').innerHTML = opthtml
         } else {
-            console.log('No more folders inside here');
+            console.log('No more folders inside here')
             arrparents.pop()
         }
-    });
+    })
 })
