@@ -164,6 +164,7 @@ document.getElementById('select-all').addEventListener('click', function() {
         {
             filenames[fl].checked = true
         }
+        this.innerHTML = "Select None"
         selectcond = true
     }
     else
@@ -172,6 +173,7 @@ document.getElementById('select-all').addEventListener('click', function() {
         {
             filenames[fl].checked = false
         }
+        this.innerHTML = "Select All"
         selectcond = false
     }
 })
