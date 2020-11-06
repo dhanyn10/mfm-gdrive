@@ -126,6 +126,8 @@ document.getElementById('folders').addEventListener('change', function () {
             arrparents.pop()
         }
     })
+
+    //shows files and folder
     drive.files.list({
         q: `'${folderID}' in parents`,
         spaces: 'drive',
@@ -142,7 +144,7 @@ document.getElementById('folders').addEventListener('change', function () {
             if (files.length) {
                 var opthtml = ""
                 files.map((file) => {
-                    opthtml += `<option value='${file.id}'>` + file.name + "</option>"
+                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + file.name + "</li>"
                 })
                 document.getElementById('gdrive-files').innerHTML = opthtml
             } else {
@@ -151,4 +153,12 @@ document.getElementById('folders').addEventListener('change', function () {
             }
         }
     })
+})
+
+document.getElementById('select-all').addEventListener('click', function() {
+    var filenames = document.getElementsByClassName('gdrive-filenames')
+    for(fl = 0; fl < filenames.length; fl++)
+    {
+        filenames[fl].checked = "true"
+    }
 })
