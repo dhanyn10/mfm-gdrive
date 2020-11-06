@@ -5,6 +5,7 @@ const shell = require('electron').shell
 var drive = null
 var oAuth2Client = null
 var arrparents = []
+var selectcond = false
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
@@ -157,8 +158,21 @@ document.getElementById('folders').addEventListener('change', function () {
 
 document.getElementById('select-all').addEventListener('click', function() {
     var filenames = document.getElementsByClassName('gdrive-filenames')
-    for(fl = 0; fl < filenames.length; fl++)
+    if(selectcond == false)
     {
-        filenames[fl].checked = "true"
+        for(fl = 0; fl < filenames.length; fl++)
+        {
+            filenames[fl].checked = true
+        }
+        selectcond = true
+    }
+    else
+    {
+        
+        for(fl = 0; fl < filenames.length; fl++)
+        {
+            filenames[fl].checked = false
+        }
+        selectcond = false
     }
 })
