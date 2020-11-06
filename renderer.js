@@ -84,7 +84,6 @@ document.getElementById('result').addEventListener('change', function () {
     var prevfolder
     if(folderID == 'upfolder')
     {
-        console.log(arrparents.length)
         prevfolder = (arrparents.length)-2
         folderID = arrparents[prevfolder]
         arrparents.pop()
