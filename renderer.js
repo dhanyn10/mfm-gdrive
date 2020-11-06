@@ -70,10 +70,11 @@ function listFiles(auth) {
         if (err) return console.log('The API returned an error: ' + err);
         const files = res.data.files;
         if (files.length) {
-            document.getElementById('result').innerHTML = ""
+            var opthtml = ""
             files.map((file) => {
-                document.getElementById('result').innerHTML += `<option value='${file.id}'>` + file.name + "</option>"
+                opthtml += `<option value='${file.id}'>` + file.name + "</option>"
             });
+            document.getElementById('result').innerHTML = opthtml
         } else {
             console.log('No files found.');
         }
@@ -104,15 +105,16 @@ document.getElementById('result').addEventListener('change', function () {
                 arrparents.push(folderID)
         }
         if (files.length) {
-            document.getElementById('result').innerHTML = ""
+            var opthtml = ""
             files.map((file) => {
                 if(displayupfolder == true)
                 {
-                    document.getElementById('result').innerHTML = `<option value='upfolder'>...</option>`
+                    opthtml = `<option value='upfolder'>...</option>`
                     displayupfolder = false
                 }
-                document.getElementById('result').innerHTML += `<option value='${file.id}'>` + file.name + "</option>"
+                opthtml += `<option value='${file.id}'>` + file.name + "</option>"
             });
+            document.getElementById('result').innerHTML = opthtml
         } else {
             console.log('No more folders inside here');
             arrparents.pop()
