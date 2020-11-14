@@ -246,15 +246,29 @@ document.getElementById('go').addEventListener('click', function(){
             listAllFiles[fl].checked = false
         }
     }
+    var _from = document.getElementById('from').value
+    var _to = document.getElementById('to').value
     if(selectfunc == 1)
     {
-        var _from = document.getElementById('from').value
-        var _to = document.getElementById('to').value
         for(r = 0; r < listAllFiles.length; r++)
         {
             if(listAllFiles[r].checked == true)
             {
                 newfilename = listAllFiles[r].name.replace(_from, _to)
+                renameFile(listAllFiles[r].id, newfilename)
+            }
+        }
+    }
+    if(selectfunc == 2)
+    {
+        _from = parseInt(_from)
+        _to = parseInt(_to)
+        for(r = 0; r < listAllFiles.length; r++)
+        {
+            if(listAllFiles[r].checked == true)
+            {
+                var oldname = listAllFiles[r].name
+                newfilename = oldname.slice(0,_from) + oldname.slice(_to)
                 renameFile(listAllFiles[r].id, newfilename)
             }
         }
