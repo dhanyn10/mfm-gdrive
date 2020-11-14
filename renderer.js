@@ -1,14 +1,17 @@
 const fs = require('fs')
 const {google} = require('googleapis')
-const { file } = require('googleapis/build/src/apis/file')
 const shell = require('electron').shell
+const bottleneck = require('bottleneck')
+const limiter = new bottleneck({minTime: 110})
 var drive = null
 var oAuth2Client = null
 var arrparents = []
 var selectcond = false
+var filenames
+var listAllFiles = []
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+const SCOPES = ['https://www.googleapis.com/auth/drive.metadata']
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -84,7 +87,38 @@ function listFiles(auth) {
         } else {
             console.log('No files found.')
         }
-    });
+    })
+    //shows files and folder
+    drive.files.list({
+        q: `'root' in parents`,
+        spaces: 'drive',
+        fields: 'nextPageToken, files(id, name)',
+    }, (err, res) => {
+        if(err)
+        {
+            console.log("error: ",err)
+        }
+        else
+        {
+            const files = res.data.files
+            if (files.length) {
+                var opthtml = ""
+                listAllFiles = []
+                files.map((file) => {
+                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + file.name + "</li>"
+                    listAllFiles.push({
+                        id: file.id,
+                        name: file.name,
+                        checked: false
+                    })
+                })
+                document.getElementById('gdrive-files').innerHTML = opthtml
+            } else {
+                console.log('No more folders inside here')
+                arrparents.pop()
+            }
+        }
+    })    
 }
 document.getElementById('folders').addEventListener('change', function () {
     folderID = this.value
@@ -144,20 +178,25 @@ document.getElementById('folders').addEventListener('change', function () {
             const files = res.data.files
             if (files.length) {
                 var opthtml = ""
+                listAllFiles = []
                 files.map((file) => {
                     opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + file.name + "</li>"
+                    listAllFiles.push({
+                        id: file.id,
+                        name: file.name,
+                        checked: false
+                    })
                 })
                 document.getElementById('gdrive-files').innerHTML = opthtml
             } else {
-                console.log('No more folders inside here')
-                arrparents.pop()
+                console.log('folder is empty')
             }
         }
     })
 })
 
 document.getElementById('select-all').addEventListener('click', function() {
-    var filenames = document.getElementsByClassName('gdrive-filenames')
+    filenames = document.getElementsByClassName('gdrive-filenames')
     if(selectcond == false)
     {
         for(fl = 0; fl < filenames.length; fl++)
@@ -175,5 +214,49 @@ document.getElementById('select-all').addEventListener('click', function() {
         }
         this.innerHTML = "Select All"
         selectcond = false
+    }
+})
+
+function renameFile(fileId, newTitle) {
+    var body = {'name': newTitle}
+    limiter.schedule(() => {
+        drive.files.update({
+            'fileId': fileId,
+            'resource': body
+        }, (err, res) => {
+            if(err)
+                return console.log("error", err)
+            else
+                return console.log("renamed to: ",res.data.name)
+        })
+    })
+}
+
+document.getElementById('go').addEventListener('click', function(){
+    var selectfunc = document.getElementById('select-function').value
+    filenames = document.getElementsByClassName('gdrive-filenames')
+    for(fl = 0; fl < filenames.length; fl++)
+    {
+        if(filenames[fl].checked == true)
+        {
+            listAllFiles[fl].checked = true
+        }
+        else
+        {
+            listAllFiles[fl].checked = false
+        }
+    }
+    if(selectfunc == 1)
+    {
+        var _from = document.getElementById('from').value
+        var _to = document.getElementById('to').value
+        for(r = 0; r < listAllFiles.length; r++)
+        {
+            if(listAllFiles[r].checked == true)
+            {
+                newfilename = listAllFiles[r].name.replace(_from, _to)
+                renameFile(listAllFiles[r].id, newfilename)
+            }
+        }
     }
 })
