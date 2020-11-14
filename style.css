@@ -1,7 +1,15 @@
 .custom-multiple{
-    min-height: 60vh;
+    min-height: 80vh;
 }
 #gdrive-files{
-    max-height: 60vh;
+    max-height: 80vh;
     overflow: auto;
+}
+#gdrive-files li{
+    font-family: 'Courier New', Courier, monospace;
+}
+#gdrive-files li span:hover{
+    background: black;
+    color: white;
+    cursor: pointer;
 }

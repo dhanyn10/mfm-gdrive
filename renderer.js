@@ -105,7 +105,12 @@ function listFiles(auth) {
                 var opthtml = ""
                 listAllFiles = []
                 files.map((file) => {
-                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + file.name + "</li>"
+                    var htmlIndex = ""
+                    for(var ao = 0; ao < file.name.length; ao++)
+                    {
+                        htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
+                    }
+                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + htmlIndex + "</li>"
                     listAllFiles.push({
                         id: file.id,
                         name: file.name,
@@ -180,7 +185,12 @@ document.getElementById('folders').addEventListener('change', function () {
                 var opthtml = ""
                 listAllFiles = []
                 files.map((file) => {
-                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + file.name + "</li>"
+                    var htmlIndex = ""
+                    for(var ao = 0; ao < file.name.length; ao++)
+                    {
+                        htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
+                    }
+                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + htmlIndex + "</li>"
                     listAllFiles.push({
                         id: file.id,
                         name: file.name,
