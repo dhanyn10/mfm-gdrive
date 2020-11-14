@@ -47,6 +47,7 @@ function getAccessToken(oAuth2Client, callback) {
         scope: SCOPES,
     });
     shell.openExternal(authUrl)
+    document.getElementById('key').style.display = "block"
     document.getElementById('key').addEventListener('keypress', function (e) {
         if(e.keyCode == 13)
         {

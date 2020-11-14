@@ -5,6 +5,9 @@
     max-height: 80vh;
     overflow: auto;
 }
+#key{
+    display: none;
+}
 #gdrive-files li{
     font-family: 'Courier New', Courier, monospace;
 }
