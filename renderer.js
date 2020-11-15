@@ -259,6 +259,9 @@ document.getElementById('go').addEventListener('click', function(){
     }
     var _from = document.getElementById('from').value
     var _to = document.getElementById('to').value
+    var padwith = document.getElementById('padwith').value
+    var number = document.getElementById('number').value
+    number = parseInt(number)
     if(selectfunc == 1)
     {
         for(r = 0; r < listAllFiles.length; r++)
@@ -280,6 +283,23 @@ document.getElementById('go').addEventListener('click', function(){
             {
                 var oldname = listAllFiles[r].name
                 newfilename = oldname.slice(0,_from) + oldname.slice(_to)
+                renameFile(listAllFiles[r].id, newfilename)
+            }
+        }
+    }
+    if(selectfunc == 3)
+    {
+        _from = parseInt(_from)
+        _to = parseInt(_to)
+        for(r = 0; r < listAllFiles.length; r++)
+        {
+            if(listAllFiles[r].checked == true)
+            {
+                var oldname = listAllFiles[r].name
+                var tmp = oldname.substr(_from, _to)
+                var maskednumber = tmp.padStart(number, padwith)
+                var newfilename = oldname.replace(tmp, maskednumber)
+                console.log("tmp " + tmp + " ma " + maskednumber + " new " + newfilename)
                 renameFile(listAllFiles[r].id, newfilename)
             }
         }
