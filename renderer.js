@@ -74,7 +74,7 @@ function listFiles(auth) {
     drive.files.list({
         q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
         spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)',
+        fields: 'nextPageToken, files(id, name)'
     }, (err, res) => {
         if (err)
             return console.log('The API returned an error: ' + err)
@@ -93,7 +93,7 @@ function listFiles(auth) {
     drive.files.list({
         q: `'root' in parents`,
         spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)',
+        fields: 'nextPageToken, files(id, name)'
     }, (err, res) => {
         if(err)
         {
@@ -173,7 +173,7 @@ document.getElementById('folders').addEventListener('change', function () {
         q: `'${folderID}' in parents`,
         spaces: 'drive',
         fileId: folderID,
-        fields: 'nextPageToken, files(id, name)',
+        fields: 'nextPageToken, files(id, name)'
     }, (err, res) => {
         if(err)
         {
@@ -236,14 +236,15 @@ function renameFile(fileId, newTitle) {
             'resource': body
         }, (err, res) => {
             if(err)
-                return console.log("error", err)
+                document.getElementById('console-log').innerHTML =+ "ERROR: " + err + "<br/>"
             else
-                return console.log("renamed to: ",res.data.name)
+                document.getElementById('console-log').innerHTML =+ "renamed to: " + res.data.name + "<br/>"
         })
     })
 }
 
 document.getElementById('go').addEventListener('click', function(){
+    document.getElementById('console-log').innerHTML = ""
     var selectfunc = document.getElementById('select-function').value
     filenames = document.getElementsByClassName('gdrive-filenames')
     for(fl = 0; fl < filenames.length; fl++)
@@ -257,32 +258,32 @@ document.getElementById('go').addEventListener('click', function(){
             listAllFiles[fl].checked = false
         }
     }
-    var _from = document.getElementById('from').value
-    var _to = document.getElementById('to').value
-    var padwith = document.getElementById('padwith').value
-    var number = document.getElementById('number').value
-    number = parseInt(number)
     if(selectfunc == 1)
     {
+        var renameFrom = document.getElementById('rename-from').value
+        var renameTo = document.getElementById('rename-to').value
         for(r = 0; r < listAllFiles.length; r++)
         {
             if(listAllFiles[r].checked == true)
             {
-                newfilename = listAllFiles[r].name.replace(_from, _to)
+                newfilename = listAllFiles[r].name.replace(renameFrom, renameTo)
                 renameFile(listAllFiles[r].id, newfilename)
             }
         }
     }
     if(selectfunc == 2)
     {
-        _from = parseInt(_from)
-        _to = parseInt(_to)
+        var indexFrom = document.getElementById('index-from').value
+        var indexTo = document.getElementById('index-to').value
+        indexFrom = parseInt(indexFrom)
+        indexTo = parseInt(indexTo)
+        indexTo =  indexTo - indexFrom
         for(r = 0; r < listAllFiles.length; r++)
         {
             if(listAllFiles[r].checked == true)
             {
                 var oldname = listAllFiles[r].name
-                var todelete = oldname.substr(_from, _to)
+                var todelete = oldname.substr(indexFrom, indexTo)
                 newfilename = oldname.replace(todelete, "")
                 renameFile(listAllFiles[r].id, newfilename)
             }
@@ -290,17 +291,19 @@ document.getElementById('go').addEventListener('click', function(){
     }
     if(selectfunc == 3)
     {
-        _from = parseInt(_from)
-        _to = parseInt(_to)
+        var psFrom = document.getElementById('ps-from').value
+        var psTo = document.getElementById('ps-to').value
+        var psWith = document.getElementById('ps-with').value
+        var psLength = document.getElementById('ps-length').value
         for(r = 0; r < listAllFiles.length; r++)
         {
             if(listAllFiles[r].checked == true)
             {
                 var oldname = listAllFiles[r].name
-                var tmp = oldname.substr(_from, _to)
-                var maskednumber = tmp.padStart(number, padwith)
+                var tmp = oldname.substr(psFrom, psTo)
+                var maskednumber = tmp.padStart(psLength, psWith)
                 var newfilename = oldname.replace(tmp, maskednumber)
-                console.log("tmp " + tmp + " ma " + maskednumber + " new " + newfilename)
+                // console.log("tmp " + tmp + " ma " + maskednumber + " new " + newfilename)
                 renameFile(listAllFiles[r].id, newfilename)
             }
         }
