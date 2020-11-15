@@ -282,7 +282,8 @@ document.getElementById('go').addEventListener('click', function(){
             if(listAllFiles[r].checked == true)
             {
                 var oldname = listAllFiles[r].name
-                newfilename = oldname.slice(0,_from) + oldname.slice(_to)
+                var todelete = oldname.substr(_from, _to)
+                newfilename = oldname.replace(todelete, "")
                 renameFile(listAllFiles[r].id, newfilename)
             }
         }
