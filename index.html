@@ -41,21 +41,40 @@
                             <button class="btn btn-danger" id="go">GO</button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control form-control-sm" id="from" placeholder="from"/>
+                    <div id="rename">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="r-from" placeholder="from"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="r-to" placeholder="to"/>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control form-control-sm" id="to" placeholder="to"/>
+                    <div id="substr">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="i-from" placeholder="from index"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="i-to" placeholder="to index"/>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control form-control-sm" id="padwith" placeholder="pad with"/>
-                    </div>
-                    <div class="form-group">
-                        <input type="number" class="form-control form-control-sm" id="number" placeholder="number"/>
+                    <div id="padstart">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="p-from" placeholder="from index"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="p-to" placeholder="to index"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="p-with" placeholder="pad with"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-sm" id="p-length" placeholder="length"/>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <script src="./utils.js"></script>
         <script src="./renderer.js"></script>
     </body>
 </html>

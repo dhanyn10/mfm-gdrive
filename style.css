@@ -16,3 +16,8 @@
     color: white;
     cursor: pointer;
 }
+#rename,
+#substr,
+#padstart{
+    display: none;
+}
