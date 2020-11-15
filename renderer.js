@@ -236,9 +236,9 @@ function renameFile(fileId, newTitle) {
             'resource': body
         }, (err, res) => {
             if(err)
-                document.getElementById('console-log').innerHTML =+ "ERROR: " + err + "<br/>"
+                console.error(err)
             else
-                document.getElementById('console-log').innerHTML =+ "renamed to: " + res.data.name + "<br/>"
+                console.log(res.data.name)
         })
     })
 }
@@ -277,13 +277,13 @@ document.getElementById('go').addEventListener('click', function(){
         var indexTo = document.getElementById('index-to').value
         indexFrom = parseInt(indexFrom)
         indexTo = parseInt(indexTo)
-        indexTo =  indexTo - indexFrom
+        indexTo =  indexTo + 1
         for(r = 0; r < listAllFiles.length; r++)
         {
             if(listAllFiles[r].checked == true)
             {
                 var oldname = listAllFiles[r].name
-                var todelete = oldname.substr(indexFrom, indexTo)
+                var todelete = oldname.slice(indexFrom, indexTo)
                 newfilename = oldname.replace(todelete, "")
                 renameFile(listAllFiles[r].id, newfilename)
             }
@@ -295,15 +295,18 @@ document.getElementById('go').addEventListener('click', function(){
         var psTo = document.getElementById('ps-to').value
         var psWith = document.getElementById('ps-with').value
         var psLength = document.getElementById('ps-length').value
+        psFrom = parseInt(psFrom)
+        psTo = parseInt(psTo)
+        psTo = psTo + 1
+        psLength = parseInt(psLength)
         for(r = 0; r < listAllFiles.length; r++)
         {
             if(listAllFiles[r].checked == true)
             {
                 var oldname = listAllFiles[r].name
-                var tmp = oldname.substr(psFrom, psTo)
+                var tmp = oldname.slice(psFrom, psTo)
                 var maskednumber = tmp.padStart(psLength, psWith)
                 var newfilename = oldname.replace(tmp, maskednumber)
-                // console.log("tmp " + tmp + " ma " + maskednumber + " new " + newfilename)
                 renameFile(listAllFiles[r].id, newfilename)
             }
         }
