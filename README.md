@@ -34,7 +34,7 @@ our-file-4.pdf
 
 ### delete character by index
 below is how to get the index character:
-![](https://media.giphy.com/media/8qqqesHEL8YRHjbfwF/source.gif)
+![delete character by index](https://media.giphy.com/media/8qqqesHEL8YRHjbfwF/source.gif)
   
 We will delete character `[Koenime]` from the filename. So you need to choose rename option **delete character by index** and fill **`from index`** with `0` and **`to index`** with `8`
 
