@@ -20,7 +20,7 @@
     "electron": "^8.5.2"
   },
   "dependencies": {
-    "bootstrap": "^4.0.0",
+    "bootstrap-css-only": "^4.4.1",
     "bottleneck": "^2.19.5",
     "googleapis": "^39.2.0"
   }
