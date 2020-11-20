@@ -5,7 +5,7 @@ Easy rename your multiple files in Google Drive
 ## Quick Start
 1. Install dependencies
     ```bash
-    npm install
+    $ npm install
     ```
 2. run the application
     ```bash
