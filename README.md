@@ -3,10 +3,14 @@
 Easy rename your multiple files in Google Drive
 
 ## Quick Start
-To run this application, use the following command:
-```bash
-$ npm start
-```
+1. Install dependencies
+    ```bash
+    npm install
+    ```
+2. run the application
+    ```bash
+    $ npm start
+    ```
 ## How to Use
 1. click button **authorize** to let the apps gain authorization to your Google Drive metadata
 2. you will redirected to Google Drive API authorization forms, follow the instructions until you get the **authorization key**
@@ -48,7 +52,7 @@ file-998.pdf
 file-999.pdf
 file-1000.pdf
 ```
-From the list above, set  **`from index`** with `5`, **`to index`**  with `7`, **`pad with`** with `0`, **`length`** with `4`
+From the list above, set  **`from index`** with `5`, **`to index`**  with `7`, **`pad with`** with `0`, **`length`** with `4`. The result will become:
 
 ```
 file-0997.pdf
