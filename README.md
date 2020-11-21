@@ -2,15 +2,20 @@
 # mfm-gdrive
 Easy rename your multiple files in Google Drive
 
-## Quick Start
-1. Install dependencies
+## Install
+1. Clone this repo
     ```bash
-    $ npm install
+    https://github.com/dhanyn10/mfm-gdrive
     ```
-2. run the application
+2. Install dependencies
     ```bash
-    $ npm start
+    npm install
     ```
+## Usage
+run the application
+```bash
+npm start
+```
 ## How to Use
 1. click button **authorize** to let the apps gain authorization to your Google Drive metadata
 2. you will redirected to Google Drive API authorization forms, follow the instructions until you get the **authorization key**
