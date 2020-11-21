@@ -4,7 +4,7 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron ./apps/main"
   },
   "repository": "https://github.com/dhanyn10/electron-example",
   "keywords": [
