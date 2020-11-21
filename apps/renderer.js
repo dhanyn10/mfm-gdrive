@@ -17,12 +17,19 @@ const SCOPES = ['https://www.googleapis.com/auth/drive.metadata']
 // time.
 const TOKEN_PATH = './apps/token.json'
 
+function loggerData(datalog)
+{
+    if(typeof datalog == 'object')
+        datalog = JSON.stringify(datalog)
+    document.getElementById('console-log').innerHTML += datalog + "<br/>"
+}
+
 document.getElementById('authorize').addEventListener('click', function (){
     arrparents = []
     // Load client secrets from a local file.
     fs.readFile('./apps/credentials.json', (err, content) => {
         if (err)
-            return console.log('Error loading client secret file:', err)
+            loggerData(err)
         // Authorize a client with credentials, then call the Google Drive API.
         authorize(JSON.parse(content), listFiles)
     });
@@ -54,13 +61,13 @@ function getAccessToken(oAuth2Client, callback) {
             var code = this.value
             oAuth2Client.getToken(code, (err, token) => {
                 if (err)
-                    return console.error('Error retrieving access token', err)
+                    loggerData(err)
                 oAuth2Client.setCredentials(token)
                 // Store the token to disk for later program executions
                 fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
                     if (err)
-                        return console.error(err)
-                    console.log('Token stored to', TOKEN_PATH)
+                        loggerData(err)
+                    loggerData(`Token stored to : ${TOKEN_PATH}`)
                 })
                 callback(oAuth2Client)
             })
@@ -77,7 +84,7 @@ function listFiles(auth) {
         fields: 'nextPageToken, files(id, name)'
     }, (err, res) => {
         if (err)
-            return console.log('The API returned an error: ' + err)
+            loggerData(`The API returned an error : ${err}`)
         const files = res.data.files;
         if (files.length) {
             var opthtml = ""
@@ -86,7 +93,7 @@ function listFiles(auth) {
             })
             document.getElementById('folders').innerHTML = opthtml
         } else {
-            console.log('No files found.')
+            loggerData('No files found')
         }
     })
     //shows files and folder
@@ -97,7 +104,7 @@ function listFiles(auth) {
     }, (err, res) => {
         if(err)
         {
-            console.log("error: ",err)
+            loggerData(`error : ${err}`)
         }
         else
         {
@@ -120,7 +127,7 @@ function listFiles(auth) {
                 })
                 document.getElementById('gdrive-files').innerHTML = opthtml
             } else {
-                console.log('No more folders inside here')
+                loggerData('No more folders inside here')
                 arrparents.pop()
             }
         }
@@ -142,7 +149,7 @@ document.getElementById('folders').addEventListener('change', function () {
         fields: 'nextPageToken, files(id, name)',
     }, (err, res) => {
         if (err)
-            return console.log('The API returned an error: ' + err)
+            loggerData(`error : ${err}`)
         const files = res.data.files
         var displayupfolder = false
         if(folderID != "root")
@@ -163,7 +170,7 @@ document.getElementById('folders').addEventListener('change', function () {
             })
             document.getElementById('folders').innerHTML = opthtml
         } else {
-            console.log('No more folders inside here')
+            loggerData('No more folders inside here')
             arrparents.pop()
         }
     })
@@ -177,7 +184,7 @@ document.getElementById('folders').addEventListener('change', function () {
     }, (err, res) => {
         if(err)
         {
-            console.log("error: ",err)
+            loggerData(`error : ${err}`)
         }
         else
         {
@@ -200,7 +207,7 @@ document.getElementById('folders').addEventListener('change', function () {
                 })
                 document.getElementById('gdrive-files').innerHTML = opthtml
             } else {
-                console.log('folder is empty')
+                loggerData('folder is empty')
             }
         }
     })
@@ -236,9 +243,9 @@ function renameFile(fileId, newTitle) {
             'resource': body
         }, (err, res) => {
             if(err)
-                console.error(err)
+                loggerData(`error : ${err}`)
             else
-                console.log(res.data.name)
+            loggerData(`renamed : ${res.data.name}`)
         })
     })
 }

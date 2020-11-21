@@ -21,3 +21,7 @@
 #padstart{
     display: none;
 }
+#console-log{
+    max-height: 100px;
+    overflow: auto;
+}
