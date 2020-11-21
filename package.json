@@ -1,21 +1,21 @@
 {
   "name": "gdrive",
-  "version": "0.0.0",
-  "description": "A minimal Electron application",
-  "main": "main.js",
+  "version": "0.1.0",
+  "description": "Easy rename your multiple files in Google Drive",
   "scripts": {
     "start": "electron ./apps/main"
   },
-  "repository": "https://github.com/dhanyn10/electron-example",
+  "repository": "https://github.com/dhanyn10/mfm-gdrive",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "file-manager",
+    "utilities",
+    "google-drive"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": {
+    "name": "Dhany Nurdiansyah",
+    "email": "dhanyn.dhan@gmail.com"
+  },
+  "license": "MIT",
   "devDependencies": {
     "electron": "^8.5.2"
   },
