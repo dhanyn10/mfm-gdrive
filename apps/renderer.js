@@ -81,7 +81,8 @@ function listFiles(auth) {
     drive.files.list({
         q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
         spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)'
+        fields: 'nextPageToken, files(id, name)',
+        orderBy: 'name'
     }, (err, res) => {
         if (err)
             loggerData(`The API returned an error : ${err}`)
@@ -100,7 +101,8 @@ function listFiles(auth) {
     drive.files.list({
         q: `'root' in parents`,
         spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)'
+        fields: 'nextPageToken, files(id, name)',
+        orderBy: 'name'
     }, (err, res) => {
         if(err)
         {
@@ -147,6 +149,7 @@ document.getElementById('folders').addEventListener('change', function () {
         spaces: 'drive',
         fileId: folderID,
         fields: 'nextPageToken, files(id, name)',
+        orderBy: 'name'
     }, (err, res) => {
         if (err)
             loggerData(`error : ${err}`)
@@ -180,7 +183,8 @@ document.getElementById('folders').addEventListener('change', function () {
         q: `'${folderID}' in parents`,
         spaces: 'drive',
         fileId: folderID,
-        fields: 'nextPageToken, files(id, name)'
+        fields: 'nextPageToken, files(id, name)',
+        orderBy: 'name'
     }, (err, res) => {
         if(err)
         {
@@ -312,6 +316,14 @@ document.getElementById('go').addEventListener('click', function(){
             {
                 var oldname = listAllFiles[r].name
                 var tmp = oldname.slice(psFrom, psTo)
+                var tmpnum = ""
+                for(var num = 0; num < tmp.length; num++)
+                {
+                    var c = tmp.charAt(num)
+                    if(parseInt(c) >= 0 && parseInt(c) <= 9)
+                        tmpnum += c
+                }
+                tmp = tmpnum.toString()
                 var maskednumber = tmp.padStart(psLength, psWith)
                 var newfilename = oldname.replace(tmp, maskednumber)
                 renameFile(listAllFiles[r].id, newfilename)
