@@ -19,8 +19,8 @@ npm start
 ## How to Use
 1. click button **authorize** to let the apps gain authorization to your Google Drive metadata
 2. you will redirected to Google Drive API authorization forms, follow the instructions until you get the **authorization key**
-3. **copy and paste** the authorization key to application input form and **press enter from your keyboard**.
-4. this application adopts navigation style from popular pc operating system. **Left sidebar** shows you folder view; **right sidebar** shows you files and folder. If you need to return back to previous(parent) folder, you can click to folder **"..."**
+3. **copy and paste** the authorization key to application input form and **press enter from your keyboard**.  
+4. **Left sidebar** shows you folder view; **right sidebar** shows you files and folder. If you need to return back to previous(parent) folder, you can click to folder **"..."**
 5. choose any files you needed to change the names by checking it's **checkbox**. If you need to choose all files and/or folder, you can use **toggle button Select All** to checking them faster.
 6. And finally, click **Go** button to execute the rename function.
 
