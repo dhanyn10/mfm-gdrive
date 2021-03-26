@@ -17,11 +17,11 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "electron": "^8.5.2"
+    "electron": "^8.5.5"
   },
   "dependencies": {
     "bootstrap-css-only": "^4.4.1",
     "bottleneck": "^2.19.5",
-    "googleapis": "^39.2.0"
+    "googleapis": "^68.0.0"
   }
 }
