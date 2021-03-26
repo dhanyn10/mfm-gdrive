@@ -114,18 +114,20 @@ function listFiles(auth) {
             if (files.length) {
                 var opthtml = ""
                 listAllFiles = []
+                var dataIndex = 0
                 files.map((file) => {
                     var htmlIndex = ""
                     for(var ao = 0; ao < file.name.length; ao++)
                     {
                         htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
                     }
-                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + htmlIndex + "</li>"
+                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${dataIndex}'/> ` + htmlIndex + "</li>"
                     listAllFiles.push({
                         id: file.id,
                         name: file.name,
                         checked: false
                     })
+                    dataIndex++
                 })
                 document.getElementById('gdrive-files').innerHTML = opthtml
             } else {
@@ -196,18 +198,20 @@ document.getElementById('folders').addEventListener('change', function () {
             if (files.length) {
                 var opthtml = ""
                 listAllFiles = []
+                var dataIndex = 0
                 files.map((file) => {
                     var htmlIndex = ""
                     for(var ao = 0; ao < file.name.length; ao++)
                     {
                         htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
                     }
-                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${file.id}'/> ` + htmlIndex + "</li>"
+                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${dataIndex}'/>` + htmlIndex + "</li>"
                     listAllFiles.push({
                         id: file.id,
                         name: file.name,
                         checked: false
                     })
+                    dataIndex++
                 })
                 document.getElementById('gdrive-files').innerHTML = opthtml
             } else {
@@ -216,7 +220,33 @@ document.getElementById('folders').addEventListener('change', function () {
         }
     })
 })
-
+var fromIndex = null
+var toIndex = null
+document.getElementById('gdrive-files').addEventListener('click', (evt) => {
+    var checkboxes = document.querySelectorAll('.gdrive-filenames')
+    for(k = 0; k < checkboxes.length; k++)
+    {
+        if(checkboxes[k].checked && evt.shiftKey == false)
+            fromIndex = k
+            
+        checkboxes[k].addEventListener('keydown', function(e) {
+            if(e.shiftKey)
+            {
+                toIndex = this.value
+                
+            var low = fromIndex
+            var high = toIndex
+            if(low > high)
+            {
+                low = toIndex
+                high = fromIndex
+            }
+            for(idx = low; idx <= high; idx++)
+                checkboxes[idx].checked = true
+            }
+        })
+    }
+})
 document.getElementById('select-all').addEventListener('click', function() {
     filenames = document.getElementsByClassName('gdrive-filenames')
     if(selectcond == false)
