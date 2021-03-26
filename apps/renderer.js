@@ -220,6 +220,8 @@ document.getElementById('folders').addEventListener('change', function () {
         }
     })
 })
+
+//feature: select multiple with shiftkey + click, like gmail
 var fromIndex = null
 var toIndex = null
 document.getElementById('gdrive-files').addEventListener('click', (evt) => {
