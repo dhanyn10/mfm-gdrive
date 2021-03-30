@@ -223,15 +223,15 @@ document.getElementById('gdrive-files').addEventListener('click', (evt) => {
             {
                 toIndex = this.value
                 
-            var low = fromIndex
-            var high = toIndex
-            if(low > high)
-            {
-                low = toIndex
-                high = fromIndex
-            }
-            for(idx = low; idx <= high; idx++)
-                checkboxes[idx].checked = true
+                var low = fromIndex
+                var high = toIndex
+                if(low > high)
+                {
+                    low = toIndex
+                    high = fromIndex
+                }
+                for(idx = low; idx <= high; idx++)
+                    checkboxes[idx].checked = true
             }
         })
     }
