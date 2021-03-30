@@ -112,30 +112,34 @@ function listFiles(auth) {
         {
             const files = res.data.files
             if (files.length) {
-                var opthtml = ""
-                listAllFiles = []
-                var dataIndex = 0
-                files.map((file) => {
-                    var htmlIndex = ""
-                    for(var ao = 0; ao < file.name.length; ao++)
-                    {
-                        htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
-                    }
-                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${dataIndex}'/> ` + htmlIndex + "</li>"
-                    listAllFiles.push({
-                        id: file.id,
-                        name: file.name,
-                        checked: false
-                    })
-                    dataIndex++
-                })
-                document.getElementById('gdrive-files').innerHTML = opthtml
+                OptHtml(files)
             } else {
                 loggerData('No more folders inside here')
                 arrparents.pop()
             }
         }
     })    
+}
+function OptHtml (files)
+{
+    var opthtml = ""
+    listAllFiles = []
+    var dataIndex = 0
+    files.map((file) => {
+        var htmlIndex = ""
+        for(var ao = 0; ao < file.name.length; ao++)
+        {
+            htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
+        }
+        opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${dataIndex}'/> ` + htmlIndex + "</li>"
+        listAllFiles.push({
+            id: file.id,
+            name: file.name,
+            checked: false
+        })
+        dataIndex++
+    })
+    document.getElementById('gdrive-files').innerHTML = opthtml
 }
 document.getElementById('folders').addEventListener('change', function () {
     folderID = this.value
@@ -196,24 +200,7 @@ document.getElementById('folders').addEventListener('change', function () {
         {
             const files = res.data.files
             if (files.length) {
-                var opthtml = ""
-                listAllFiles = []
-                var dataIndex = 0
-                files.map((file) => {
-                    var htmlIndex = ""
-                    for(var ao = 0; ao < file.name.length; ao++)
-                    {
-                        htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
-                    }
-                    opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${dataIndex}'/>` + htmlIndex + "</li>"
-                    listAllFiles.push({
-                        id: file.id,
-                        name: file.name,
-                        checked: false
-                    })
-                    dataIndex++
-                })
-                document.getElementById('gdrive-files').innerHTML = opthtml
+                OptHtml(files)
             } else {
                 loggerData('folder is empty')
             }
