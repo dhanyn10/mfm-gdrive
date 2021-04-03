@@ -5,7 +5,7 @@ Easy rename your multiple files in Google Drive
 ## Install
 1. Clone this repo
     ```bash
-    https://github.com/dhanyn10/mfm-gdrive
+    git clone https://github.com/dhanyn10/mfm-gdrive
     ```
 2. Install dependencies
     ```bash
