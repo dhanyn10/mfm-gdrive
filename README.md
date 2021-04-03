@@ -1,6 +1,6 @@
 ![logo](./apps/icon.png)
 # mfm-gdrive
-Easy rename your multiple files in Google Drive
+Easy rename your files in Google Drive
 
 ## Install
 1. Clone this repo
