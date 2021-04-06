@@ -2,32 +2,29 @@ var rename = document.getElementById('rename')
 var index = document.getElementById('index')
 var padstart = document.getElementById('padstart')
 
+function featDisplay(rn, ix, ps)
+{
+    rename.style.display = rn
+    index.style.display = ix
+    padstart.style.display = ps
+}
+
 document.getElementById('select-function').addEventListener('change', function () {
     var val = this.value
     if(val == 1)
     {
-        rename.style.display = "block"
-        index.style.display = "none"
-        padstart.style.display = "none"
+        featDisplay("block", "none", "none")
     }
     else if(val == 2)
     {
-        rename.style.display = "none"
-        index.style.display = "block"
-        padstart.style.display = "none"
+        featDisplay("none", "block", "none")
     }
     else if(val == 3)
     {
-        
-        rename.style.display = "none"
-        index.style.display = "none"
-        padstart.style.display = "block"
+        featDisplay("none", "none", "block")
     }
     else
     {
-        
-        rename.style.display =
-        index.style.display =
-        padstart.style.display = "none"
+        featDisplay("none", "none", "none")
     }
 })
