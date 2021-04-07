@@ -1,6 +1,6 @@
 {
   "name": "gdrive",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Easy rename your files in Google Drive",
   "scripts": {
     "start": "electron ./apps/main"
