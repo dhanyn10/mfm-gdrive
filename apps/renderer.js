@@ -56,7 +56,7 @@ function getAccessToken(oAuth2Client, callback) {
     shell.openExternal(authUrl)
     document.getElementById('key').style.display = "block"
     document.getElementById('key').addEventListener('keypress', function (e) {
-        if(e.keyCode == 13)
+        if(e.key == "Enter")
         {
             var code = this.value
             oAuth2Client.getToken(code, (err, token) => {
