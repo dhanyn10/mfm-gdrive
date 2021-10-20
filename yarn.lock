@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@electron/get@^1.0.1":
+"@electron/get@^1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.13.0.tgz#95c6bcaff4f9a505ea46792424f451efea89228c"
   integrity sha512-+SjZhRuRo+STTO1Fdhzqnv9D2ZhjxXP6egsJ9kiO8dtP68cDx7dFCwWi64dlMQV7sWcfW1OYCW4wviEBzmRsfQ==
@@ -30,10 +30,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@types/node@^12.0.12":
-  version "12.20.20"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.20.tgz#ce3d6c13c15c5e622a85efcd3a1cb2d9c7fa43a6"
-  integrity sha512-kqmxiJg4AT7rsSPIhO6eoBIx9mNwwpeH42yjtgQh6X2ANSpLpvToMXv+LMFdfxpwG1FZXZ41OGZMiUAtbBLEvg==
+"@types/node@^14.6.2":
+  version "14.17.27"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.27.tgz#5054610d37bb5f6e21342d0e6d24c494231f3b85"
+  integrity sha512-94+Ahf9IcaDuJTle/2b+wzvjmutxXAEXU6O81JHblYXUg2BDG+dnBy7VxIPHKAyEEDHzCMQydTJuWvrE+Aanzw==
 
 abort-controller@^3.0.0:
   version "3.0.0"
@@ -200,13 +200,13 @@ ecdsa-sig-formatter@1.0.11, ecdsa-sig-formatter@^1.0.11:
   dependencies:
     safe-buffer "^5.0.1"
 
-electron@^8.5.5:
-  version "8.5.5"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-8.5.5.tgz#17b12bd70139c0099f750fc5de0d480bf03acb96"
-  integrity sha512-e355H+tRDial0m+X2v+l+0SnaATAPw4sNjv9qmdk/6MJz/glteVJwVJEnxTjPfEELIJSChrBWDBVpjdDvoBF4Q==
+electron@^15.3.0:
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-15.3.0.tgz#f9803c5a05b2dac12efc6d4203492c7e204b4819"
+  integrity sha512-YLzaKCFmSniNlz9+NUTNs7ssPyDc+bYOCYZ0b/D6DjVkOeIFz4SR8EYKqlOc8TcqlDNu18BbWqz6zbJPyAAURg==
   dependencies:
-    "@electron/get" "^1.0.1"
-    "@types/node" "^12.0.12"
+    "@electron/get" "^1.13.0"
+    "@types/node" "^14.6.2"
     extract-zip "^1.0.3"
 
 encodeurl@^1.0.2:
