@@ -20,7 +20,7 @@ function createWindow () {
   Menu.setApplicationMenu(null)
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools({mode:'bottom'})
 }
 
 // This method will be called when Electron has finished
