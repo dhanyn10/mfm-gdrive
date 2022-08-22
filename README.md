@@ -9,7 +9,7 @@ Easy rename your files in Google Drive
     ```
 2. Install dependencies
     ```bash
-    npm install
+    yarn
     ```
 ## Usage
 run the application
