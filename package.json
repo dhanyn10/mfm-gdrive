@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "electron": "^20.0.3"
+    "electron": "^20.1.4"
   },
   "dependencies": {
     "bootstrap-css-only": "^4.4.1",
