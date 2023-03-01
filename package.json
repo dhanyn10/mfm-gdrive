@@ -22,6 +22,6 @@
   "dependencies": {
     "bootstrap-css-only": "^4.4.1",
     "bottleneck": "^2.19.5",
-    "googleapis": "^107.0.0"
+    "googleapis": "^112.0.0"
   }
 }
