@@ -80,8 +80,11 @@ async function authorize() {
 async function listFiles(authClient) {
   const drive = google.drive({version: 'v3', auth: authClient});
   const res = await drive.files.list({
-    pageSize: 10,
+    pageSize: 30,
+    q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
+    spaces: 'drive',
     fields: 'nextPageToken, files(id, name)',
+    orderBy: 'name'
   });
   const files = res.data.files;
   if (files.length === 0) {
@@ -89,8 +92,35 @@ async function listFiles(authClient) {
     return;
   }
 
-  console.log('Files:');
+  console.log('Files:')
   files.map((file) => {
+    //checkbox
+    const checkboxFolders = document.createElement('INPUT')
+    checkboxFolders.setAttribute('type', 'checkbox')
+    checkboxFolders.value = file.id
+    checkboxFolders.className = "cbox-folders peer hidden"
+    //span
+    const spanFolders = document.createElement('span')
+    const textNode = document.createTextNode(file.name)
+    spanFolders.appendChild(textNode)
+    spanFolders.className =
+    `inline-block w-full px-4 py-2 border-b border-gray-200 
+    peer-checked:bg-gray-100
+    hover:bg-gray-100 dark:border-gray-600`
+    //li
+    const listFolders = document.createElement('li')
+    listFolders.setAttribute('id', file.id)
+    listFolders.appendChild(checkboxFolders)
+    listFolders.appendChild(spanFolders)
+    listFolders.addEventListener("click", () => {
+      console.log(checkboxFolders.value)
+      let lenFolders = document.querySelectorAll(".cbox-folders").length
+      for(let j = 0; j < lenFolders; j++) {
+        document.querySelectorAll(".cbox-folders")[j].checked = false
+      }
+      checkboxFolders.checked = true
+    })
+    document.getElementById('folder-list').appendChild(listFolders)
     console.log(`${file.name} (${file.id})`);
   });
 }
@@ -98,5 +128,5 @@ async function listFiles(authClient) {
 // authorize().then(listFiles).catch(console.error);
 
 document.getElementById("authorize").addEventListener('click', () => {
-  authorize()
+  authorize().then(listFiles).catch(console.error)
 })
