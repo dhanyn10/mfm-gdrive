@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@google-cloud/local-auth": "^2.1.1",
+    "google-auth-library": "^8.9.0",
+    "googleapis": "^122.0.0"
+  },
+  "name": "mfm-gdrive-next",
+  "version": "0.0.1",
+  "main": "quickstart.js",
+  "repository": "https://github.com/dhanyn10/mfm-gdrive-next.git",
+  "author": "dhanyn10 <dhanyn.dhan@gmail.com>",
+  "license": "MIT"
+}
