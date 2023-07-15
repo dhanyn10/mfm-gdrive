@@ -4,15 +4,24 @@
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ">
-      <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link rel="stylesheet" href="./node_modules/milligram/dist/milligram.min.css">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <link rel="stylesheet" href="./css/output.css">
     <title>MFM Gdrive</title>
   </head>
   <body>
-    <div class="container">
+    <div class="container mx-auto px-4">
       <div class="row">
           <div class="column-50 offset-25">
-              <button id="authorize" id="authorize" class="button button-outline">Authorize</button>
+              <button id="authorize" id="authorize" class="
+              text-gray-900 bg-white border border-gray-300 focus:outline-none 
+              hover:bg-gray-100 font-medium 
+              rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 
+              dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 
+              dark:hover:border-gray-600 dark:focus:ring-gray-700
+              drop-shadow-md
+              active:mt-1
+              active:drop-shadow-sm
+              ">authorize</button>
           </div>
       </div>
     </div>
