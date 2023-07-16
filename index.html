@@ -10,19 +10,48 @@
   </head>
   <body>
     <div class="container mx-auto px-4 mt-4">
-      <button id="authorize" id="authorize" class="
-        text-gray-900 bg-white border border-gray-300 focus:outline-none 
-        hover:bg-gray-100 font-medium 
-        rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 
-        dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 
-        dark:hover:border-gray-600 dark:focus:ring-gray-700
-        drop-shadow-md
-        active:mt-1
-        active:drop-shadow-sm
-      ">authorize</button>
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-4">
+          <button id="authorize" id="authorize" class="
+          text-gray-900 text-center bg-white border border-gray-300 focus:outline-none 
+          hover:bg-gray-100 font-medium 
+          rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 
+          dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 
+          dark:hover:border-gray-600 dark:focus:ring-gray-700
+          drop-shadow-md
+          active:mt-1
+          active:drop-shadow-sm
+        ">authorize</button>
+        </div>
+        <div id="mfm-opt" class="col-span-7 invisible">
+          <select class="
+          bg-gray-50 border border-gray-300 text-gray-900 text-sm 
+          focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 
+          dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
+          dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <option selected>Options</option>
+            <option value="1">change filename by name</option>
+            <option value="2">change filename by index</option>
+            <option value="3">insert padStart</option>
+          </select>
+        </div>
+        <div id="mfm-play" class="col-span-1 invisible">
+          <button type="button" class="
+          text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 
+          focus:ring-4 focus:outline-none focus:ring-gray-100
+          px-5 py-2 text-center inline-flex items-center 
+          dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 
+          dark:text-white dark:hover:bg-gray-700 mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+            </svg>
+          </button>
+        </div>
+      </div>
         <div class="grid grid-cols-12 gap-2">
           <div class="col-span-4">
-            <div class="
+            <div id="folders" class="
+              invisible
               block max-w-sm bg-white border border-gray-200 
               shadow dark:bg-gray-800 dark:border-gray-700
               divide-y

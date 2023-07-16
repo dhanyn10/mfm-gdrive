@@ -207,5 +207,8 @@ async function listFiles(authClient, source) {
 }
 
 document.getElementById("authorize").addEventListener('click', () => {
+  document.getElementById("mfm-opt").classList.remove("invisible")
+  document.getElementById("folders").classList.remove("invisible")
+  document.getElementById("mfm-play").classList.remove("invisible")
   authorize().then(listFiles).catch(console.error)
 })
