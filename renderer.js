@@ -10,6 +10,7 @@ const path = require('path');
 const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
+let parentFolder = ['root']
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
@@ -77,22 +78,53 @@ async function authorize() {
  * Lists the names and IDs of up to 10 files.
  * @param {OAuth2Client} authClient An authorized OAuth2 client.
  */
-async function listFiles(authClient) {
+async function listFiles(authClient, source) {
   const drive = google.drive({version: 'v3', auth: authClient});
-  const folderLists = await drive.files.list({
-    pageSize: 30,
-    q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
-    spaces: 'drive',
-    fields: 'nextPageToken, files(id, name)',
-    orderBy: 'name'
-  });
-  const resFolderLists = folderLists.data.files;
-  if (resFolderLists.length === 0) {
-    console.log('No files found.');
-    return;
-  }
-
-  console.log('Files:')
+    //checkbox
+    let upcbFolders = document.createElement('INPUT')
+    upcbFolders.setAttribute('type', 'checkbox')
+    upcbFolders.value = source
+    upcbFolders.className = "cbox-folders peer hidden"
+    //span
+    const upSpFolders = document.createElement('span')
+    const upTextNode = document.createTextNode("...")
+    upSpFolders.appendChild(upTextNode)
+    upSpFolders.className =
+    `inline-block w-full px-4 py-2 border-b border-gray-200 
+    peer-checked:bg-gray-100
+    hover:bg-gray-100 dark:border-gray-600`
+    //li
+    const upListFolders = document.createElement('li')
+    upListFolders.appendChild(upcbFolders)
+    upListFolders.appendChild(upSpFolders)
+    upListFolders.addEventListener("click", () => {
+      // console.log(checkboxFolders.value)
+      if(parentFolder.length > 1) {
+        parentFolder.pop()
+      }
+      listFiles(authClient, parentFolder[parentFolder.length-1])
+      let lenFolders = document.querySelectorAll(".cbox-folders").length
+      for(let j = 0; j < lenFolders; j++) {
+        document.querySelectorAll(".cbox-folders")[j].checked = false
+      }
+      upcbFolders.checked = true
+    })
+    console.log(parentFolder)
+    document.getElementById('folder-list').innerHTML = ""
+    document.getElementById('folder-list').appendChild(upListFolders)
+    let folderLists = await drive.files.list({
+      pageSize: 30,
+      q: `'${parentFolder[parentFolder.length-1]}' in parents and mimeType='application/vnd.google-apps.folder'`,
+      spaces: 'drive',
+      fields: 'nextPageToken, files(id, name)',
+      orderBy: 'name'
+    });
+    let resFolderLists = folderLists.data.files;
+    if (resFolderLists.length === 0) {
+      console.log('No files found.');
+      return;
+    }
+  
   resFolderLists.map((file) => {
     //checkbox
     const checkboxFolders = document.createElement('INPUT')
@@ -109,11 +141,12 @@ async function listFiles(authClient) {
     hover:bg-gray-100 dark:border-gray-600`
     //li
     const listFolders = document.createElement('li')
-    listFolders.setAttribute('id', file.id)
     listFolders.appendChild(checkboxFolders)
     listFolders.appendChild(spanFolders)
     listFolders.addEventListener("click", () => {
       console.log(checkboxFolders.value)
+      parentFolder.push(checkboxFolders.value)
+      listFiles(authClient, checkboxFolders.value)
       let lenFolders = document.querySelectorAll(".cbox-folders").length
       for(let j = 0; j < lenFolders; j++) {
         document.querySelectorAll(".cbox-folders")[j].checked = false
@@ -123,39 +156,51 @@ async function listFiles(authClient) {
     document.getElementById('folder-list').appendChild(listFolders)
   });
 
-  const fileLists = await drive.files.list({
+  let fileLists = await drive.files.list({
     pageSize: 30,
-    q: "'root' in parents",
+    q: `'${parentFolder[parentFolder.length-1]}' in parents`,
     spaces: 'drive',
-    fields: 'nextPageToken, files(id, name)',
-    orderBy: 'name'
+    fields: 'nextPageToken, files(id, name, mimeType)',
+    orderBy: 'folder, name'
   });
-  const resFileLists = fileLists.data.files;
+  let resFileLists = fileLists.data.files;
   if (resFileLists.length === 0) {
     console.log('No files found.');
     return;
   }
+  document.getElementById('file-folder-list').innerHTML = null
   resFileLists.map((file) => {
     //checkbox : cbFileFolder
     const cbFileFolder = document.createElement('INPUT')
     cbFileFolder.setAttribute('type', 'checkbox')
     cbFileFolder.value = file.id
     cbFileFolder.className = "cbox-file-folder peer hidden"
+
     //span: spFileFolder
     const spFileFolder = document.createElement('span')
     const sptextNode = document.createTextNode(file.name)
+    if(file.mimeType == "application/vnd.google-apps.folder") {
+          //span : folder icon
+      const spFolderIcon = document.createElement('span')
+      spFolderIcon.className = "float-left pr-2"
+      spFolderIcon.innerHTML =
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+        <path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" />
+      </svg>  
+        `
+      spFileFolder.appendChild(spFolderIcon) //span folder icon
+    }
     spFileFolder.appendChild(sptextNode)
     spFileFolder.className =
-    `inline-block w-full px-4 py-2 border-b border-gray-200 
+    `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto
     peer-checked:bg-gray-100
     hover:bg-gray-100 dark:border-gray-600`
     //li: liFileFolder
     const liFileFolder = document.createElement('li')
-    liFileFolder.setAttribute('id', file.id)
-    liFileFolder.appendChild(cbFileFolder)
-    liFileFolder.appendChild(spFileFolder)
+    liFileFolder.appendChild(cbFileFolder) // checkbox
+    liFileFolder.appendChild(spFileFolder) // span
     liFileFolder.addEventListener("click", () => {
-      console.log(cbFileFolder.value)
+      console.log(file.mimeType)
       let lenFileFolders = document.querySelectorAll(".cbox-file-folder").length
       for(let j = 0; j < lenFileFolders; j++) {
         document.querySelectorAll(".cbox-file-folder")[j].checked = false
