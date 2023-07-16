@@ -10,8 +10,12 @@ const path = require('path');
 const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
+
+// variable
+const mime = "application/vnd.google-apps.folder"
 let parentFolder = ['root']
-const mime = "application/vnd.google-apps.folder";
+let selectedFiles = []
+
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
@@ -206,6 +210,15 @@ async function listFiles(authClient, source) {
         else
           cbFileFolder.checked = false
       }
+
+      // get all selected file
+      selectedFiles = []
+      let sfiles = document.querySelectorAll(".cbox-file-folder")
+      for(k = 0; k < sfiles.length; k++) {
+        if(sfiles[k].checked == true)
+          selectedFiles.push(sfiles[k].value)
+      }
+      console.log(selectedFiles)
     })
     document.getElementById('file-folder-list').appendChild(liFileFolder)
   });
