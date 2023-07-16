@@ -10,6 +10,7 @@ const path = require('path');
 const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
+const Swal = require('sweetalert2')
 
 import { elemFactory } from './utils.js'
 
@@ -211,4 +212,65 @@ document.getElementById("authorize").addEventListener('click', () => {
   document.getElementById("folders").classList.remove("invisible")
   document.getElementById("mfm-play").classList.remove("invisible")
   authorize().then(listFiles).catch(console.error)
+})
+
+// define value for swal
+const inputClass =
+`block w-full p-2 text-gray-900 border border-gray-300 rounded-lg 
+bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500 
+dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
+dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+mb-2
+`
+const myswal = Swal.mixin({
+  customClass: {
+    title: `block mb-2 text-sm font-medium text-gray-900 dark:text-white`,
+    confirmButton: `px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 
+    rounded-sm hover:bg-blue-800 focus:ring-4 focus:outline-none 
+    focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 
+    dark:focus:ring-blue-800`
+  },
+  buttonsStyling: false
+})
+
+document.getElementById('mfm-play').addEventListener('click', async () => {
+  let child = document.getElementById('mfm-opt').children[0]
+  if(child.value == 1) {
+    await myswal.fire({
+      title: child[1].innerHTML,
+      html:
+      '<input id="swal-input1" placeholder="from" class="'+inputClass+'">' +
+      '<input id="swal-input2" placeholder="to" class="'+inputClass+'">',
+      inputAttributes: {
+        maxlength: 10,
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
+      preConfirm: () => {
+        return [
+          document.getElementById('swal-input1').value,
+          document.getElementById('swal-input2').value
+        ]
+      }
+    })
+  }
+  else if(child.value == 2) {
+    await myswal.fire({
+      title: child[2].innerHTML,
+      html:
+      '<input type="number" id="swal-input1" placeholder="start(index)" class="'+inputClass+'">' +
+      '<input type="number" id="swal-input2" placeholder="end(index)" class="'+inputClass+'">',
+      inputAttributes: {
+        maxlength: 10,
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
+      preConfirm: () => {
+        return [
+          document.getElementById('swal-input1').value,
+          document.getElementById('swal-input2').value
+        ]
+      }
+    })
+  }
 })

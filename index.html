@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ;style-src 'self' 'unsafe-inline'; ">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <link rel="stylesheet" href="./css/output.css">
     <title>MFM Gdrive</title>
@@ -29,10 +29,9 @@
           focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 
           dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
           dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option selected>Options</option>
+            <option value="0">Options</option>
             <option value="1">change filename by name</option>
             <option value="2">change filename by index</option>
-            <option value="3">insert padStart</option>
           </select>
         </div>
         <div id="mfm-play" class="col-span-1 invisible">
