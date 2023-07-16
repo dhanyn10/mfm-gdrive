@@ -140,7 +140,7 @@ async function listFiles(authClient) {
     const cbFileFolder = document.createElement('INPUT')
     cbFileFolder.setAttribute('type', 'checkbox')
     cbFileFolder.value = file.id
-    cbFileFolder.className = "cbox-files peer hidden"
+    cbFileFolder.className = "cbox-file-folder peer hidden"
     //span: spFileFolder
     const spFileFolder = document.createElement('span')
     const sptextNode = document.createTextNode(file.name)
@@ -156,9 +156,9 @@ async function listFiles(authClient) {
     liFileFolder.appendChild(spFileFolder)
     liFileFolder.addEventListener("click", () => {
       console.log(cbFileFolder.value)
-      let lenFolders = document.querySelectorAll(".cbox-folders").length
-      for(let j = 0; j < lenFolders; j++) {
-        document.querySelectorAll(".cbox-folders")[j].checked = false
+      let lenFileFolders = document.querySelectorAll(".cbox-file-folder").length
+      for(let j = 0; j < lenFileFolders; j++) {
+        document.querySelectorAll(".cbox-file-folder")[j].checked = false
       }
       cbFileFolder.checked = true
     })
