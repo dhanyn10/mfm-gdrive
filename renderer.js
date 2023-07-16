@@ -11,6 +11,7 @@ const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
 let parentFolder = ['root']
+const mime = "application/vnd.google-apps.folder";
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
@@ -109,7 +110,6 @@ async function listFiles(authClient, source) {
       }
       upcbFolders.checked = true
     })
-    console.log(parentFolder)
     document.getElementById('folder-list').innerHTML = ""
     document.getElementById('folder-list').appendChild(upListFolders)
     let folderLists = await drive.files.list({
@@ -137,14 +137,13 @@ async function listFiles(authClient, source) {
     spanFolders.appendChild(textNode)
     spanFolders.className =
     `inline-block w-full px-4 py-2 border-b border-gray-200 
-    peer-checked:bg-gray-100
+    peer-checked:bg-gray-100 cursor-pointer
     hover:bg-gray-100 dark:border-gray-600`
     //li
     const listFolders = document.createElement('li')
     listFolders.appendChild(checkboxFolders)
     listFolders.appendChild(spanFolders)
     listFolders.addEventListener("click", () => {
-      console.log(checkboxFolders.value)
       parentFolder.push(checkboxFolders.value)
       listFiles(authClient, checkboxFolders.value)
       let lenFolders = document.querySelectorAll(".cbox-folders").length
@@ -193,19 +192,20 @@ async function listFiles(authClient, source) {
     spFileFolder.appendChild(sptextNode)
     spFileFolder.className =
     `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto
-    peer-checked:bg-gray-100
+    peer-checked:bg-gray-100 cursor-pointer
     hover:bg-gray-100 dark:border-gray-600`
     //li: liFileFolder
     const liFileFolder = document.createElement('li')
     liFileFolder.appendChild(cbFileFolder) // checkbox
     liFileFolder.appendChild(spFileFolder) // span
     liFileFolder.addEventListener("click", () => {
-      console.log(file.mimeType)
-      let lenFileFolders = document.querySelectorAll(".cbox-file-folder").length
-      for(let j = 0; j < lenFileFolders; j++) {
-        document.querySelectorAll(".cbox-file-folder")[j].checked = false
+      // console.log(file.mimeType)
+      if(file.mimeType != mime) { // only allows selection for non-folder
+        if(cbFileFolder.checked == false) 
+          cbFileFolder.checked = true
+        else
+          cbFileFolder.checked = false
       }
-      cbFileFolder.checked = true
     })
     document.getElementById('file-folder-list').appendChild(liFileFolder)
   });
