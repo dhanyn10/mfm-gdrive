@@ -79,21 +79,21 @@ async function authorize() {
  */
 async function listFiles(authClient) {
   const drive = google.drive({version: 'v3', auth: authClient});
-  const res = await drive.files.list({
+  const folderLists = await drive.files.list({
     pageSize: 30,
     q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
     spaces: 'drive',
     fields: 'nextPageToken, files(id, name)',
     orderBy: 'name'
   });
-  const files = res.data.files;
-  if (files.length === 0) {
+  const resFolderLists = folderLists.data.files;
+  if (resFolderLists.length === 0) {
     console.log('No files found.');
     return;
   }
 
   console.log('Files:')
-  files.map((file) => {
+  resFolderLists.map((file) => {
     //checkbox
     const checkboxFolders = document.createElement('INPUT')
     checkboxFolders.setAttribute('type', 'checkbox')
@@ -121,11 +121,50 @@ async function listFiles(authClient) {
       checkboxFolders.checked = true
     })
     document.getElementById('folder-list').appendChild(listFolders)
-    console.log(`${file.name} (${file.id})`);
+  });
+
+  const fileLists = await drive.files.list({
+    pageSize: 30,
+    q: "'root' in parents",
+    spaces: 'drive',
+    fields: 'nextPageToken, files(id, name)',
+    orderBy: 'name'
+  });
+  const resFileLists = fileLists.data.files;
+  if (resFileLists.length === 0) {
+    console.log('No files found.');
+    return;
+  }
+  resFileLists.map((file) => {
+    //checkbox : cbFileFolder
+    const cbFileFolder = document.createElement('INPUT')
+    cbFileFolder.setAttribute('type', 'checkbox')
+    cbFileFolder.value = file.id
+    cbFileFolder.className = "cbox-files peer hidden"
+    //span: spFileFolder
+    const spFileFolder = document.createElement('span')
+    const sptextNode = document.createTextNode(file.name)
+    spFileFolder.appendChild(sptextNode)
+    spFileFolder.className =
+    `inline-block w-full px-4 py-2 border-b border-gray-200 
+    peer-checked:bg-gray-100
+    hover:bg-gray-100 dark:border-gray-600`
+    //li: liFileFolder
+    const liFileFolder = document.createElement('li')
+    liFileFolder.setAttribute('id', file.id)
+    liFileFolder.appendChild(cbFileFolder)
+    liFileFolder.appendChild(spFileFolder)
+    liFileFolder.addEventListener("click", () => {
+      console.log(cbFileFolder.value)
+      let lenFolders = document.querySelectorAll(".cbox-folders").length
+      for(let j = 0; j < lenFolders; j++) {
+        document.querySelectorAll(".cbox-folders")[j].checked = false
+      }
+      cbFileFolder.checked = true
+    })
+    document.getElementById('file-folder-list').appendChild(liFileFolder)
   });
 }
-
-// authorize().then(listFiles).catch(console.error);
 
 document.getElementById("authorize").addEventListener('click', () => {
   authorize().then(listFiles).catch(console.error)
