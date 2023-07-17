@@ -11,21 +11,39 @@ const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
 const Swal = require('sweetalert2')
+const bottleneck = require('bottleneck')
+const limiter = new bottleneck({minTime: 110})
+let gdrive = null
 
 import { elemFactory } from './utils.js'
 
 // variable
 const mime = "application/vnd.google-apps.folder"
-let parentFolder = ['root']
-let selectedFiles = []
+var parentFolder = ['root']
+let listAllFiles = []
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+
+function renameFile(fileId, newTitle) {
+  var body = {'name': newTitle}
+  limiter.schedule(() => {
+    gdrive.files.update({
+      'fileId': fileId,
+      'resource': body
+    }, (err, res) => {
+      if(err)
+          console.error(`error: ${err}`)
+      else
+      console.log(`renamed: ${res.data.name}`)
+    })
+  })
+}
 
 /**
  * Reads previously authorized credentials from the save file.
@@ -85,8 +103,8 @@ async function authorize() {
  * Lists the names and IDs of up to 10 files.
  * @param {OAuth2Client} authClient An authorized OAuth2 client.
  */
-async function listFiles(authClient, source) {
-  const drive = google.drive({version: 'v3', auth: authClient});
+async function listFiles(authenticate, source) {
+  gdrive = google.drive({version: 'v3', auth: authenticate});
     //checkbox
     let upcbFolders = elemFactory('input', 'type', 'checkbox', "cbox-folders peer hidden", source, null, null)
     //span
@@ -100,7 +118,7 @@ async function listFiles(authClient, source) {
       if(parentFolder.length > 1) {
         parentFolder.pop()
       }
-      listFiles(authClient, parentFolder[parentFolder.length-1])
+      listFiles(authenticate, parentFolder[parentFolder.length-1])
       let lenFolders = document.querySelectorAll(".cbox-folders").length
       for(let j = 0; j < lenFolders; j++) {
         document.querySelectorAll(".cbox-folders")[j].checked = false
@@ -109,14 +127,14 @@ async function listFiles(authClient, source) {
     })
     document.getElementById('folder-list').innerHTML = ""
     document.getElementById('folder-list').appendChild(upListFolders)
-    let folderLists = await drive.files.list({
+    let folderLists = await gdrive.files.list({
       pageSize: 30,
       q: `'${parentFolder[parentFolder.length-1]}' in parents`,
       spaces: 'drive',
       fields: 'nextPageToken, files(id, name, mimeType)',
       orderBy: 'name'
     });
-    let resFolderLists = folderLists.data.files;
+    let resFolderLists = folderLists.data.files
     if (resFolderLists.length === 0) {
       console.log('No files found.');
       return;
@@ -136,7 +154,7 @@ async function listFiles(authClient, source) {
     let listFolders = elemFactory('li', null, null, null, null, null, [checkboxFolders, spanFolders])
     listFolders.addEventListener("click", () => {
       parentFolder.push(checkboxFolders.value)
-      listFiles(authClient, checkboxFolders.value)
+      listFiles(authenticate, checkboxFolders.value)
       let lenFolders = document.querySelectorAll(".cbox-folders").length
       for(let j = 0; j < lenFolders; j++) {
         document.querySelectorAll(".cbox-folders")[j].checked = false
@@ -147,7 +165,7 @@ async function listFiles(authClient, source) {
       document.getElementById('folder-list').appendChild(listFolders)
   });
 
-  let fileLists = await drive.files.list({
+  let fileLists = await gdrive.files.list({
     pageSize: 30,
     q: `'${parentFolder[parentFolder.length-1]}' in parents`,
     spaces: 'drive',
@@ -161,6 +179,7 @@ async function listFiles(authClient, source) {
     return;
   }
   document.getElementById('file-folder-list').innerHTML = null
+  listAllFiles = []
   resFileLists.map((file) => {
     //checkbox : cbFileFolder
     let cbFileFolder = elemFactory(
@@ -185,6 +204,12 @@ async function listFiles(authClient, source) {
     spFileFolder.appendChild(sptextNode)
     //li: liFileFolder
     let liFileFolder = elemFactory('li', null, null, null, null, null, [cbFileFolder, spFileFolder])
+    
+    listAllFiles.push({
+      id: file.id,
+      name: file.name,
+      checked: cbFileFolder.checked
+    })
     liFileFolder.addEventListener("click", () => {
       // console.log(file.mimeType)
       if(file.mimeType != mime) { // only allows selection for non-folder
@@ -193,15 +218,6 @@ async function listFiles(authClient, source) {
         else
           cbFileFolder.checked = false
       }
-
-      // get all selected file
-      selectedFiles = []
-      let sfiles = document.querySelectorAll(".cbox-file-folder")
-      for(let k = 0; k < sfiles.length; k++) {
-        if(sfiles[k].checked == true)
-          selectedFiles.push(sfiles[k].value)
-      }
-      // console.log(selectedFiles)
     })
     document.getElementById('file-folder-list').appendChild(liFileFolder)
   });
@@ -233,33 +249,42 @@ const myswal = Swal.mixin({
   buttonsStyling: false
 })
 
-document.getElementById('mfm-play').addEventListener('click', async () => {
+document.getElementById('mfm-play').addEventListener('click', () => {
   let child = document.getElementById('mfm-opt').children[0]
   if(child.value == 1) {
-    await myswal.fire({
+    myswal.fire({
       title: child[1].innerHTML,
       html:
-      '<input id="swal-input1" placeholder="from" class="'+inputClass+'">' +
-      '<input id="swal-input2" placeholder="to" class="'+inputClass+'">',
+      '<input id="from" placeholder="from" class="'+inputClass+'">' +
+      '<input id="to" placeholder="to" class="'+inputClass+'">',
+      confirmButtonText: "RUN",
       inputAttributes: {
         maxlength: 10,
         autocapitalize: 'off',
         autocorrect: 'off'
-      },
-      preConfirm: () => {
-        return [
-          document.getElementById('swal-input1').value,
-          document.getElementById('swal-input2').value
-        ]
+      }
+    }).then((res) => {
+      if(res.isConfirmed) {
+        let from = document.getElementById('from').value
+        let to = document.getElementById('to').value
+
+        let chData = document.getElementsByClassName('cbox-file-folder')
+        for(let j = 0; j < listAllFiles.length; j++) {
+          // transform to checked
+          if(chData[j].checked) {  
+            let newfilename = listAllFiles[j].name.replace(from, to)
+            renameFile(listAllFiles[j].id, newfilename)
+          }
+        }
       }
     })
   }
   else if(child.value == 2) {
-    await myswal.fire({
+    myswal.fire({
       title: child[2].innerHTML,
       html:
-      '<input type="number" id="swal-input1" placeholder="start(index)" class="'+inputClass+'">' +
-      '<input type="number" id="swal-input2" placeholder="end(index)" class="'+inputClass+'">',
+      '<input type="number" id="start" placeholder="start(index)" class="'+inputClass+'">' +
+      '<input type="number" id="end" placeholder="end(index)" class="'+inputClass+'">',
       inputAttributes: {
         maxlength: 10,
         autocapitalize: 'off',
