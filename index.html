@@ -25,13 +25,13 @@
         </div>
         <div id="mfm-opt" class="col-span-7 invisible">
           <select class="
-          bg-gray-50 border border-gray-300 text-gray-900 text-sm 
-          focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 
+          bg-gray-50 border border-gray-300 text-gray-900 text-sm ml-2
+          focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 
           dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
           dark:focus:ring-blue-500 dark:focus:border-blue-500">
             <option selected value="0">Options</option>
             <option value="1">change filename by name</option>
-            <option value="2">change filename by index</option>
+            <option value="2">change filename by index(not available yet)</option>
           </select>
         </div>
         <div id="mfm-play" class="col-span-1 invisible">
@@ -60,7 +60,7 @@
             </div>
           </div>
           <div class="col-span-8">
-            <div class="shadow dark:bg-gray-800 dark:border-gray-700">
+            <div id="files" class="ml-2 invisible w-full border dark:border-gray-700">
               <ul class="overflow-y-scroll max-h-[calc(100vh-95px)]" id="file-folder-list"></ul>
             </div>
           </div>

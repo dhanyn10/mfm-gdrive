@@ -226,6 +226,7 @@ async function listFiles(authenticate, source) {
 document.getElementById("authorize").addEventListener('click', () => {
   document.getElementById("mfm-opt").classList.remove("invisible")
   document.getElementById("folders").classList.remove("invisible")
+  document.getElementById("files").classList.remove("invisible")
   document.getElementById("mfm-play").classList.remove("invisible")
   authorize().then(listFiles).catch(console.error)
 })
@@ -292,8 +293,8 @@ document.getElementById('mfm-play').addEventListener('click', () => {
       },
       preConfirm: () => {
         return [
-          document.getElementById('swal-input1').value,
-          document.getElementById('swal-input2').value
+          document.getElementById('start').value,
+          document.getElementById('end').value
         ]
       }
     })
