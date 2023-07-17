@@ -1,7 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: npm
-  directory: "/apps"
+  directory: "/app"
   schedule:
     interval: daily
     time: "22:00"
