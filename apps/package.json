@@ -1,0 +1,26 @@
+{
+  "name": "mfm-gdrive",
+  "version": "0.3.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "css": "npx tailwindcss -i ./css/input.css -o ./css/output.css --minify --watch"
+  },
+  "repository": "https://github.com/dhanyn10/mfm-gdrive.git",
+  "author": {
+    "name": "Dhany Nurdiansyah",
+    "email": "dhanyn.dhan@gmail.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^25.3.0",
+    "tailwindcss": "^3.3.3"
+  },
+  "dependencies": {
+    "@google-cloud/local-auth": "^2.1.1",
+    "bottleneck": "^2.19.5",
+    "google-auth-library": "^8.9.0",
+    "googleapis": "^122.0.0",
+    "sweetalert2": "^11.7.18"
+  }
+}

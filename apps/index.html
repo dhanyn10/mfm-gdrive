@@ -1,80 +1,73 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ">
-        <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-        <link rel="stylesheet" href="../node_modules/bootstrap-css-only/css/bootstrap.min.css">
-        <link rel="stylesheet" href="./style.css">
-        <title>mfm-gdrive</title>
-    </head>
-    <body>
-        <div class="container-fluid mt-4 mb-4">
-            <div class="form-group row">
-                <div class="col-sm-4">
-                    <button class="btn btn-primary btn-block" id="authorize">authorize</button>
-                </div>
-                <div class="col-sm-8">
-                    <input class="form-control form-control-sm" type="text" id="key" placeholder="insert key here then press enter">
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-md-4">
-                    <select multiple class="form-control custom-multiple" id="folders"></select>
-                </div>
-                <div class="col-md-8">
-                    <ul class="list-group" id="gdrive-files"></ul>
-                    <div class="form-inline mt-2 mb-2">
-                        <div class="form-group">
-                            <button class="btn btn-light" id="select-all">Select All</button>
-                        </div>
-                        <div class="form-group mx-sm-3">
-                            <select class="form-control" id="select-function">
-                                <option>...</option>
-                                <option value="1">change filename by name</option>
-                                <option value="2">delete filename by index</option>
-                                <option value="3">insert padStart</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <button class="btn btn-danger" id="go">GO</button>
-                        </div>
-                    </div>
-                    <div id="rename">
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="rename-from" placeholder="from"/>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="rename-to" placeholder="to"/>
-                        </div>
-                    </div>
-                    <div id="index">
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="index-from" placeholder="from index"/>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="index-to" placeholder="to index"/>
-                        </div>
-                    </div>
-                    <div id="padstart">
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="ps-from" placeholder="from index"/>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="ps-to" placeholder="to index"/>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="ps-with" placeholder="pad with"/>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" id="ps-length" placeholder="length"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group" id="console-log"></div>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ;style-src 'self' 'unsafe-inline'; ">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <link rel="stylesheet" href="./css/output.css">
+    <title>MFM Gdrive</title>
+  </head>
+  <body>
+    <div class="container mx-auto px-4 mt-4">
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-4">
+          <button id="authorize" id="authorize" class="
+          text-gray-900 text-center bg-white border border-gray-300 focus:outline-none 
+          hover:bg-gray-100 font-medium 
+          rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 
+          dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 
+          dark:hover:border-gray-600 dark:focus:ring-gray-700
+          drop-shadow-md
+          active:mt-1
+          active:drop-shadow-sm
+        ">authorize</button>
         </div>
-        <script src="./utils.js"></script>
-        <script src="./renderer.js"></script>
-    </body>
+        <div id="mfm-opt" class="col-span-7 invisible">
+          <select class="
+          bg-gray-50 border border-gray-300 text-gray-900 text-sm ml-2
+          focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 
+          dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
+          dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <option selected value="0">Options</option>
+            <option value="1">change filename by name</option>
+            <option value="2">change filename by index(not available yet)</option>
+          </select>
+        </div>
+        <div id="mfm-play" class="col-span-1 invisible">
+          <button type="button" class="
+          text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 
+          focus:ring-4 focus:outline-none focus:ring-gray-100
+          px-5 py-2 text-center inline-flex items-center 
+          dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 
+          dark:text-white dark:hover:bg-gray-700 mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+        <div class="grid grid-cols-12 gap-2">
+          <div class="col-span-4">
+            <div id="folders" class="
+              invisible
+              block max-w-sm bg-white border border-gray-200 
+              shadow dark:bg-gray-800 dark:border-gray-700
+              divide-y
+              ">
+                <p class="px-6 py-2 text-white bg-blue-700">folders</p>
+                <ul class="overflow-y-scroll max-h-[calc(100vh-136px)]" id="folder-list"></ul>
+            </div>
+          </div>
+          <div class="col-span-8">
+            <div id="files" class="ml-2 invisible shadow w-full border dark:border-gray-700">
+              <ul class="overflow-y-scroll max-h-[calc(100vh-96px)]" id="file-folder-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- You can also require other files to run in this process -->
+    <script type="module" src="./renderer.js"></script>
+  </body>
 </html>

@@ -1,352 +1,302 @@
-const fs = require('fs')
-const {google} = require('googleapis')
-const shell = require('electron').shell
+/**
+ * This file is loaded via the <script> tag in the index.html file and will
+ * be executed in the renderer process for that window. No Node.js APIs are
+ * available in this process because `nodeIntegration` is turned off and
+ * `contextIsolation` is turned on. Use the contextBridge API in `preload.js`
+ * to expose Node.js functionality from the main process.
+ */
+const fs = require('fs').promises;
+const path = require('path');
+const process = require('process');
+const {authenticate} = require('@google-cloud/local-auth');
+const {google} = require('googleapis');
+const Swal = require('sweetalert2')
 const bottleneck = require('bottleneck')
 const limiter = new bottleneck({minTime: 110})
-var drive = null
-var oAuth2Client = null
-var arrparents = []
-var selectcond = false
-var filenames
-var listAllFiles = []
+let gdrive = null
+
+import { elemFactory } from './utils.js'
+
+// variable
+const mime = "application/vnd.google-apps.folder"
+var parentFolder = ['root']
+let listAllFiles = []
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata']
+const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
-const TOKEN_PATH = './apps/token.json'
-
-function loggerData(datalog)
-{
-    if(typeof datalog == 'object')
-        datalog = JSON.stringify(datalog)
-    document.getElementById('console-log').innerHTML += datalog + "<br/>"
-}
-
-document.getElementById('authorize').addEventListener('click', function (){
-    arrparents = []
-    // Load client secrets from a local file.
-    fs.readFile('./apps/credentials.json', (err, content) => {
-        if (err)
-            loggerData(err)
-        // Authorize a client with credentials, then call the Google Drive API.
-        authorize(JSON.parse(content), listFiles)
-    });
-})
-
-function authorize(credentials, callback) {
-    const {client_secret, client_id, redirect_uris} = credentials.installed
-    oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0])
-
-    // Check if we have previously stored a token.
-    fs.readFile(TOKEN_PATH, (err, token) => {
-        if (err)
-            return getAccessToken(oAuth2Client, callback)
-        oAuth2Client.setCredentials(JSON.parse(token))
-        callback(oAuth2Client)
-    });
-}
-
-function getAccessToken(oAuth2Client, callback) {
-    const authUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-    });
-    shell.openExternal(authUrl)
-    document.getElementById('key').style.display = "block"
-    document.getElementById('key').addEventListener('keypress', function (e) {
-        if(e.key == "Enter")
-        {
-            var code = this.value
-            oAuth2Client.getToken(code, (err, token) => {
-                if (err)
-                    loggerData(err)
-                oAuth2Client.setCredentials(token)
-                // Store the token to disk for later program executions
-                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-                    if (err)
-                        loggerData(err)
-                    loggerData(`Token stored to : ${TOKEN_PATH}`)
-                })
-                callback(oAuth2Client)
-            })
-        }
-    })
-}
-
-function listFiles(auth) {
-    drive = google.drive({version: 'v3', auth})
-    arrparents.push('root')
-    drive.files.list({
-        q: "'root' in parents and mimeType='application/vnd.google-apps.folder'",
-        spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)',
-        orderBy: 'name'
-    }, (err, res) => {
-        if (err)
-            loggerData(`The API returned an error : ${err}`)
-        const files = res.data.files;
-        if (files.length) {
-            var opthtml = ""
-            files.map((file) => {
-                opthtml += `<option value='${file.id}'>` + file.name + "</option>"
-            })
-            document.getElementById('folders').innerHTML = opthtml
-        } else {
-            loggerData('No files found')
-        }
-    })
-    //shows files and folder
-    drive.files.list({
-        q: `'root' in parents`,
-        spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)',
-        orderBy: 'name'
-    }, (err, res) => {
-        if(err)
-        {
-            loggerData(`error : ${err}`)
-        }
-        else
-        {
-            const files = res.data.files
-            if (files.length) {
-                OptHtml(files)
-            } else {
-                loggerData('No more folders inside here')
-                arrparents.pop()
-            }
-        }
-    })    
-}
-function OptHtml (files)
-{
-    var opthtml = ""
-    listAllFiles = []
-    var dataIndex = 0
-    files.map((file) => {
-        var htmlIndex = ""
-        for(var ao = 0; ao < file.name.length; ao++)
-        {
-            htmlIndex += `<span title='${ao}'>${file.name.substr(ao, 1)}</span>`
-        }
-        opthtml += `<li class='list-group-item'><input type='checkbox' class='gdrive-filenames' value='${dataIndex}'/> ` + htmlIndex + "</li>"
-        listAllFiles.push({
-            id: file.id,
-            name: file.name,
-            checked: false
-        })
-        dataIndex++
-    })
-    document.getElementById('gdrive-files').innerHTML = opthtml
-}
-document.getElementById('folders').addEventListener('change', function () {
-    folderID = this.value
-    var prevfolder
-    if(folderID == 'upfolder')
-    {
-        prevfolder = (arrparents.length)-2
-        folderID = arrparents[prevfolder]
-        arrparents.pop()
-    }
-    drive.files.list({
-        q: `'${folderID}' in parents and mimeType='application/vnd.google-apps.folder'`,
-        spaces: 'drive',
-        fileId: folderID,
-        fields: 'nextPageToken, files(id, name)',
-        orderBy: 'name'
-    }, (err, res) => {
-        if (err)
-            loggerData(`error : ${err}`)
-        const files = res.data.files
-        var displayupfolder = false
-        if(folderID != "root")
-        {
-            displayupfolder = true
-            if(folderID != arrparents[prevfolder])
-                arrparents.push(folderID)
-        }
-        if (files.length) {
-            var opthtml = ""
-            files.map((file) => {
-                if(displayupfolder == true)
-                {
-                    opthtml = `<option value='upfolder'>...</option>`
-                    displayupfolder = false
-                }
-                opthtml += `<option value='${file.id}'>` + file.name + "</option>"
-            })
-            document.getElementById('folders').innerHTML = opthtml
-        } else {
-            loggerData('No more folders inside here')
-            arrparents.pop()
-        }
-    })
-
-    //shows files and folder
-    drive.files.list({
-        q: `'${folderID}' in parents`,
-        spaces: 'drive',
-        fileId: folderID,
-        fields: 'nextPageToken, files(id, name)',
-        orderBy: 'name'
-    }, (err, res) => {
-        if(err)
-        {
-            loggerData(`error : ${err}`)
-        }
-        else
-        {
-            const files = res.data.files
-            if (files.length) {
-                OptHtml(files)
-            } else {
-                loggerData('folder is empty')
-            }
-        }
-    })
-})
-
-//feature: select multiple with shiftkey + click, like gmail
-var fromIndex = null
-var toIndex = null
-document.getElementById('gdrive-files').addEventListener('click', (evt) => {
-    var checkboxes = document.querySelectorAll('.gdrive-filenames')
-    for(k = 0; k < checkboxes.length; k++)
-    {
-        if(checkboxes[k].checked && evt.shiftKey == false)
-            fromIndex = k
-            
-        checkboxes[k].addEventListener('keydown', function(e) {
-            if(e.shiftKey)
-            {
-                toIndex = this.value
-                
-                var low = fromIndex
-                var high = toIndex
-                if(low > high)
-                {
-                    low = toIndex
-                    high = fromIndex
-                }
-                for(idx = low; idx <= high; idx++)
-                    checkboxes[idx].checked = true
-            }
-        })
-    }
-})
-document.getElementById('select-all').addEventListener('click', function() {
-    filenames = document.getElementsByClassName('gdrive-filenames')
-    if(selectcond == false)
-    {
-        for(fl = 0; fl < filenames.length; fl++)
-        {
-            filenames[fl].checked = true
-        }
-        this.innerHTML = "Select None"
-        selectcond = true
-    }
-    else
-    {
-        for(fl = 0; fl < filenames.length; fl++)
-        {
-            filenames[fl].checked = false
-        }
-        this.innerHTML = "Select All"
-        selectcond = false
-    }
-})
+const TOKEN_PATH = path.join(process.cwd(), 'token.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 
 function renameFile(fileId, newTitle) {
-    var body = {'name': newTitle}
-    limiter.schedule(() => {
-        drive.files.update({
-            'fileId': fileId,
-            'resource': body
-        }, (err, res) => {
-            if(err)
-                loggerData(`error : ${err}`)
-            else
-            loggerData(`renamed : ${res.data.name}`)
-        })
+  var body = {'name': newTitle}
+  limiter.schedule(() => {
+    gdrive.files.update({
+      'fileId': fileId,
+      'resource': body
+    }, (err, res) => {
+      if(err)
+          console.error(`error: ${err}`)
+      else
+      console.log(`renamed: ${res.data.name}`)
     })
+  })
 }
 
-document.getElementById('go').addEventListener('click', function(){
-    document.getElementById('console-log').innerHTML = ""
-    var selectfunc = document.getElementById('select-function').value
-    filenames = document.getElementsByClassName('gdrive-filenames')
-    for(fl = 0; fl < filenames.length; fl++)
-    {
-        if(filenames[fl].checked == true)
-        {
-            listAllFiles[fl].checked = true
-        }
+/**
+ * Reads previously authorized credentials from the save file.
+ *
+ * @return {Promise<OAuth2Client|null>}
+ */
+async function loadSavedCredentialsIfExist() {
+  try {
+    const content = await fs.readFile(TOKEN_PATH);
+    const credentials = JSON.parse(content);
+    return google.auth.fromJSON(credentials);
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * Serializes credentials to a file comptible with GoogleAUth.fromJSON.
+ *
+ * @param {OAuth2Client} client
+ * @return {Promise<void>}
+ */
+async function saveCredentials(client) {
+  const content = await fs.readFile(CREDENTIALS_PATH);
+  const keys = JSON.parse(content);
+  const key = keys.installed || keys.web;
+  const payload = JSON.stringify({
+    type: 'authorized_user',
+    client_id: key.client_id,
+    client_secret: key.client_secret,
+    refresh_token: client.credentials.refresh_token,
+  });
+  await fs.writeFile(TOKEN_PATH, payload);
+}
+
+/**
+ * Load or request or authorization to call APIs.
+ *
+ */
+async function authorize() {
+  let client = await loadSavedCredentialsIfExist();
+  if (client) {
+    return client;
+  }
+  client = await authenticate({
+    scopes: SCOPES,
+    keyfilePath: CREDENTIALS_PATH,
+  });
+  console.log(client)
+  if (client.credentials) {
+    await saveCredentials(client);
+  }
+  return client;
+}
+
+/**
+ * Lists the names and IDs of up to 10 files.
+ * @param {OAuth2Client} authClient An authorized OAuth2 client.
+ */
+async function listFiles(authenticate, source) {
+  gdrive = google.drive({version: 'v3', auth: authenticate});
+    //checkbox
+    let upcbFolders = elemFactory('input', 'type', 'checkbox', "cbox-folders peer hidden", source, null, null)
+    //span
+    let upSpFolders = elemFactory('span', null, null,
+    `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100
+    hover:bg-gray-100 dark:border-gray-600`, null, "...", upcbFolders)
+    //li
+    let upListFolders = elemFactory('li', null, null, null, null, null, [upcbFolders, upSpFolders])
+    upListFolders.addEventListener("click", () => {
+      // console.log(checkboxFolders.value)
+      if(parentFolder.length > 1) {
+        parentFolder.pop()
+      }
+      listFiles(authenticate, parentFolder[parentFolder.length-1])
+      let lenFolders = document.querySelectorAll(".cbox-folders").length
+      for(let j = 0; j < lenFolders; j++) {
+        document.querySelectorAll(".cbox-folders")[j].checked = false
+      }
+      upcbFolders.checked = true
+    })
+    document.getElementById('folder-list').innerHTML = ""
+    document.getElementById('folder-list').appendChild(upListFolders)
+    let folderLists = await gdrive.files.list({
+      pageSize: 30,
+      q: `'${parentFolder[parentFolder.length-1]}' in parents`,
+      spaces: 'drive',
+      fields: 'nextPageToken, files(id, name, mimeType)',
+      orderBy: 'name'
+    });
+    let resFolderLists = folderLists.data.files
+    if (resFolderLists.length === 0) {
+      console.log('No files found.');
+      return;
+    }
+
+  resFolderLists.map((file) => {
+    //checkbox
+    let checkboxFolders = elemFactory('input', 'type', 'checkbox', "cbox-folders peer hidden", file.id, null, null)
+    //span
+    let spanFolders = elemFactory('span', null, null, 
+    `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 cursor-pointer
+    hover:bg-gray-100 dark:border-gray-600`
+    , null, file.name, null)
+    
+    //li
+    // const listFolders = document.createElement('li')
+    let listFolders = elemFactory('li', null, null, null, null, null, [checkboxFolders, spanFolders])
+    listFolders.addEventListener("click", () => {
+      parentFolder.push(checkboxFolders.value)
+      listFiles(authenticate, checkboxFolders.value)
+      let lenFolders = document.querySelectorAll(".cbox-folders").length
+      for(let j = 0; j < lenFolders; j++) {
+        document.querySelectorAll(".cbox-folders")[j].checked = false
+      }
+      checkboxFolders.checked = true
+    })
+    if(file.mimeType == "application/vnd.google-apps.folder")
+      document.getElementById('folder-list').appendChild(listFolders)
+  });
+
+  let fileLists = await gdrive.files.list({
+    pageSize: 30,
+    q: `'${parentFolder[parentFolder.length-1]}' in parents`,
+    spaces: 'drive',
+    fields: 'nextPageToken, files(id, name, mimeType)',
+    orderBy: 'folder, name'
+  });
+  // console.log(parentFolder, parentFolder[parentFolder.length-2])
+  let resFileLists = fileLists.data.files;
+  if (resFileLists.length === 0) {
+    console.log('No files found.');
+    return;
+  }
+  document.getElementById('file-folder-list').innerHTML = null
+  listAllFiles = []
+  resFileLists.map((file) => {
+    //checkbox : cbFileFolder
+    let cbFileFolder = elemFactory(
+      'input', 'type', 'checkbox', "cbox-file-folder peer hidden", file.id, null, null)
+    //span: spFileFolder
+    let spFileFolder = elemFactory('span', null, null,
+    `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto
+    peer-checked:bg-gray-100 cursor-pointer
+    hover:bg-gray-100 dark:border-gray-600`, null, null, null)
+    if(file.mimeType == "application/vnd.google-apps.folder") {
+          //span : folder icon
+      const spFolderIcon = document.createElement('span')
+      spFolderIcon.className = "float-left pr-2"
+      spFolderIcon.innerHTML =
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+        <path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" />
+      </svg>  
+        `
+      spFileFolder.appendChild(spFolderIcon) //span folder icon
+    }
+    const sptextNode = document.createTextNode(file.name)
+    spFileFolder.appendChild(sptextNode)
+    //li: liFileFolder
+    let liFileFolder = elemFactory('li', null, null, null, null, null, [cbFileFolder, spFileFolder])
+    
+    listAllFiles.push({
+      id: file.id,
+      name: file.name,
+      checked: cbFileFolder.checked
+    })
+    liFileFolder.addEventListener("click", () => {
+      // console.log(file.mimeType)
+      if(file.mimeType != mime) { // only allows selection for non-folder
+        if(cbFileFolder.checked == false) 
+          cbFileFolder.checked = true
         else
-        {
-            listAllFiles[fl].checked = false
+          cbFileFolder.checked = false
+      }
+    })
+    document.getElementById('file-folder-list').appendChild(liFileFolder)
+  });
+}
+
+document.getElementById("authorize").addEventListener('click', () => {
+  document.getElementById("mfm-opt").classList.remove("invisible")
+  document.getElementById("folders").classList.remove("invisible")
+  document.getElementById("files").classList.remove("invisible")
+  document.getElementById("mfm-play").classList.remove("invisible")
+  authorize().then(listFiles).catch(console.error)
+})
+
+// define value for swal
+const inputClass =
+`block w-full p-2 text-gray-900 border border-gray-300 rounded-lg 
+bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500 
+dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
+dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+mb-2
+`
+const myswal = Swal.mixin({
+  customClass: {
+    title: `block mb-2 text-sm font-medium text-gray-900 dark:text-white`,
+    confirmButton: `px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 
+    rounded-sm hover:bg-blue-800 focus:ring-4 focus:outline-none 
+    focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 
+    dark:focus:ring-blue-800`
+  },
+  buttonsStyling: false
+})
+
+document.getElementById('mfm-play').addEventListener('click', () => {
+  let child = document.getElementById('mfm-opt').children[0]
+  if(child.value == 1) {
+    myswal.fire({
+      title: child[1].innerHTML,
+      html:
+      '<input id="from" placeholder="from" class="'+inputClass+'">' +
+      '<input id="to" placeholder="to" class="'+inputClass+'">',
+      confirmButtonText: "RUN",
+      inputAttributes: {
+        maxlength: 10,
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      }
+    }).then((res) => {
+      if(res.isConfirmed) {
+        let from = document.getElementById('from').value
+        let to = document.getElementById('to').value
+
+        let chData = document.getElementsByClassName('cbox-file-folder')
+        for(let j = 0; j < listAllFiles.length; j++) {
+          // transform to checked
+          if(chData[j].checked) {  
+            let newfilename = listAllFiles[j].name.replace(from, to)
+            renameFile(listAllFiles[j].id, newfilename)
+          }
         }
-    }
-    if(selectfunc == 1)
-    {
-        var renameFrom = document.getElementById('rename-from').value
-        var renameTo = document.getElementById('rename-to').value
-        for(r = 0; r < listAllFiles.length; r++)
-        {
-            if(listAllFiles[r].checked == true)
-            {
-                newfilename = listAllFiles[r].name.replace(renameFrom, renameTo)
-                renameFile(listAllFiles[r].id, newfilename)
-            }
-        }
-    }
-    if(selectfunc == 2)
-    {
-        var indexFrom = document.getElementById('index-from').value
-        var indexTo = document.getElementById('index-to').value
-        indexFrom = parseInt(indexFrom)
-        indexTo = parseInt(indexTo)
-        indexTo =  indexTo + 1
-        for(r = 0; r < listAllFiles.length; r++)
-        {
-            if(listAllFiles[r].checked == true)
-            {
-                var oldname = listAllFiles[r].name
-                var todelete = oldname.slice(indexFrom, indexTo)
-                newfilename = oldname.replace(todelete, "")
-                renameFile(listAllFiles[r].id, newfilename)
-            }
-        }
-    }
-    if(selectfunc == 3)
-    {
-        var psFrom = document.getElementById('ps-from').value
-        var psTo = document.getElementById('ps-to').value
-        var psWith = document.getElementById('ps-with').value
-        var psLength = document.getElementById('ps-length').value
-        psFrom = parseInt(psFrom)
-        psTo = parseInt(psTo)
-        psTo = psTo + 1
-        psLength = parseInt(psLength)
-        for(r = 0; r < listAllFiles.length; r++)
-        {
-            if(listAllFiles[r].checked == true)
-            {
-                var oldname = listAllFiles[r].name
-                var tmp = oldname.slice(psFrom, psTo)
-                var tmpnum = ""
-                for(var num = 0; num < tmp.length; num++)
-                {
-                    var c = tmp.charAt(num)
-                    if(parseInt(c) >= 0 && parseInt(c) <= 9)
-                        tmpnum += c
-                }
-                tmp = tmpnum.toString()
-                var maskednumber = tmp.padStart(psLength, psWith)
-                var newfilename = oldname.replace(tmp, maskednumber)
-                renameFile(listAllFiles[r].id, newfilename)
-            }
-        }
-    }
+      }
+    })
+  }
+  else if(child.value == 2) {
+    myswal.fire({
+      title: child[2].innerHTML,
+      html:
+      '<input type="number" id="start" placeholder="start(index)" class="'+inputClass+'">' +
+      '<input type="number" id="end" placeholder="end(index)" class="'+inputClass+'">',
+      inputAttributes: {
+        maxlength: 10,
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
+      preConfirm: () => {
+        return [
+          document.getElementById('start').value,
+          document.getElementById('end').value
+        ]
+      }
+    })
+  }
 })
