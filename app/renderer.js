@@ -21,7 +21,7 @@ import { elemFactory } from './utils.js'
 const mime = "application/vnd.google-apps.folder"
 var arrParentFolder = ['root']
 let arrListFolders = []
-let listAllFiles = []
+let arrListAllFiles = []
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
@@ -168,49 +168,17 @@ async function listFiles(authenticate, source) {
     return;
   }
   document.getElementById('file-folder-list').innerHTML = null
-  // let idx = 0
-  listAllFiles = []
+
+  arrListAllFiles = []
   resFileLists.map((file) => {
-    //checkbox : cbFileFolder
-    let cbFileFolder = elemFactory(
-      'input', 'type', 'checkbox', "cbox-file-folder peer hidden", file.id, null, null)
-    //span: spFileFolder
-    let spFileFolder = elemFactory('span', null, null,
-    `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto
-    peer-checked:bg-gray-100 cursor-pointer
-    hover:bg-gray-100 dark:border-gray-600`, null, null, null)
-    if(file.mimeType == "application/vnd.google-apps.folder") {
-          //span : folder icon
-      const spFolderIcon = document.createElement('span')
-      spFolderIcon.className = "float-left pr-2"
-      spFolderIcon.innerHTML =
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-        <path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" />
-      </svg>  
-        `
-      spFileFolder.appendChild(spFolderIcon) //span folder icon
-    }
-    const sptextNode = document.createTextNode(file.name)
-    spFileFolder.appendChild(sptextNode)
-    //li: liFileFolder
-    let liFileFolder = elemFactory('li', null, null, null, null, null, [cbFileFolder, spFileFolder])
-    
-    listAllFiles.push({
+    arrListAllFiles.push({
       id: file.id,
       name: file.name,
-      checked: cbFileFolder.checked
+      type: file.mimeType,
+      checked: false
     })
-    liFileFolder.addEventListener("click", () => {
-      // console.log(file.mimeType)
-      if(file.mimeType != mime) { // only allows selection for non-folder
-        if(cbFileFolder.checked == false) 
-          cbFileFolder.checked = true
-        else
-          cbFileFolder.checked = false
-      }
-    })
-    document.getElementById('file-folder-list').appendChild(liFileFolder)
   })
+
   // loop arrListFolder
   for(let i = 0; i < arrListFolders.length; i++) {
     //checkbox
@@ -224,10 +192,51 @@ async function listFiles(authenticate, source) {
       
     let listFolders = elemFactory('li', null, null, null, null, null, [checkboxFolders, spanFolders])
     listFolders.addEventListener("click", () => {
+      listFiles(authenticate, arrParentFolder[arrParentFolder.length-1])
       arrParentFolder.push(arrListFolders[i].id)
-      listFiles(authenticate, arrListFolders[i].id)
     })
     document.getElementById('folder-list').appendChild(listFolders)
+  }
+
+  console.log("loop")
+  //loop for list file and folder
+  for(let i = 0; i < arrListAllFiles.length; i++) {
+      //checkbox : cbFileFolder
+    let cbFileFolder = elemFactory(
+      'input', 'type', 'checkbox', "cbox-file-folder peer hidden",
+      arrListAllFiles[i].id, null, null)
+    //span: spFileFolder
+    let spFileFolder = elemFactory('span', null, null,
+    `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto
+    peer-checked:bg-gray-100 cursor-pointer
+    hover:bg-gray-100 dark:border-gray-600`, null, null, null)
+    if(arrListAllFiles[i].type == "application/vnd.google-apps.folder") {
+          //span : folder icon
+      const spFolderIcon = document.createElement('span')
+      spFolderIcon.className = "float-left pr-2"
+      spFolderIcon.innerHTML =
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+        <path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" />
+      </svg>  
+        `
+      spFileFolder.appendChild(spFolderIcon) //span folder icon
+    }
+    const sptextNode = document.createTextNode(arrListAllFiles[i].name)
+    spFileFolder.appendChild(sptextNode)
+    //li: liFileFolder
+    let liFileFolder = elemFactory(
+      'li', null, null, null, null, null, [cbFileFolder, spFileFolder])
+
+    liFileFolder.addEventListener("click", () => {
+      if(arrListAllFiles[i].type != mime) { // only allows selection for non-folder
+        if(arrListAllFiles[i].checked == false)
+            arrListAllFiles[i].checked = true
+        else
+          arrListAllFiles[i].checked = false
+      }
+      document.getElementsByClassName('cbox-file-folder')[i].checked = arrListAllFiles[i].checked
+    })
+    document.getElementById('file-folder-list').appendChild(liFileFolder)
   }
 }
 
@@ -278,11 +287,11 @@ document.getElementById('mfm-play').addEventListener('click', () => {
         let to = document.getElementById('to').value
 
         let chData = document.getElementsByClassName('cbox-file-folder')
-        for(let j = 0; j < listAllFiles.length; j++) {
+        for(let j = 0; j < arrListAllFiles.length; j++) {
           
           if(chData[j].checked) {  
-            let newfilename = listAllFiles[j].name.replace(from, to)
-            renameFile(listAllFiles[j].id, newfilename)
+            let newfilename = arrListAllFiles[j].name.replace(from, to)
+            renameFile(arrListAllFiles[j].id, newfilename)
           }
         }
       }
