@@ -198,7 +198,6 @@ async function listFiles(authenticate, source) {
     document.getElementById('folder-list').appendChild(listFolders)
   }
 
-  console.log("loop")
   //loop for list file and folder
   for(let i = 0; i < arrListAllFiles.length; i++) {
       //checkbox : cbFileFolder
