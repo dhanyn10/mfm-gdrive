@@ -153,7 +153,26 @@ async function listFiles(authenticate, source) {
         name: file.name
       })
     }
-  });
+  })
+  
+  // loop arrListFolder
+  for(let i = 0; i < arrListFolders.length; i++) {
+    //checkbox
+    let checkboxFolders = elemFactory(
+      'input', 'type', 'checkbox', "cbox-folders peer hidden", arrListFolders[i].id, null, null)
+    //span
+    let spanFolders = elemFactory('span', null, null, 
+    `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 cursor-pointer
+    hover:bg-gray-100 dark:border-gray-600`
+    , null, arrListFolders[i].name, null)
+      
+    let listFolders = elemFactory('li', null, null, null, null, null, [checkboxFolders, spanFolders])
+    listFolders.addEventListener("click", () => {
+      listFiles(authenticate, arrParentFolder[arrParentFolder.length-1])
+      arrParentFolder.push(arrListFolders[i].id)
+    })
+    document.getElementById('folder-list').appendChild(listFolders)
+  }
 
   let fileLists = await gdrive.files.list({
     pageSize: 30,
@@ -178,25 +197,6 @@ async function listFiles(authenticate, source) {
       checked: false
     })
   })
-
-  // loop arrListFolder
-  for(let i = 0; i < arrListFolders.length; i++) {
-    //checkbox
-    let checkboxFolders = elemFactory(
-      'input', 'type', 'checkbox', "cbox-folders peer hidden", arrListFolders[i].id, null, null)
-    //span
-    let spanFolders = elemFactory('span', null, null, 
-    `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 cursor-pointer
-    hover:bg-gray-100 dark:border-gray-600`
-    , null, arrListFolders[i].name, null)
-      
-    let listFolders = elemFactory('li', null, null, null, null, null, [checkboxFolders, spanFolders])
-    listFolders.addEventListener("click", () => {
-      listFiles(authenticate, arrParentFolder[arrParentFolder.length-1])
-      arrParentFolder.push(arrListFolders[i].id)
-    })
-    document.getElementById('folder-list').appendChild(listFolders)
-  }
 
   //loop for list file and folder
   for(let i = 0; i < arrListAllFiles.length; i++) {
