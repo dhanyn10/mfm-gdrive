@@ -204,6 +204,7 @@ async function listFiles(authenticate, source) {
     let cbFileFolder = elemFactory(
       'input', 'type', 'checkbox', "cbox-file-folder peer hidden",
       arrListAllFiles[i].id, null, null)
+      cbFileFolder.checked = arrListAllFiles[i].checked
     //span: spFileFolder
     let spFileFolder = elemFactory('span', null, null,
     `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto
@@ -314,5 +315,33 @@ document.getElementById('mfm-play').addEventListener('click', () => {
         ]
       }
     })
+  }
+})
+
+//feature: select multiple with shiftkey + click, like gmail
+let fromIndex = null
+let toIndex = null
+document.getElementById('file-folder-list').addEventListener('click', (evt) => {
+  let checkboxes = arrListAllFiles
+  for(let k = 0; k < checkboxes.length; k++)
+  {
+    if(checkboxes[k].checked && evt.shiftKey == false) {
+      fromIndex = k
+    }
+    if(checkboxes[k].checked && evt.shiftKey == true) {
+      toIndex = k
+      
+      let low = fromIndex
+      let high = toIndex
+      if(low > high)
+      {
+          low = toIndex
+          high = fromIndex
+      }
+      for(let idx = low; idx <= high; idx++) {
+        document.getElementsByClassName('cbox-file-folder')[idx].checked = true
+        arrListAllFiles[idx].checked = true
+      }
+    }
   }
 })
