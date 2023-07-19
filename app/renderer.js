@@ -318,7 +318,11 @@ document.getElementById('mfm-play').addEventListener('click', () => {
   }
 })
 
-//feature: select multiple with shiftkey + click, like gmail
+/**
+ *  feature: select multiple with shiftkey + click, like gmail
+ * @var fromIndex : first index of the selected file
+ * @var toIndex : last index of the selected file
+ */
 let fromIndex = null
 let toIndex = null
 document.getElementById('file-folder-list').addEventListener('click', (evt) => {
@@ -333,8 +337,7 @@ document.getElementById('file-folder-list').addEventListener('click', (evt) => {
       
       let low = fromIndex
       let high = toIndex
-      if(low > high)
-      {
+      if(low > high) {
           low = toIndex
           high = fromIndex
       }
