@@ -350,10 +350,10 @@ ecdsa-sig-formatter@1.0.11, ecdsa-sig-formatter@^1.0.11:
   dependencies:
     safe-buffer "^5.0.1"
 
-electron@^25.3.0:
-  version "25.3.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-25.3.0.tgz#e818ab3ebd3e7a45f8fca0f47e607c9af2dc92c7"
-  integrity sha512-cyqotxN+AroP5h2IxUsJsmehYwP5LrFAOO7O7k9tILME3Sa1/POAg3shrhx4XEnaAMyMqMLxzGvkzCVxzEErnA==
+electron@^27.0.1:
+  version "27.0.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-27.0.1.tgz#809bbe5363f414224789cfa1f3d7237906f71b9e"
+  integrity sha512-AjDGgpf2thNxVXoNqEG+0GCUK4upAEa2B+IoM5Yk9YrOLd6uUOEMfGI9rhPtj+jC14iKOvBdefY2uAzcDC0qng==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^18.11.18"
