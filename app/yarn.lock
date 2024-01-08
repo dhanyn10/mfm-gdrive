@@ -22,10 +22,10 @@
   optionalDependencies:
     global-agent "^3.0.0"
 
-"@google-cloud/local-auth@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/local-auth/-/local-auth-3.0.0.tgz#474fc18fd83cc912624f4bf3c6727e21c244b2d0"
-  integrity sha512-PfRv6WkjqgqRLGPzhqzjZO+gogNPRDPDWiwq4+1+qn2oIiG0xLEeHfIf0230QzzJmY7yuAbojms/luHczDCVag==
+"@google-cloud/local-auth@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@google-cloud/local-auth/-/local-auth-3.0.1.tgz#e4e593eea4de344ea997ef36e8ca90aac91fc69b"
+  integrity sha512-YJ3GFbksfHyEarbVHPSCzhKpjbnlAhdzg2SEf79l6ODukrSM1qUOqfopY232Xkw26huKSndyzmJz+A6b2WYn7Q==
   dependencies:
     arrify "^2.0.1"
     google-auth-library "^9.0.0"
