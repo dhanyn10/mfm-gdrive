@@ -19,7 +19,7 @@
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.0",
     "bottleneck": "^2.19.5",
-    "google-auth-library": "^9.4.1",
+    "google-auth-library": "^9.6.0",
     "googleapis": "^129.0.0",
     "sweetalert2": "^11.7.32"
   }
