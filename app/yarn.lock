@@ -533,10 +533,10 @@ globalthis@^1.0.1:
   dependencies:
     define-properties "^1.1.3"
 
-google-auth-library@^9.0.0, google-auth-library@^9.4.1:
-  version "9.4.1"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.4.1.tgz#dea32cbdae0a47066995a379e6873c52926ea80e"
-  integrity sha512-Chs7cuzDuav8W/BXOoRgSXw4u0zxYtuqAHETDR5Q6dG1RwNwz7NUKjsDDHAsBV3KkiiJBtJqjbzy1XU1L41w1g==
+google-auth-library@^9.0.0, google-auth-library@^9.6.1:
+  version "9.6.1"
+  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.6.1.tgz#f22c575383a7900c63de189e1a66b61e50ebda19"
+  integrity sha512-rPL44wV0yJnA11+ggxA348ylUY1o7mkcHLwlZNlLZsKROPLl7q3LgMU5nM65h1QpxhJu/shk2FLml7173XIthA==
   dependencies:
     base64-js "^1.3.0"
     ecdsa-sig-formatter "^1.0.11"
