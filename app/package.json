@@ -21,6 +21,6 @@
     "bottleneck": "^2.19.5",
     "google-auth-library": "^9.4.1",
     "googleapis": "^129.0.0",
-    "sweetalert2": "^11.7.32"
+    "sweetalert2": "^11.10.7"
   }
 }
