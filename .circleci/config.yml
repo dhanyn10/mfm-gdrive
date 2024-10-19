@@ -36,7 +36,6 @@ workflows:
       - build:
           filters:
             branches:
-            branches:
               only:
                 - master  # Run on master branch
               pull_requests:
