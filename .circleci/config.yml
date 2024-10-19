@@ -38,6 +38,6 @@ workflows:
             branches:
               only:
                 - master  # Run on master branch
-              pull_requests:
-                only:
-                  - master  # Run on pull requests to master branch
+            pull_requests:
+              only:
+                - master  # Run on pull requests to master branch
