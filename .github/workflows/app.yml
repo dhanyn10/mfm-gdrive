@@ -34,7 +34,6 @@ jobs:
       - name: build electron apps
         working-directory: ./app
         run: npm run app:dir
-      - name: Run headless webdriverio test
-        uses: coactions/setup-xvfb@v1
+      - uses: coactions/setup-xvfb@v1
         working-directory: ./app
         run: npx wdio run wdio.conf.js
