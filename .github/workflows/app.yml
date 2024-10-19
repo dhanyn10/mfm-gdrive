@@ -36,6 +36,5 @@ jobs:
         run: npm run app:dir
       - name: Run headless webdriverio test
         uses: coactions/setup-xvfb@v1
-        with:
-          working-directory: ./app
+        working-directory: ./app
         run: npx wdio run wdio.conf.js
