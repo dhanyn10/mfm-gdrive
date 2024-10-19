@@ -24,4 +24,4 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:  
           working-directory: ./app
-          run: npx wdio run wdio.conf.js
+          run: xvfb-maybe electron-mocha ./test/specs/*.ts
