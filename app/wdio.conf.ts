@@ -52,15 +52,14 @@ export const config: WebdriverIO.Config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
+    services: ['electron'],
     capabilities: [{
-        browserName: 'chrome',
-        'goog:chromeOptions': {
-            args: ['headless', 'disable-gpu']
-        },
+        browserName: 'electron',
         // Electron service options
         // see https://webdriver.io/docs/desktop-testing/electron/configuration/#service-options
         'wdio:electronServiceOptions': {
             // custom application args
+            appBinaryPath: './dist/win-unpacked/mfm-gdrive.exe',
             appArgs: []
         }
     }],

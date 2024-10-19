@@ -1,8 +1,9 @@
-import { browser } from '@wdio/globals'
+import { browser, $, expect } from '@wdio/globals'
 
 describe('Electron Testing', () => {
     it('should print application title', async () => {
-        console.log('Hello', await browser.getTitle(), 'MFM Gdrive')
+        var title = await browser.getTitle()
+        await expect(title).toEqual("MFM Gdrive")
     })
 })
 
