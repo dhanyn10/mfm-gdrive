@@ -6,7 +6,7 @@ export const config: WebdriverIO.Config = {
     // ====================
     // WebdriverIO supports running e2e tests as well as unit and component tests.
     runner: 'local',
-    tsConfigPath: './tsconfig.json',
+    tsConfigPath: './test/tsconfig.json',
     
     //
     // ==================
@@ -52,19 +52,15 @@ export const config: WebdriverIO.Config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    services: ['electron'],
     capabilities: [{
         browserName: 'electron',
         // Electron service options
         // see https://webdriver.io/docs/desktop-testing/electron/configuration/#service-options
         'wdio:electronServiceOptions': {
             // custom application args
-            appBinaryPath: './dist/win-unpacked',
+            appBinaryPath: './dist/win-unpacked/mfm-gdrive.exe',
             appArgs: []
-        },
-        'wdio:chromedriverOptions': {
-            binary: './dist/win-unpacked', // path to Chromedriver you just downloaded
-        },
+        }
     }],
 
     //
@@ -114,8 +110,8 @@ export const config: WebdriverIO.Config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    // services: [],
-    //
+    services: ['electron'],
+
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
     // see also: https://webdriver.io/docs/frameworks
