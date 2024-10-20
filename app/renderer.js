@@ -109,13 +109,21 @@ async function listFiles(authenticate, source) {
   
   // upfolder elements
   //checkbox
-  let upcbFolders = elemFactory('input', 'type', 'checkbox', "cbox-folders peer hidden", source, null, null)
+  let upcbFolders = elemFactory('input', {
+    type: 'checkbox',
+    "class": 'cbox-folders peer hidden',
+    value: source
+  });
   //span
-  let upSpFolders = elemFactory('span', null, null,
-  `inline-block w-full px-4 py-2 border-b border-gray-200
-  hover:bg-gray-100 dark:border-gray-600`, null, "...", upcbFolders)
+  let upSpFolders = elemFactory('span', {
+    "class": 'inline-block w-full px-4 py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600',
+    innerHTML: "...",
+    child: upcbFolders
+  });
   //li
-  let upListFolders = elemFactory('li', null, null, null, null, null, [upcbFolders, upSpFolders])
+  let upListFolders = elemFactory('li', {
+    child: [upcbFolders, upSpFolders]
+  });
   upListFolders.addEventListener("click", () => {
     // console.log(checkboxFolders.value)
     if(arrParentFolder.length > 1) {
@@ -158,15 +166,19 @@ async function listFiles(authenticate, source) {
   // loop arrListFolder
   for(let i = 0; i < arrListFolders.length; i++) {
     //checkbox
-    let checkboxFolders = elemFactory(
-      'input', 'type', 'checkbox', "cbox-folders peer hidden", arrListFolders[i].id, null, null)
+      let checkboxFolders = elemFactory('input', {
+        type: "checkbox",
+        "class": "cbox-folders peer hidden",
+        value: arrListFolders[i].id
+      });
     //span
-    let spanFolders = elemFactory('span', null, null, 
-    `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100
-    hover:bg-gray-100`
-    , null, arrListFolders[i].name, null)
-      
-    let listFolders = elemFactory('li', null, null, null, null, null, [checkboxFolders, spanFolders])
+    let spanFolders = elemFactory('span', {
+      "class": "inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 hover:bg-gray-100",
+      innerHTML: arrListFolders[i].name
+    });
+    let listFolders = elemFactory('li', {
+      child: [checkboxFolders, spanFolders]
+    });
     listFolders.addEventListener("click", () => {
       listFiles(authenticate, arrParentFolder[arrParentFolder.length-1])
       arrParentFolder.push(arrListFolders[i].id)
@@ -201,15 +213,18 @@ async function listFiles(authenticate, source) {
   //loop for list file and folder
   for(let i = 0; i < arrListAllFiles.length; i++) {
       //checkbox : cbFileFolder
-    let cbFileFolder = elemFactory(
-      'input', 'type', 'checkbox', "cbox-file-folder peer hidden",
-      arrListAllFiles[i].id, null, null)
+      let cbFileFolder = elemFactory('input', {
+        type: "checkbox",
+        "class": "cbox-file-folder peer hidden",
+        value: arrListAllFiles[i].id
+      });
       cbFileFolder.checked = arrListAllFiles[i].checked
     //span: spFileFolder
-    let spFileFolder = elemFactory('span', null, null,
-    `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none
-    peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed
-    hover:bg-gray-100`, null, null, null)
+    let spFileFolder = elemFactory('span', {
+      "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
+                  peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed \
+                  hover:bg-gray-100",
+    });
     if(arrListAllFiles[i].type == "application/vnd.google-apps.folder") {
           //span : folder icon
       const spFolderIcon = document.createElement('span')
@@ -226,11 +241,12 @@ async function listFiles(authenticate, source) {
       spFileFolder.classList.add('cursor-pointer')
     }
 
-    const sptextNode = document.createTextNode(arrListAllFiles[i].name)
+    let sptextNode = document.createTextNode(arrListAllFiles[i].name)
     spFileFolder.appendChild(sptextNode)
     //li: liFileFolder
-    let liFileFolder = elemFactory(
-      'li', null, null, null, null, null, [cbFileFolder, spFileFolder])
+    let liFileFolder = elemFactory('li', {
+      child: [cbFileFolder, spFileFolder]
+    })
 
     liFileFolder.addEventListener("click", () => {
       if(arrListAllFiles[i].type != mime) { // only allows selection for non-folder
@@ -240,6 +256,7 @@ async function listFiles(authenticate, source) {
           arrListAllFiles[i].checked = false
       }
       document.getElementsByClassName('cbox-file-folder')[i].checked = arrListAllFiles[i].checked
+      console.log(arrListAllFiles[i].checked)
     })
     document.getElementById('file-folder-list').appendChild(liFileFolder)
   }
