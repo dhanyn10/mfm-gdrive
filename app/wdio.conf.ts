@@ -54,6 +54,7 @@ export const config: WebdriverIO.Config = {
     //
     capabilities: [{
         browserName: 'electron',
+        browserVersion: '130.0.6723.44',
         // Electron service options
         // see https://webdriver.io/docs/desktop-testing/electron/configuration/#service-options
         'wdio:electronServiceOptions': {
