@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/node:20.16-browsers
+      - image: ci/node:20.16-browsers
     steps:
       - checkout
 
@@ -35,7 +35,7 @@ jobs:
       - run:
           name: Run WebdriverIO tests
           working_directory: ./app
-          command: xvfb npx wdio run wdio.conf.js
+          command: Xvfb npx wdio run wdio.conf.js
 
 workflows:
   version: 2
