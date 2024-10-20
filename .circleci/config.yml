@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: node:20.16  # Node.js Docker image
+      - image: cimg/node:20.16.0  # Node.js Docker image
     steps:
       - checkout
 
