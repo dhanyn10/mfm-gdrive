@@ -1,12 +1,7 @@
 version: 2.1
-orbs:
-  win: circleci/windows@5.0 # The Windows orb gives you everything you need to 
 
 jobs:
   build:
-    executor:
-      name: win/default # executor type
-      size: medium # can be medium, large, xlarge, 2xlarge
     docker:
       - image: cimg/node:20.16-browsers
     steps:
