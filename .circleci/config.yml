@@ -33,7 +33,7 @@ jobs:
       #       xset q  # This command will fail if Xvfb isn't running correctly
       - run:
           name: Running X virtual framebuffer
-          command: Xvfb :99 -screen 0 1280x1024x24
+          command: Xvfb :99 -ac & export DISPLAY=:99
           background: true
       - run:
           name: Run WebdriverIO tests
