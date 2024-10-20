@@ -1,34 +1,43 @@
 // utility
 /**
- * @param {string | null} elem input, checkbox, etc
- * @param {string | null} [attr=null] attribute
- * @param {string | null} [attrvalue=null] value for the attribute
- * @param {string | null} [className=null] list of class for the element
- * @param {string | null} [innerHTML=null] any html inside the element
- * @param {string | null} [value=null] set value
- * @param {string | Array} [child=null] children for the element, will inserted based on it's queue
+ * Creates a DOM element with specified attributes, class name, and children.
+ * 
+ * @param {string} elem - The type of element to create (e.g., 'div').
+ * @param {Object} [options={}] - An object containing attributes and optional properties.
+ * @param {string | null} [options.className] - List of classes for the element (optional).
+ * @param {string | null} [options.innerHTML] - Any HTML inside the element (optional).
+ * @param {string | Array} [options.child] - Children for the element, will be inserted based on its queue (optional).
  */
 export function elemFactory(
-  elem,
-  attr,
-  attrvalue=null,
-  className=null,
-  value=null,
-  innerHTML=null,
-  child=null) {
+    elem,
+    options = {}  // Default to an empty object
+  ) {
+    const factory = document.createElement(elem);
 
-  const factory = document.createElement(elem)
-  factory.setAttribute(attr, attrvalue)
-  factory.className = className
-  factory.value = value
-  factory.innerHTML = innerHTML
-  if(child != null) {
-      if(Array.isArray(child)) {
-      for(let b = 0; b < child.length; b++) {
-          factory.appendChild(child[b])
+    // Set attributes
+    Object.entries(options).forEach(([key, val]) => {
+      if (key === 'className') {
+        factory.className = val;  // Handle className separately
+      } else {
+        factory.setAttribute(key, val);
       }
-      } else
-      factory.appendChild(child)
-  }
-  return factory
+    });
+
+    // Set innerHTML if provided
+    if (options.innerHTML) {
+      factory.innerHTML = options.innerHTML;
+    }
+
+    // Handle children
+    if (options.child != null) {
+        if (Array.isArray(options.child)) {
+            options.child.forEach(c => {
+                factory.appendChild(c);
+            });
+        } else {
+            factory.appendChild(options.child);
+        }
+    }
+    return factory;
 }
+  
