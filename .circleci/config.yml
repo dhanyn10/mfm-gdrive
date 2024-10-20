@@ -1,0 +1,44 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: node:20.16  # Node.js Docker image
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          working_directory: ./app
+          command: npm install
+
+      - run:
+          name: Build Electron apps
+          working_directory: ./app
+          command: npm run app:dir
+
+      - run:
+          name: Set up Xvfb
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+            Xvfb :99 -ac &
+            export DISPLAY=:99
+            echo "Xvfb started"
+
+      - run:
+          name: Verify Display
+          command: |
+            echo $DISPLAY  # Check if DISPLAY is set
+            xset q  # This command will fail if Xvfb isn't running correctly
+
+      - run:
+          name: Run WebdriverIO tests
+          working_directory: ./app
+          command: xvfb-maybe npx wdio run wdio.conf.js
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
