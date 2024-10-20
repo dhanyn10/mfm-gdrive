@@ -31,11 +31,14 @@ jobs:
       #     command: |
       #       echo $DISPLAY  # Check if DISPLAY is set
       #       xset q  # This command will fail if Xvfb isn't running correctly
-
+      - run:
+          name: Running X virtual framebuffer
+          command: Xvfb :99 -screen 0 1280x1024x24
+          background: true
       - run:
           name: Run WebdriverIO tests
           working_directory: ./app
-          command: Xvfb npx wdio run wdio.conf.js
+          command: npx wdio run wdio.conf.js
 
 workflows:
   version: 2
