@@ -1,0 +1,32 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:20.16-browsers
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          working_directory: ./app
+          command: npm install
+
+      - run:
+          name: Build Electron apps
+          working_directory: ./app
+          command: npm run app:dir
+      - run:
+          name: Running X virtual framebuffer
+          command: Xvfb :99 -ac & export DISPLAY=:99
+          background: true
+      - run:
+          name: Run WebdriverIO tests
+          working_directory: ./app
+          command: npx wdio run wdio.conf.js
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
