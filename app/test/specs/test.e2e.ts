@@ -1,5 +1,4 @@
 import { browser, $, expect } from '@wdio/globals'
-import { assuredworkloads } from 'googleapis/build/src/apis/assuredworkloads'
 
 describe('Electron Testing', () => {
     it('should print application title', async () => {
