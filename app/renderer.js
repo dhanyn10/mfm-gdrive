@@ -112,7 +112,7 @@ async function listFiles(authenticate, source) {
   let upcbFolders = elemFactory('input', 'type', 'checkbox', "cbox-folders peer hidden", source, null, null)
   //span
   let upSpFolders = elemFactory('span', null, null,
-  `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100
+  `inline-block w-full px-4 py-2 border-b border-gray-200
   hover:bg-gray-100 dark:border-gray-600`, null, "...", upcbFolders)
   //li
   let upListFolders = elemFactory('li', null, null, null, null, null, [upcbFolders, upSpFolders])
@@ -162,8 +162,8 @@ async function listFiles(authenticate, source) {
       'input', 'type', 'checkbox', "cbox-folders peer hidden", arrListFolders[i].id, null, null)
     //span
     let spanFolders = elemFactory('span', null, null, 
-    `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 cursor-pointer
-    hover:bg-gray-100 dark:border-gray-600`
+    `inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100
+    hover:bg-gray-100`
     , null, arrListFolders[i].name, null)
       
     let listFolders = elemFactory('li', null, null, null, null, null, [checkboxFolders, spanFolders])
@@ -207,9 +207,9 @@ async function listFiles(authenticate, source) {
       cbFileFolder.checked = arrListAllFiles[i].checked
     //span: spFileFolder
     let spFileFolder = elemFactory('span', null, null,
-    `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto
-    peer-checked:bg-gray-100 cursor-pointer
-    hover:bg-gray-100 dark:border-gray-600`, null, null, null)
+    `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none
+    peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed
+    hover:bg-gray-100`, null, null, null)
     if(arrListAllFiles[i].type == "application/vnd.google-apps.folder") {
           //span : folder icon
       const spFolderIcon = document.createElement('span')
@@ -220,7 +220,12 @@ async function listFiles(authenticate, source) {
       </svg>  
         `
       spFileFolder.appendChild(spFolderIcon) //span folder icon
+    } else {
+      //setup cursor for non folder
+      spFileFolder.classList.remove('cursor-not-allowed')
+      spFileFolder.classList.add('cursor-pointer')
     }
+
     const sptextNode = document.createTextNode(arrListAllFiles[i].name)
     spFileFolder.appendChild(sptextNode)
     //li: liFileFolder
@@ -251,9 +256,7 @@ document.getElementById("authorize").addEventListener('click', () => {
 // define value for swal
 const inputClass =
 `block w-full p-2 text-gray-900 border border-gray-300 rounded-lg 
-bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500 
-dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500
 mb-2
 `
 const myswal = Swal.mixin({
@@ -261,8 +264,7 @@ const myswal = Swal.mixin({
     title: `block mb-2 text-sm font-medium text-gray-900 dark:text-white`,
     confirmButton: `px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 
     rounded-sm hover:bg-blue-800 focus:ring-4 focus:outline-none 
-    focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 
-    dark:focus:ring-blue-800`
+    focus:ring-blue-300`
   },
   buttonsStyling: false
 })

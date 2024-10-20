@@ -10,7 +10,7 @@
  */
 export function elemFactory(
   elem,
-  attr=null,
+  attr,
   attrvalue=null,
   className=null,
   value=null,
