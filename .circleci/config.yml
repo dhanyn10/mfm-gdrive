@@ -44,8 +44,6 @@ workflows:
       - build:  # Reference the job by name
           filters:
             branches:
-              only:
-                - master  # Run on master branch
+              only: master  # Run on master branch
             pull_requests:
-              only:
-                - master  # Run on pull requests to master branch
+              only: master  # Run on pull requests to master branch
