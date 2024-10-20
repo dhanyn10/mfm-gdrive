@@ -61,7 +61,10 @@ export const config: WebdriverIO.Config = {
             // custom application args
             appBinaryPath: './dist/win-unpacked',
             appArgs: []
-        }
+        },
+        'wdio:chromedriverOptions': {
+            binary: './dist/win-unpacked', // path to Chromedriver you just downloaded
+        },
     }],
 
     //
