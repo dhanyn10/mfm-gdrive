@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: ci/node:20.16-browsers
+      - image: cimg/node:20.16-browsers
     steps:
       - checkout
 
