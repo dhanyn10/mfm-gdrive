@@ -17,25 +17,25 @@ jobs:
           working_directory: ./app
           command: npm run app:dir
 
-      - run:
-          name: Set up Xvfb
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y xvfb
-            Xvfb :99 -ac &
-            export DISPLAY=:99
-            echo "Xvfb started"
+      # - run:
+      #     name: Set up Xvfb
+      #     command: |
+      #       sudo apt-get update
+      #       sudo apt-get install -y xvfb
+      #       Xvfb :99 -ac &
+      #       export DISPLAY=:99
+      #       echo "Xvfb started"
 
-      - run:
-          name: Verify Display
-          command: |
-            echo $DISPLAY  # Check if DISPLAY is set
-            xset q  # This command will fail if Xvfb isn't running correctly
+      # - run:
+      #     name: Verify Display
+      #     command: |
+      #       echo $DISPLAY  # Check if DISPLAY is set
+      #       xset q  # This command will fail if Xvfb isn't running correctly
 
       - run:
           name: Run WebdriverIO tests
           working_directory: ./app
-          command: xvfb-maybe npx wdio run wdio.conf.js
+          command: npx wdio run wdio.conf.js
 
 workflows:
   version: 2
