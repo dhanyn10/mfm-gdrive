@@ -41,9 +41,4 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - build:  # Reference the job by name
-          filters:
-            branches:
-              only: master  # Run on master branch
-            pull_requests:
-              only: master  # Run on pull requests to master branch
+      - build
