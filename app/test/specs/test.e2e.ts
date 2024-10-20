@@ -1,4 +1,5 @@
 import { browser, $, expect } from '@wdio/globals'
+import { assuredworkloads } from 'googleapis/build/src/apis/assuredworkloads'
 
 describe('Electron Testing', () => {
     it('should print application title', async () => {
@@ -6,7 +7,7 @@ describe('Electron Testing', () => {
         await expect(title).toEqual("MFM Gdrive")
     })
     it('should show button authorize', async () => {
-        const btnauthorize = await browser.getElementText("authorize")
-        await expect(btnauthorize).toEqual("authorize")
+        const btnauthorize = await $("#authorize")
+        await expect(btnauthorize).toBeDisplayed()
     })
 })
