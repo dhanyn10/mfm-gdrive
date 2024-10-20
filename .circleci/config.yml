@@ -35,7 +35,7 @@ jobs:
       - run:
           name: Run WebdriverIO tests
           working_directory: ./app
-          command: npx wdio run wdio.conf.js
+          command: xvfb npx wdio run wdio.conf.js
 
 workflows:
   version: 2
