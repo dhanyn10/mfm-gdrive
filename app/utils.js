@@ -16,26 +16,22 @@ export function elemFactory(
 
     // Set attributes
     Object.entries(options).forEach(([key, val]) => {
-      if (key === 'className') {
-        factory.className = val;  // Handle className separately
-      } else {
-        factory.setAttribute(key, val);
-      }
-    });
+        factory.setAttribute(key, val)
+    })
 
     // Set innerHTML if provided
     if (options.innerHTML) {
-      factory.innerHTML = options.innerHTML;
+      factory.innerHTML = options.innerHTML
     }
 
     // Handle children
     if (options.child != null) {
         if (Array.isArray(options.child)) {
             options.child.forEach(c => {
-                factory.appendChild(c);
-            });
+                factory.appendChild(c)
+            })
         } else {
-            factory.appendChild(options.child);
+            factory.appendChild(options.child)
         }
     }
     return factory;

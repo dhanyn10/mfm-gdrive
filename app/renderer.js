@@ -111,12 +111,12 @@ async function listFiles(authenticate, source) {
   //checkbox
   let upcbFolders = elemFactory('input', {
     type: 'checkbox',
-    className: 'cbox-folders peer hidden',
+    "class": 'cbox-folders peer hidden',
     value: source
   });
   //span
   let upSpFolders = elemFactory('span', {
-    className: 'inline-block w-full px-4 py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600',
+    "class": 'inline-block w-full px-4 py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600',
     innerHTML: "...",
     child: upcbFolders
   });
@@ -168,12 +168,12 @@ async function listFiles(authenticate, source) {
     //checkbox
       let checkboxFolders = elemFactory('input', {
         type: "checkbox",
-        className: "cbox-folders peer hidden",
-        value: "arrListFolders[i].id"
+        "class": "cbox-folders peer hidden",
+        value: arrListFolders[i].id
       });
     //span
     let spanFolders = elemFactory('span', {
-      className: "inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 hover:bg-gray-100",
+      "class": "inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 hover:bg-gray-100",
       innerHTML: arrListFolders[i].name
     });
     let listFolders = elemFactory('li', {
@@ -215,15 +215,15 @@ async function listFiles(authenticate, source) {
       //checkbox : cbFileFolder
       let cbFileFolder = elemFactory('input', {
         type: "checkbox",
-        className: "cbox-file-folder peer hidden",
+        "class": "cbox-file-folder peer hidden",
         value: arrListAllFiles[i].id
       });
       cbFileFolder.checked = arrListAllFiles[i].checked
     //span: spFileFolder
     let spFileFolder = elemFactory('span', {
-      className: `flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none
-                  peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed
-                  hover:bg-gray-100`,
+      "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
+                  peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed \
+                  hover:bg-gray-100",
     });
     if(arrListAllFiles[i].type == "application/vnd.google-apps.folder") {
           //span : folder icon
@@ -242,14 +242,11 @@ async function listFiles(authenticate, source) {
     }
 
     let sptextNode = document.createTextNode(arrListAllFiles[i].name)
-    for(let x = 1; x <= arrListAllFiles[i].name; x++) {
-      // elemFactory('span', 'aria-label', x, )
-    }
     spFileFolder.appendChild(sptextNode)
     //li: liFileFolder
-      let liFileFolder = elemFactory('li', {
-        child: [cbFileFolder, spFileFolder]
-      })
+    let liFileFolder = elemFactory('li', {
+      child: [cbFileFolder, spFileFolder]
+    })
 
     liFileFolder.addEventListener("click", () => {
       if(arrListAllFiles[i].type != mime) { // only allows selection for non-folder
@@ -259,6 +256,7 @@ async function listFiles(authenticate, source) {
           arrListAllFiles[i].checked = false
       }
       document.getElementsByClassName('cbox-file-folder')[i].checked = arrListAllFiles[i].checked
+      console.log(arrListAllFiles[i].checked)
     })
     document.getElementById('file-folder-list').appendChild(liFileFolder)
   }
