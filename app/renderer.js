@@ -121,9 +121,7 @@ async function listFiles(authenticate, source) {
     child: upcbFolders
   });
   //li
-  let upListFolders = elemFactory('li', {
-    child: [upcbFolders, upSpFolders]
-  });
+  let upListFolders = elemFactory('li', { child: [upcbFolders, upSpFolders]})
   upListFolders.addEventListener("click", () => {
     // console.log(checkboxFolders.value)
     if(arrParentFolder.length > 1) {
@@ -176,9 +174,7 @@ async function listFiles(authenticate, source) {
       "class": "inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 hover:bg-gray-100",
       innerHTML: arrListFolders[i].name
     });
-    let listFolders = elemFactory('li', {
-      child: [checkboxFolders, spanFolders]
-    });
+    let listFolders = elemFactory('li', {child: [checkboxFolders, spanFolders]})
     listFolders.addEventListener("click", () => {
       listFiles(authenticate, arrParentFolder[arrParentFolder.length-1])
       arrParentFolder.push(arrListFolders[i].id)
@@ -250,11 +246,8 @@ async function listFiles(authenticate, source) {
           "absolute left-1/2 transform -translate-x-1/2 top-[-25px] w-max \
           px-2 py-1 text-sm text-white bg-black rounded opacity-0 group-hover:opacity-100 \
           transition-opacity duration-300"})
-          if(arrListAllFiles[i].name.charAt(j) === " ")
-            spanChar.innerHTML = "&nbsp;"
-          else
-            spanChar.innerHTML = arrListAllFiles[i].name.charAt(j)
 
+          spanChar.innerHTML = arrListAllFiles[i].name.charAt(j) === " " ? "&nbsp;" : arrListAllFiles[i].name.charAt(j)
           spanChar.classList.add('font-mono', 'whitespace-hormal')
           charNumTooltip.innerHTML = j+1
 
