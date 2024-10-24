@@ -282,6 +282,7 @@ async function listFiles(authenticate, source) {
     document.getElementById('file-folder-list').appendChild(liFileFolder)
   }
   let firstchildFileList = elemFactory('div', {"class": "h-4 bg-gray-100"})
+  // remove additional div at first list for folder list
   document.getElementById('file-folder-list').prepend(firstchildFileList)
 }
 
