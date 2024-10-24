@@ -121,9 +121,7 @@ async function listFiles(authenticate, source) {
     child: upcbFolders
   });
   //li
-  let upListFolders = elemFactory('li', {
-    child: [upcbFolders, upSpFolders]
-  });
+  let upListFolders = elemFactory('li', { child: [upcbFolders, upSpFolders]})
   upListFolders.addEventListener("click", () => {
     // console.log(checkboxFolders.value)
     if(arrParentFolder.length > 1) {
@@ -176,9 +174,7 @@ async function listFiles(authenticate, source) {
       "class": "inline-block w-full px-4 py-2 border-b border-gray-200 peer-checked:bg-gray-100 hover:bg-gray-100",
       innerHTML: arrListFolders[i].name
     });
-    let listFolders = elemFactory('li', {
-      child: [checkboxFolders, spanFolders]
-    });
+    let listFolders = elemFactory('li', {child: [checkboxFolders, spanFolders]})
     listFolders.addEventListener("click", () => {
       listFiles(authenticate, arrParentFolder[arrParentFolder.length-1])
       arrParentFolder.push(arrListFolders[i].id)
@@ -223,8 +219,11 @@ async function listFiles(authenticate, source) {
     let spFileFolder = elemFactory('span', {
       "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
                   peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed \
-                  hover:bg-gray-100",
+                  hover:bg-gray-100 hover:overflow-visible",
     });
+
+    
+    let fullFileName = document.createElement('span')
     if(arrListAllFiles[i].type == "application/vnd.google-apps.folder") {
           //span : folder icon
       const spFolderIcon = document.createElement('span')
@@ -239,10 +238,32 @@ async function listFiles(authenticate, source) {
       //setup cursor for non folder
       spFileFolder.classList.remove('cursor-not-allowed')
       spFileFolder.classList.add('cursor-pointer')
+      for (let j = 0; j < arrListAllFiles[i].name.length; j++) {
+        // Initialize a container for the tooltips
+        let fullCharTooltip = elemFactory('span', {"class": "relative group"})
+        let spanChar = elemFactory('span', {"class": "hover:ring ring-blue-200"})
+        let charNumTooltip = elemFactory("span", {"class":
+          "absolute left-1/2 transform -translate-x-1/2 top-[-25px] w-max \
+          px-2 py-1 text-sm text-white bg-black rounded opacity-0 group-hover:opacity-100 \
+          transition-opacity duration-300"})
+
+          spanChar.innerHTML = arrListAllFiles[i].name.charAt(j) === " " ? "&nbsp;" : arrListAllFiles[i].name.charAt(j)
+          spanChar.classList.add('font-mono', 'whitespace-hormal')
+          charNumTooltip.innerHTML = j+1
+
+          fullCharTooltip.appendChild(spanChar)
+          fullCharTooltip.appendChild(charNumTooltip)
+          fullFileName.appendChild(fullCharTooltip)
+      }
     }
 
-    let sptextNode = document.createTextNode(arrListAllFiles[i].name)
-    spFileFolder.appendChild(sptextNode)
+    // Create a text node with the file name and append it to spFileFolder
+    if(arrListAllFiles[i].type == mime) {
+      let sptextNode = document.createTextNode(arrListAllFiles[i].name)
+      spFileFolder.appendChild(sptextNode)
+    } else {
+      spFileFolder.appendChild(fullFileName)
+    }
     //li: liFileFolder
     let liFileFolder = elemFactory('li', {
       child: [cbFileFolder, spFileFolder]
@@ -256,10 +277,13 @@ async function listFiles(authenticate, source) {
           arrListAllFiles[i].checked = false
       }
       document.getElementsByClassName('cbox-file-folder')[i].checked = arrListAllFiles[i].checked
-      console.log(arrListAllFiles[i].checked)
     })
+    
     document.getElementById('file-folder-list').appendChild(liFileFolder)
   }
+  let firstchildFileList = elemFactory('div', {"class": "h-4 bg-gray-100"})
+  // remove additional div at first list for folder list
+  document.getElementById('file-folder-list').prepend(firstchildFileList)
 }
 
 document.getElementById("authorize").addEventListener('click', () => {
