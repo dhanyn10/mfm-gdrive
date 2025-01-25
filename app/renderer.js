@@ -312,7 +312,9 @@ const myswal = Swal.mixin({
 
 document.getElementById('mfm-play').addEventListener('click', () => {
   let child = document.getElementById('mfm-opt').children[0]
-  if(child.value == 1) {
+  // option variable is used to capture and store the user's selection or choice
+  const option = child.value
+  if(option == 1) {
     myswal.fire({
       title: child[1].innerHTML,
       html:
@@ -340,7 +342,7 @@ document.getElementById('mfm-play').addEventListener('click', () => {
       }
     })
   }
-  else if(child.value == 2) {
+  else if(option == 2) {
     myswal.fire({
       title: child[2].innerHTML,
       html:
@@ -356,6 +358,44 @@ document.getElementById('mfm-play').addEventListener('click', () => {
           document.getElementById('start').value,
           document.getElementById('end').value
         ]
+      }
+    })
+  }
+  else if(option == 3) {
+    myswal.fire({
+      title: child[3].innerHTML,
+      html:
+      '<input id="numprefix" placeholder="expected value" class="'+inputClass+'">',
+      confirmButtonText: "RUN",
+      inputAttributes: {
+        maxlength: 10,
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      }
+    }).then((res) => {
+      if(res.isConfirmed) {
+        /**
+         * 'numprefix' is a variable that stores a string containing both a non-numeric prefix
+         * and a numeric part. The goal is to pad the numeric part of the string with leading zeros
+         * to ensure it reaches a specific length, while keeping the non-numeric prefix unchanged.
+         * 
+         * For example, given the input 'abc123', we want to add leading zeros to the numeric part 
+         * ('123') so that it becomes '00123', resulting in the final string 'abc00123'.
+         */
+        const numPrefix = document.getElementById('numprefix').value
+        
+        let chData = document.getElementsByClassName('cbox-file-folder')
+        for(let j = 0; j < arrListAllFiles.length; j++) {
+          
+          if(chData[j].checked) {
+
+            const filename = arrListAllFiles[j].name
+            const paddedFilename = padFilename(filename, numPrefix);
+
+            let newfilename = arrListAllFiles[j].name.replace(filename, paddedFilename)
+            renameFile(arrListAllFiles[j].id, newfilename)
+          }
+        }
       }
     })
   }
@@ -391,3 +431,19 @@ document.getElementById('file-folder-list').addEventListener('click', (evt) => {
     }
   }
 })
+
+/**
+ * Pads numbers in a single filename based on the specified length.
+ * @param {string} filename - The filename to process.
+ * @param {number} padLength - Number of digits to pad the numbers to.
+ * @returns {string} - The filename with the padded number.
+ */
+function padFilename(filename, padLength) {
+  // Use regex to find any number in the filename
+  return filename.replace(/(\D*?)(\d+)(.*)/, (_, prefix, num, suffix) => {
+    // Pad the numeric part
+    const paddedNum = num.padStart(padLength, "0");
+    // Return the updated filename
+    return `${prefix}${paddedNum}${suffix}`;
+  });
+}
