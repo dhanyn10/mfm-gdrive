@@ -14,8 +14,9 @@ const Swal = require('sweetalert2')
 const bottleneck = require('bottleneck')
 const limiter = new bottleneck({minTime: 110})
 let gdrive = null
+let currentPage = 1
 
-import { elemFactory } from './utils.js'
+import { elemFactory, generatePaging } from './utils.js'
 
 // variable
 const mime = "application/vnd.google-apps.folder"
@@ -188,7 +189,7 @@ async function listFiles(authenticate, source) {
     spaces: 'drive',
     fields: 'nextPageToken, files(id, name, mimeType)',
     orderBy: 'folder, name'
-  });
+  })
   let resFileLists = fileLists.data.files;
   if (resFileLists.length === 0) {
     console.log('No files found.');
@@ -284,6 +285,9 @@ async function listFiles(authenticate, source) {
   let firstchildFileList = elemFactory('div', {"class": "h-4 bg-gray-100"})
   // remove additional div at first list for folder list
   document.getElementById('file-folder-list').prepend(firstchildFileList)
+  
+  renderPagination();
+  // updateContent(currentPage);
 }
 
 document.getElementById("authorize").addEventListener('click', () => {
@@ -446,4 +450,24 @@ function padFilename(filename, padLength) {
     // Return the updated filename
     return `${prefix}${paddedNum}${suffix}`;
   });
+}
+
+// Function to handle page changes
+function handlePageChange(newPage) {
+  currentPage = newPage;
+  console.log(`Switched to page: ${currentPage}`);
+  
+  // Update content based on the new page
+  // updateContent(currentPage);
+
+  // Re-render the pagination
+  renderPagination();
+}
+
+
+// Fungsi untuk merender pagination
+function renderPagination() {
+  const paginationContainer = document.getElementById('pagination')
+  paginationContainer.innerHTML = ''; // Bersihkan container sebelumnya
+  paginationContainer.appendChild(generatePaging(10, currentPage, handlePageChange))
 }
