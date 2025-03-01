@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
+    "@tailwindcss/cli": "^4.0.9",
     "bottleneck": "^2.19.5",
     "google-auth-library": "^9.14.2",
     "googleapis": "^146.0.0",
