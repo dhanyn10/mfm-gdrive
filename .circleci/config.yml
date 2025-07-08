@@ -21,7 +21,6 @@ jobs:
           command: |
             npm run app:dist
             npx electron-builder build
-            ls -l
       - run:
           name: Put token.json
           working_directory: ./app
@@ -34,7 +33,6 @@ jobs:
           name: Run WebdriverIO tests
           working_directory: ./app
           command: |
-            ls -l
             npm run wdio
 
 workflows:
