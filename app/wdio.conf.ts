@@ -54,13 +54,12 @@ export const config: WebdriverIO.Config = {
     //
     capabilities: [{
         browserName: 'electron',
-        browserVersion: '132.0.6834.83',
         // Electron service options
         // see https://webdriver.io/docs/desktop-testing/electron/configuration/#service-options
         'wdio:electronServiceOptions': {
             // custom application args
-            appBinaryPath: './dist/linux-unpacked/mfm-gdrive',
-            appArgs: []
+            appArgs: [],
+            appBinaryPath: './dist/win-unpacked/mfm-gdrive.exe',
         }
     }],
 
