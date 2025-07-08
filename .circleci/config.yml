@@ -33,7 +33,9 @@ jobs:
       - run:
           name: Run WebdriverIO tests
           working_directory: ./app
-          command: npm run wdio
+          command: |
+            ls -l
+            npm run wdio
 
 workflows:
   version: 2
