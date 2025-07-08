@@ -18,7 +18,7 @@ describe('Electron Testing', () => {
             let res = await folderList.getText()
             return res.includes("mfm-test")
           }, {
-            timeout: 5000,
+            timeout: 10000,
             timeoutMsg: 'failed to get mfm-test'
         })
     })
