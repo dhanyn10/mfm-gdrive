@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/node:20.16-browsers
+      - image: cimg/node:22.17-browsers
     steps:
       - checkout
 
@@ -18,7 +18,9 @@ jobs:
       - run:
           name: Build Electron apps
           working_directory: ./app
-          command: npm run app:dir
+          command: |
+            npm run app:dist
+            npx electron-builder build
       - run:
           name: Put token.json
           working_directory: ./app
@@ -30,7 +32,8 @@ jobs:
       - run:
           name: Run WebdriverIO tests
           working_directory: ./app
-          command: npx wdio run wdio.conf.ts
+          command: |
+            npm run wdio
 
 workflows:
   version: 2
