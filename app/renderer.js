@@ -11,11 +11,12 @@ const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
 const Swal = require('sweetalert2'); // Swal is kept as it's used by myswal
+const Toastify = require('toastify-js');
 const bottleneck = require('bottleneck');
 const limiter = new bottleneck({minTime: 110});
 let gdrive = null;
 
-import { elemFactory } from './utils.js';
+const { elemFactory, createFileNameWithTooltips, padFilename } = require('./utils.js');
 
 // variables
 const mime = "application/vnd.google-apps.folder";
@@ -38,12 +39,36 @@ const authorizeButton = document.getElementById('authorize');
 let isInitialAuthSuccessful = false;
 
 /**
+ * Displays a toast notification using Toastify and Tailwind CSS classes.
+ * @param {string} text - The message to display.
+ * @param {'success' | 'error' | 'info'} [type='info'] - The type of toast.
+ */
+function showToast(text, type = 'info') {
+  const classMap = {
+    success: 'bg-green-500',
+    error: 'bg-red-500',
+    info: 'bg-slate-700'
+  };
+
+  Toastify({
+    text: text,
+    duration: 5000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    stopOnFocus: true,
+    className: `text-white px-4 py-2 rounded-md shadow-lg ${classMap[type] || classMap['info']}`,
+  }).showToast();
+}
+
+/**
  * Renames a file in Google Drive.
  * @param {string} fileId - The ID of the file to rename.
  * @param {string} newTitle - The new name for the file.
+ * @param {string} oldTitle - The original name of the file, for the toast message.
  * @returns {Promise<object>} - A promise that resolves with the updated file data or rejects with an error.
  */
-function renameFile(fileId, newTitle) {
+function renameFile(fileId, newTitle, oldTitle) {
   return new Promise((resolve, reject) => {
     const body = {'name': newTitle};
     limiter.schedule(() => {
@@ -52,10 +77,11 @@ function renameFile(fileId, newTitle) {
         'resource': body
       }, (err, res) => {
         if (err) {
-          console.error(`Error: ${err}`); // Log error to console
+          showToast(`Error renaming file: ${err.message}`, 'error');
+          console.error(`Error: ${err}`); // Keep console log for debugging
           reject(err);
         } else {
-          console.log(`Renamed: ${res.data.name}`);
+          showToast(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success');
           resolve(res.data);
         }
       });
@@ -110,7 +136,6 @@ async function authorize() {
     scopes: SCOPES,
     keyfilePath: CREDENTIALS_PATH,
   });
-  console.log(client);
   if (client.credentials) {
     await saveCredentials(client);
   }
@@ -182,32 +207,6 @@ function createFileIcon(fileType) {
     return spFolderIcon;
   }
   return null; // No icon for non-folders, or handle other file types
-}
-
-/**
- * Creates a span element with the filename where each character has a tooltip showing its index.
- * @param {string} fileName - The name of the file.
- * @returns {HTMLElement} - The span element containing the filename with tooltips.
- */
-function createFileNameWithTooltips(fileName) {
-  let fullFileName = document.createElement('span');
-  for (let j = 0; j < fileName.length; j++) {
-    let fullCharTooltip = elemFactory('span', {"class": "relative group"});
-    let spanChar = elemFactory('span', {"class": "hover:ring ring-blue-200"});
-    let charNumTooltip = elemFactory("span", {"class":
-      "absolute left-1/2 transform -translate-x-1/2 top-[-25px] w-max \
-      px-2 py-1 text-sm text-white bg-black rounded opacity-0 group-hover:opacity-100 \
-      transition-opacity duration-300"});
-
-    spanChar.innerHTML = fileName.charAt(j) === " " ? "&nbsp;" : fileName.charAt(j);
-    spanChar.classList.add('font-mono', 'whitespace-hormal');
-    charNumTooltip.innerHTML = j + 1;
-
-    fullCharTooltip.appendChild(spanChar);
-    fullCharTooltip.appendChild(charNumTooltip);
-    fullFileName.appendChild(fullCharTooltip);
-  }
-  return fullFileName;
 }
 
 /**
@@ -338,7 +337,9 @@ document.getElementById("authorize").addEventListener('click', async () => {
     // Use the current folder, which will be 'root' on the first authorization
     await listFiles(authClient, arrParentFolder[arrParentFolder.length - 1]);
     isInitialAuthSuccessful = true; // Set flag to true if successful
+    showToast('Authorization successful. Ready to go!', 'success');
   } catch (error) {
+    showToast('Authorization failed. Please try again.', 'error');
     console.error('Error during authorization or listFiles:', error); // Error logged to console only
     isInitialAuthSuccessful = false; // Reset flag if failure (e.g., token.json corrupted)
   } finally {
@@ -403,13 +404,14 @@ function handleReplaceText() {
       const checkedFiles = getCheckedFiles();
       const renamePromises = checkedFiles.map(file => {
         const newFilename = file.name.replace(from, to);
-        return renameFile(file.id, newFilename);
+        return renameFile(file.id, newFilename, file.name);
       });
 
       try {
         await Promise.all(renamePromises);
       } catch (error) {
-        console.error('Error during rename:', error); // Error logged to console
+        showToast('An error occurred during rename.', 'error');
+        console.error('Error during rename:', error); // Keep console log for debugging
       }
     }
   });
@@ -460,13 +462,14 @@ function handlePadFilename() {
       const checkedFiles = getCheckedFiles();
       const renamePromises = checkedFiles.map(file => {
         const paddedFilename = padFilename(file.name, numPrefix);
-        return renameFile(file.id, paddedFilename);
+        return renameFile(file.id, paddedFilename, file.name);
       });
 
       try {
         await Promise.all(renamePromises);
       } catch (error) {
-        console.error('Error during pad filename:', error); // Error logged to console only
+        showToast('An error occurred while padding filenames.', 'error');
+        console.error('Error during pad filename:', error); // Keep console log for debugging
       }
     }
   });
@@ -487,7 +490,7 @@ document.getElementById('mfm-play').addEventListener('click', () => {
       handlePadFilename();
       break;
     default:
-      console.log('No valid option selected');
+      showToast('No valid option selected.', 'info');
   }
 });
 
@@ -520,20 +523,3 @@ document.getElementById('file-folder-list').addEventListener('click', (evt) => {
     // The handleFileFolderClick on the li already toggles, so no need to explicitly toggle here for single clicks
   }
 });
-
-
-/**
- * Pads numbers in a single filename based on the specified length.
- * @param {string} filename - The filename to process.
- * @param {number} padLength - Number of digits to pad the numbers to.
- * @returns {string} - The filename with the padded number.
- */
-function padFilename(filename, padLength) {
-  // Use regex to find any number in the filename
-  return filename.replace(/(\D*?)(\d+)(.*)/, (_, prefix, num, suffix) => {
-    // Pad the numeric part
-    const paddedNum = num.padStart(parseInt(padLength), "0");
-    // Return the updated filename
-    return `${prefix}${paddedNum}${suffix}`;
-  });
-}
