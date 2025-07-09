@@ -7,7 +7,7 @@
     "css": "npx tailwindcss -i ./css/input.css -o ./css/output.css --minify --watch",
     "css-gen": "npx tailwindcss -i ./css/input.css -o ./css/output.css --minify",
     "app:dir": "electron-builder --dir",
-    "app:dist": "electron-builder --config electron-builder-config.json --publish=never",
+    "app:dist": "electron-builder --publish=never",
     "wdio": "wdio run ./wdio.conf.ts"
   },
   "repository": "https://github.com/dhanyn10/mfm-gdrive.git",
