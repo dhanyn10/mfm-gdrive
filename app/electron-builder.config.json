@@ -1,0 +1,40 @@
+{
+  "appId": "com.dhanyn10.mfm-gdrive",
+  "productName": "Mfm Gdrive",
+  "version": "0.0.0",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "**/*",
+    "!node_modules/${arch}/**/*",
+    "!node_modules/*/{CHANGELOG.md,README.md,README,.github,LICENCE}",
+    "!node_modules/**/*.d.ts",
+    "!node_modules/**/.bin",
+    "!node_modules/**/*.map",
+    "!node_modules/.bin",
+    "!node_modules/electron/**/*",
+    "!node_modules/electron-builder/**/*",
+    "!node_modules/electron-rebuild/**/*",
+    "!node_modules/webpack/**/*",
+    "!node_modules/babel*/**/*",
+    "!node_modules/typescript/**/*",
+    "!node_modules/eslint/**/*",
+    "!node_modules/prettier/**/*",
+    "!node_modules/jest/**/*",
+    "!node_modules/cypress/**/*",
+    "!node_modules/test*/**/*",
+    "!src/**/*",
+    "!build_config.js",
+    "!electron-builder.config.json"
+  ],
+  "win": {
+    "target": "nsis"
+  },
+  "mac": {
+    "target": "dmg"
+  },
+  "linux": {
+    "target": "AppImage"
+  }
+}
