@@ -14,7 +14,7 @@ jobs:
     docker:
       # Image ini sudah termasuk Node.js dan semua dependensi untuk browser/GUI
       # (termasuk Xvfb), jadi kita tidak perlu menginstalnya manual.
-      - image: cimg/node:20.12-browsers
+      - image: cimg/node:22.17-browsers
 
     steps:
       # 1. Checkout kode ke direktori ~/project
