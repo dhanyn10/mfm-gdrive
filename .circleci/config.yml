@@ -1,51 +1,42 @@
 version: 2.1
 
-# Menggunakan 'orb' Node.js dari CircleCI untuk menyederhanakan setup
-# dan caching dependensi secara otomatis.
-orbs:
-  node: circleci/node@5.2.0
-
 jobs:
-  build-and-test:
-    # Menentukan direktori kerja utama untuk semua langkah.
-    # Semua perintah akan dijalankan dari dalam direktori 'app'.
-    working_directory: ~/project/app
-
+  build:
     docker:
-      # Image ini sudah termasuk Node.js dan semua dependensi untuk browser/GUI
-      # (termasuk Xvfb), jadi kita tidak perlu menginstalnya manual.
       - image: cimg/node:22.17-browsers
-
     steps:
-      # 1. Checkout kode ke direktori ~/project
-      - checkout:
-          path: ~/project
+      - checkout
 
-      # 2. Install dependensi Node.js. Orb akan mengelola caching.
-      - node/install-packages:
-          pkg-manager: npm
-
-      # 3. (Opsional) Generate CSS jika diperlukan sebelum build
+      - run:
+          name: Install dependencies
+          working_directory: ./app
+          command: npm install
       - run:
           name: Generate Tailwind CSS
+          working_directory: ./app
           command: npm run css-gen
-
-      # 4. Build aplikasi Electron untuk Linux.
-      #    Pastikan perintah ini sesuai dengan package.json Anda dan
-      #    outputnya cocok dengan `appBinaryPath` di wdio.conf.ts.
       - run:
-          name: Build Electron App for Linux
-          # Ganti 'npm run make' atau 'npx electron-builder build' jika skrip build Anda berbeda
-          command: npx electron-builder build --linux
-
-      # 5. Jalankan tes WebdriverIO.
-      #    Tidak perlu menjalankan Xvfb manual, karena sudah dihandle
-      #    oleh `wdio-electron-service` via konfigurasi di wdio.conf.ts.
+          name: Build Electron apps
+          working_directory: ./app
+          command: |
+            npm run app:dist
+            npx electron-builder build
+      - run:
+          name: Put token.json
+          working_directory: ./app
+          command: echo $TOKEN > token.json
+      - run:
+          name: Running X virtual framebuffer
+          command: Xvfb :99 -ac & export DISPLAY=:99
+          background: true
       - run:
           name: Run WebdriverIO tests
-          command: npm run wdio
+          working_directory: ./app
+          command: |
+            npm run wdio
 
 workflows:
+  version: 2
   build_and_test:
     jobs:
-      - build-and-test
+      - build
