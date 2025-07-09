@@ -20,7 +20,6 @@ jobs:
           working_directory: ./app
           command: |
             npm run app:dist
-            npx electron-builder build  --publish=never
       - run:
           name: Put token.json
           working_directory: ./app
