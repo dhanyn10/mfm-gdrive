@@ -5,6 +5,7 @@
   "directories": {
     "output": "dist"
   },
+  "publish": null,
   "files": [
     "**/*",
     "!node_modules/${arch}/**/*",
