@@ -1,87 +1,21 @@
-const fs = require('fs').promises;
-const path = require('path');
-const process = require('process');
-const { authenticate } = require('@google-cloud/local-auth');
-const { google } = require('googleapis');
-const Bottleneck = require('bottleneck'); // Assuming Bottleneck is installed
-
-// SweetAlert2 and Toastify-JS
 const Swal = require('sweetalert2');
-const Toastify = require('toastify-js');
 
-// --- Helper Functions ---
-function elemFactory(tag, options = {}) {
-    const elem = document.createElement(tag);
-    for (const key in options) {
-        if (key === 'child') {
-            if (Array.isArray(options[key])) {
-                options[key].forEach(childElem => {
-                    if (childElem instanceof HTMLElement) {
-                        elem.appendChild(childElem);
-                    }
-                });
-            } else if (options[key] instanceof HTMLElement) {
-                elem.appendChild(options[key]);
-            }
-        } else if (key === 'innerHTML') {
-            elem.innerHTML = options[key];
-        } else {
-            elem.setAttribute(key, options[key]);
-        }
-    }
-    return elem;
-}
+// Import all functions from utils
+const {
+    showToast,
+    elemFactory,
+    createFileNameWithTooltips,
+    padFilename
+} = require('./utils');
 
-function createFileNameWithTooltips(filename) {
-    const tooltipSpan = elemFactory('span', {
-        'class': 'tooltip-container relative',
-        'innerHTML': filename
-    });
-    tooltipSpan.setAttribute('title', filename); // Add native title for basic tooltip
-    return tooltipSpan;
-}
+// Import functions from driveApi
+const {
+    authorize,
+    renameFile,
+    fetchDriveFiles
+} = require('./driveApi');
 
-function padFilename(filename, numPrefix) {
-    const num = parseInt(numPrefix, 10);
-    if (isNaN(num) || num <= 0) {
-        return filename;
-    }
-
-    const parts = filename.split('.');
-    const extension = parts.length > 1 ? '.' + parts.pop() : '';
-    const baseName = parts.join('.');
-
-    // Find if there's a number at the beginning of the filename
-    const match = baseName.match(/^(\d+)(.*)$/);
-    if (match) {
-        const currentNumber = match[1];
-        const restOfName = match[2];
-        const paddedNumber = currentNumber.padStart(num, '0');
-        return paddedNumber + restOfName + extension;
-    }
-
-    return filename; // No number to pad, return original filename
-}
-
-// --- Notifications Functions ---
-function showToast(text, type = 'info') {
-    const classMap = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        info: 'bg-slate-700'
-    };
-
-    Toastify({
-        text: text,
-        duration: 5000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        stopOnFocus: true,
-        className: `text-white px-4 py-2 rounded-md shadow-lg ${classMap[type] || classMap['info']}`,
-    }).showToast();
-}
-
+// --- Helper Constants & Mixins ---
 const inputClass =
     `block w-full p-2 text-gray-900 border border-gray-300 rounded-lg
 bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500
@@ -103,24 +37,11 @@ const mime = "application/vnd.google-apps.folder";
 var arrParentFolder = ['root'];
 let arrListFolders = [];
 let arrListAllFiles = [];
-let gdrive = null; // This will be initialized after authorization
 
 // Variables for pagination
-let currentPageToken = null; // Token for the current page (null for the first page)
-let nextPageTokenFromAPI = null; // Token returned by the API for the *next* page
-let prevPageTokensStack = []; // Stack to keep track of page tokens to go back
-
-// If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
-const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
-
-// Limiter
-const limiter = new Bottleneck({ minTime: 110 });
-
+let currentPageToken = null;
+let nextPageTokenFromAPI = null;
+let prevPageTokensStack = [];
 
 // Get references to DOM elements
 const authorizeButton = document.getElementById('authorize');
@@ -129,106 +50,6 @@ const nextPageButton = document.getElementById('next-page');
 
 // Flag to track if initial authorization was successful
 let isInitialAuthSuccessful = false;
-
-/**
- * Renames a file in Google Drive.
- * @param {string} fileId - The ID of the file to rename.
- * @param {string} newTitle - The new name for the file.
- * @param {string} oldTitle - The original name of the file, for the toast message.
- * @returns {Promise<object>} - A promise that resolves with the updated file data or rejects with an error.
- */
-function renameFile(fileId, newTitle, oldTitle) {
-    return new Promise((resolve, reject) => {
-        const body = { 'name': newTitle };
-        limiter.schedule(() => {
-            gdrive.files.update({
-                'fileId': fileId,
-                'resource': body
-            }, (err, res) => {
-                if (err) {
-                    showToast(`Error renaming file: ${err.message}`, 'error');
-                    console.error(`Error: ${err}`); // Keep console log for debugging
-                    reject(err);
-                } else {
-                    showToast(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success');
-                    resolve(res.data);
-                }
-            });
-        });
-    });
-}
-
-/**
- * Reads previously authorized credentials from the save file.
- * @return {Promise<OAuth2Client|null>}
- */
-async function loadSavedCredentialsIfExist() {
-    try {
-        const content = await fs.readFile(TOKEN_PATH);
-        const credentials = JSON.parse(content);
-        return google.auth.fromJSON(credentials);
-    } catch (err) {
-        return null;
-    }
-}
-
-/**
- * Serializes credentials to a file comptible with GoogleAUth.fromJSON.
- * @param {OAuth2Client} client
- * @return {Promise<void>}
- */
-async function saveCredentials(client) {
-    const content = await fs.readFile(CREDENTIALS_PATH);
-    const keys = JSON.parse(content);
-    const key = keys.installed || keys.web;
-    const payload = JSON.stringify({
-        type: 'authorized_user',
-        client_id: key.client_id,
-        client_secret: key.client_secret,
-        refresh_token: client.credentials.refresh_token,
-    });
-    await fs.writeFile(TOKEN_PATH, payload);
-}
-
-/**
- * Load or request or authorization to call APIs.
- */
-async function authorize() {
-    let client = await loadSavedCredentialsIfExist();
-    if (client) {
-        return client;
-    }
-    client = await authenticate({
-        scopes: SCOPES,
-        keyfilePath: CREDENTIALS_PATH,
-    });
-    if (client.credentials) {
-        await saveCredentials(client);
-    }
-    return client;
-}
-
-/**
- * Helper function to fetch file lists from Google Drive.
- * @param {string} parentId - The ID of the parent folder.
- * @param {string} orderBy - How to order the results.
- * @param {string} pageToken - The page token for pagination.
- * @returns {Promise<object>} - An object containing files and nextPageToken.
- */
-async function fetchDriveFiles(parentId, orderBy, pageToken = null) {
-    const response = await limiter.schedule(() => gdrive.files.list({
-        pageSize: 30, // Number of items per page
-        q: `'${parentId}' in parents`,
-        spaces: 'drive',
-        fields: 'nextPageToken, files(id, name, mimeType)',
-        orderBy: orderBy,
-        pageToken: pageToken
-    }));
-    return {
-        files: response.data.files || [],
-        nextPageToken: response.data.nextPageToken || null
-    };
-}
 
 /**
  * Handles the click event for folder list items.
@@ -281,7 +102,7 @@ function createFileIcon(fileType) {
             </svg>`;
         return spFolderIcon;
     }
-    return null; // No icon for non-folders, or handle other file types
+    return null;
 }
 
 /**
@@ -290,7 +111,7 @@ function createFileIcon(fileType) {
  * @param {HTMLElement} checkboxElement - The checkbox element associated with the item.
  */
 function handleFileFolderClick(file, checkboxElement) {
-    if (file.type !== mime) { // only allows selection for non-folder
+    if (file.type !== mime) {
         file.checked = !file.checked;
         checkboxElement.checked = file.checked;
     }
@@ -339,8 +160,6 @@ function createFileFolderListItem(file) {
  * @param {string} pageToken - The token for the current page of results.
  */
 async function listFiles(authClient, source, pageToken = null) {
-    gdrive = google.drive({ version: 'v3', auth: authClient });
-
     // Upfolder element
     const upcbFolders = elemFactory('input', {
         type: 'checkbox',
@@ -350,7 +169,6 @@ async function listFiles(authClient, source, pageToken = null) {
     const upSpFolders = elemFactory('span', {
         "class": 'inline-block w-full px-4 py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600',
         innerHTML: "...",
-        child: upcbFolders
     });
     const upListFolders = elemFactory('li', { child: [upcbFolders, upSpFolders] });
 
@@ -373,7 +191,7 @@ async function listFiles(authClient, source, pageToken = null) {
     // Fetch folders (always from the first page, no pagination for folders)
     const folderData = await fetchDriveFiles(arrParentFolder[arrParentFolder.length - 1], 'name');
     arrListFolders = folderData.files.filter(file => file.mimeType === mime)
-                                .map(file => ({ id: file.id, name: file.name }));
+                                     .map(file => ({ id: file.id, name: file.name }));
 
     arrListFolders.forEach(folder => {
         document.getElementById('folder-list').appendChild(createFolderListItem(folder, authClient));
@@ -389,8 +207,8 @@ async function listFiles(authClient, source, pageToken = null) {
     }));
 
     // Update pagination state based on the fetched data
-    currentPageToken = pageToken; // The token we just used to fetch this page
-    nextPageTokenFromAPI = fileData.nextPageToken; // The token for the next page, provided by the API
+    currentPageToken = pageToken;
+    nextPageTokenFromAPI = fileData.nextPageToken;
 
     // Update button states
     prevPageButton.disabled = (currentPageToken === null && prevPageTokensStack.length === 0);
@@ -413,7 +231,7 @@ document.getElementById("authorize").addEventListener('click', async () => {
     document.getElementById("folders").classList.remove("invisible");
     document.getElementById("files").classList.remove("invisible");
     document.getElementById("mfm-play").classList.remove("invisible");
-    document.getElementById("pagination-controls").classList.remove("invisible"); // Show pagination controls
+    document.getElementById("pagination-controls").classList.remove("invisible");
 
     if (authorizeButton) {
         if (isInitialAuthSuccessful) {
@@ -452,8 +270,6 @@ document.getElementById("authorize").addEventListener('click', async () => {
 // Pagination Event Listeners
 prevPageButton.addEventListener('click', async () => {
     if (prevPageTokensStack.length > 0) {
-        // Pop the current page token (which was the one used to get to the current page)
-        // and then use the new top of the stack as the previous page token.
         const prevToken = prevPageTokensStack.pop();
         const authClient = await authorize();
         listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], prevToken);
@@ -462,8 +278,6 @@ prevPageButton.addEventListener('click', async () => {
 
 nextPageButton.addEventListener('click', async () => {
     if (nextPageTokenFromAPI) {
-        // Before moving to the next page, push the current page token onto the stack
-        // unless it's the very first page (null) and the stack is empty.
         if (currentPageToken !== null || prevPageTokensStack.length === 0) {
              prevPageTokensStack.push(currentPageToken);
         }
@@ -514,8 +328,7 @@ function handleReplaceText() {
 
             try {
                 await Promise.all(renamePromises);
-                // After renaming, refresh the current page to show updated names
-                const authClient = await authorize(); // Ensure client is authorized for refresh
+                const authClient = await authorize();
                 listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
             } catch (error) {
                 showToast('An error occurred during rename.', 'error');
@@ -575,7 +388,6 @@ function handlePadFilename() {
 
             try {
                 await Promise.all(renamePromises);
-                // After renaming, refresh the current page to show updated names
                 const authClient = await authorize();
                 listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
             } catch (error) {
@@ -631,6 +443,5 @@ document.getElementById('file-folder-list').addEventListener('click', (evt) => {
     } else {
         // If not shift key, reset fromIndex and update the clicked item's state
         fromIndex = clickedIndex;
-        // The handleFileFolderClick on the li already toggles, so no need to explicitly toggle here for single clicks
     }
 });
