@@ -1,4 +1,27 @@
-// utility
+const Toastify = require('toastify-js');
+
+/**
+ * Displays a toast notification.
+ * @param {string} text - The message to display.
+ * @param {string} [type='info'] - The type of toast (e.g., 'success', 'error', 'info').
+ */
+function showToast(text, type = 'info') {
+    const classMap = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-slate-700'
+    };
+
+    Toastify({
+        text: text,
+        duration: 5000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        stopOnFocus: true,
+        className: `text-white px-4 py-2 rounded-md shadow-lg ${classMap[type] || classMap['info']}`,
+    }).showToast();
+}
 /**
  * Creates a DOM element with specified attributes, class name, and children.
  * 
@@ -82,5 +105,6 @@ function createFileNameWithTooltips(fileName) {
 module.exports = {
   elemFactory,
   padFilename,
-  createFileNameWithTooltips
+  createFileNameWithTooltips,
+  showToast
 };
