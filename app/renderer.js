@@ -327,23 +327,106 @@ function handleReplaceText() {
 /**
  * Handles the "Slice Text" operation.
  */
+
 function handleSliceText() {
     const mfmOptChildren = document.getElementById('mfm-opt').children[0];
     myswal.fire({
         title: mfmOptChildren[2].innerHTML,
         html:
-            '<input type="number" id="start" placeholder="start(index)" class="' + inputClass + '">' +
-            '<input type="number" id="end" placeholder="end(index)" class="' + inputClass + '">',
+            '<input type="number" id="start" placeholder="start (position 1, 2, ...)" class="' + inputClass + '">' +
+            '<input type="number" id="end" placeholder="end (position 1, 2, ..., inclusive)" class="' + inputClass + '">', // 'end' is no longer optional
+        confirmButtonText: "RUN",
         inputAttributes: {
             maxlength: 10,
             autocapitalize: 'off',
             autocorrect: 'off'
         },
         preConfirm: () => {
-            return [
-                document.getElementById('start').value,
-                document.getElementById('end').value
-            ];
+            const startInput = document.getElementById('start').value;
+            const endInput = document.getElementById('end').value;
+
+            const start = parseInt(startInput);
+            const end = parseInt(endInput); // end is now parsed directly, not checked for undefined
+
+            // --- Validation: Both start and end are REQUIRED and must be valid numbers >= 1 ---
+            if (isNaN(start) || start < 1) {
+                Swal.showValidationMessage('Please enter a valid start position (1 or greater).');
+                return false;
+            }
+            if (isNaN(end) || end < 1) { // End is now mandatory
+                Swal.showValidationMessage('Please enter a valid end position (1 or greater).');
+                return false;
+            }
+            // --- End Validation ---
+
+            if (start > end) {
+                Swal.showValidationMessage('Start position cannot be greater than end position.');
+                return false;
+            }
+            return { start, end };
+        }
+    }).then(async (res) => {
+        if (res.isConfirmed && res.value) {
+            const { start, end } = res.value; // Both start and end are guaranteed to be numbers >= 1
+
+            const checkedFiles = getCheckedFiles();
+            if (checkedFiles.length === 0) {
+                showToast('No files selected for operation.', 'info');
+                return;
+            }
+
+            const renamePromises = checkedFiles.map(file => {
+                const originalName = file.name;
+                const lastDotIndex = originalName.lastIndexOf('.');
+                let baseName = originalName;
+                let extension = '';
+
+                if (lastDotIndex > 0) { // Check if a dot exists and it's not the first character
+                    baseName = originalName.substring(0, lastDotIndex);
+                    extension = originalName.substring(lastDotIndex);
+                }
+
+                // Apply slicing logic to the baseName only
+                const len = baseName.length;
+                let actualStart = start - 1;
+                let actualEndForSlice = end;
+
+                // Ensure indices are within valid bounds of the baseName
+                if (actualStart < 0) actualStart = 0;
+                if (actualStart > len) actualStart = len;
+
+                if (actualEndForSlice < actualStart) actualEndForSlice = actualStart;
+                if (actualEndForSlice > len) actualEndForSlice = len;
+                
+                // Logic to construct the new base name
+                // Remove characters from 'start' position (1-based) up to and including 'end' position (1-based).
+                // This means we combine the part *before* 'start' with the part *after* 'end'.
+                const newBaseName = baseName.slice(0, actualStart) + baseName.slice(actualEndForSlice);
+
+                const finalNewName = newBaseName + extension;
+                
+                // Log the renaming process for debugging purposes
+                console.log(`Original: ${originalName}, Sliced Base: ${newBaseName}, Final New: ${finalNewName}`);
+
+                // Return the promise from the actual rename operation
+                return renameFile(file.id, finalNewName, originalName);
+            });
+
+            // --- Execute all rename operations and handle results ---
+            try {
+                await Promise.all(renamePromises); // Wait for all rename promises to resolve
+                showToast(`Operation 'slice' completed.`, 'success');
+                // Refresh the current page view in the UI to reflect the name changes
+                const authClient = await authorize();
+                await listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
+                // No updateHistoryButtons() as history is not saved for this function.
+            } catch (error) {
+                // Catch any errors during the rename process and display a toast message
+                showToast(`An error occurred during slice operation.`, 'error');
+                console.error(`Error during slice operation:`, error);
+                // If a duplicate name causes an error, it will be caught here.
+                // No automatic numbering means the user will have to handle conflicts manually.
+            }
         }
     });
 }
