@@ -7,18 +7,22 @@ Easy rename your files in Google Drive
     ```bash
     git clone https://github.com/dhanyn10/mfm-gdrive.git
     ```
+2. move to /app
+    ```
+    cd app
+    ```
 2. Install dependencies
     ```bash
-    yarn
+    npm install
     ```
 ## Usage
 - generate css (optional)
     ```bash
-    yarn css
+    npm run css-gen
     ```
 - run the application
     ```bash
-    yarn start
+    npm start
     ```
 ## How to Use
 1. click button **authorize** to let the apps gain authorization to your Google Drive metadata
@@ -44,14 +48,16 @@ our-file-3.pdf
 our-file-4.pdf
 ```
 
-## Function below NOT AVAILABLE YET, THEY STILL WAITING FOR DEVELOPMENT
-### delete character by index
-below is how to get the index character:  
-![delete character by index](https://media.giphy.com/media/8qqqesHEL8YRHjbfwF/giphy.gif)
-  
-We will delete character `[Koenime]` from the filename. So you need to choose rename option **delete character by index** and fill **`from index`** with `0` and **`to index`** with `8`
+### change filename by Position
+#### Overview
+The "Change File Name by Position" operation enables precise manipulation of filenames by specifying a start and an end position. Characters within the specified range will be removed from the filename. This operation is particularly useful for cleaning up filenames that have unwanted prefixes, suffixes, or segments in the middle.
 
-### insert PadStart
+#### How It Works
+When you select "Change File Name by Position" and click "RUN", a dialog will appear prompting you to enter two values:
+- Start: The 1-based numerical position where you want to begin removing characters.
+- End: The 1-based numerical position where you want to end removing characters. The character at this 'end' position will also be removed.
+
+### Insert PadStart
 padStart is pads the current string with given string until meet the required length, you can read more details [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart). You can use padStart to solve problem like below:
 
 ```
@@ -60,7 +66,7 @@ file-998.pdf
 file-999.pdf
 file-1000.pdf
 ```
-From the list above, set  **`from index`** with `5`, **`to index`**  with `7`, **`pad with`** with `0`, **`length`** with `4`. The result will become:
+From the list above, set expected value with `4`. The result will become:
 
 ```
 file-0997.pdf
