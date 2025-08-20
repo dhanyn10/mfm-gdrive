@@ -25,7 +25,7 @@
     "electron": "^37.2.0",
     "electron-builder": "^26.0.12",
     "tailwindcss": "^3.4.13",
-    "wdio-electron-service": "^8.2.1"
+    "wdio-electron-service": "^9.0.0"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
