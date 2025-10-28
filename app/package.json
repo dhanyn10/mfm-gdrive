@@ -24,7 +24,7 @@
     "@wdio/spec-reporter": "^9.16.2",
     "electron": "^38.1.0",
     "electron-builder": "^26.0.12",
-    "tailwindcss": "^3.4.13",
+    "tailwindcss": "^4.1.16",
     "wdio-electron-service": "^9.1.0"
   },
   "dependencies": {
