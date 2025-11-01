@@ -12,10 +12,7 @@ function createFileIcon(fileType) {
     if (fileType === mime) {
         const spFolderIcon = document.createElement('span');
         spFolderIcon.className = "float-left pr-2";
-        spFolderIcon.innerHTML =
-            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-              <path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" />
-            </svg>`;
+        spFolderIcon.innerHTML = `<i class="fas fa-folder w-5 h-5"></i>`;
         return spFolderIcon;
     }
     return null;
@@ -80,21 +77,34 @@ function createFileFolderListItem(file, onClick) {
 }
 
 function showMainUI() {
-    document.getElementById("mfm-opt").classList.remove("invisible");
-    document.getElementById("folders").classList.remove("invisible");
-    document.getElementById("files").classList.remove("invisible");
-    document.getElementById("mfm-play").classList.remove("invisible");
-    document.getElementById("pagination-controls").classList.remove("invisible");
+    const appContainer = document.getElementById('app-container');
+    const mainView = document.getElementById('main-view');
+    const authorizeButton = document.getElementById('authorize');
+    const authorizeContainer = document.getElementById('authorize-container');
+
+    // Move button to the main view
+    authorizeContainer.appendChild(authorizeButton);
+
+    appContainer.classList.add('hidden');
+    mainView.classList.remove('hidden');
 }
 
 function updateAuthorizeButton(isAuthSuccessful, isLoading) {
     const authorizeButton = document.getElementById('authorize');
     if (authorizeButton) {
+        authorizeButton.classList.add('flex', 'items-center', 'gap-2');
         if (isLoading) {
-            authorizeButton.textContent = isAuthSuccessful ? 'Refreshing...' : 'Loading...';
+            authorizeButton.innerHTML = isAuthSuccessful 
+                ? `<i class="fas fa-spinner fa-spin"></i> Refreshing...` 
+                : 'Loading...';
             authorizeButton.disabled = true;
         } else {
-            authorizeButton.textContent = isAuthSuccessful ? 'Refresh' : 'Authorize';
+            if (isAuthSuccessful) {
+                authorizeButton.title = 'Refresh';
+                authorizeButton.innerHTML = `<i class="fas fa-sync-alt"></i>`;
+            } else {
+                authorizeButton.textContent = 'Authorize';
+            }
             authorizeButton.disabled = false;
         }
     }
