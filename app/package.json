@@ -5,6 +5,7 @@
   "scripts": {
     "start": "electron .",
     "css": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify --watch",
+    "css-gen": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify",
     "app:dir": "electron-builder --dir",
     "app:dist": "electron-builder --publish=never",
     "wdio": "wdio run ./wdio.conf.ts"
