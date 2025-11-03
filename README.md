@@ -1,4 +1,4 @@
-![logo](./app/icon.png)
+![logo](icon.png)
 # mfm-gdrive
 Easy rename your files in Google Drive
 
