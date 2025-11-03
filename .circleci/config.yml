@@ -9,20 +9,16 @@ jobs:
 
       - run:
           name: Install dependencies
-          working_directory: ./app
           command: npm install
       - run:
           name: Generate Tailwind CSS
-          working_directory: ./app
           command: npm run css-gen
       - run:
           name: Build Electron apps
-          working_directory: ./app
           command: |
             npm run app:dist
       - run:
           name: Put token.json
-          working_directory: ./app
           command: echo $TOKEN > token.json
       - run:
           name: Running X virtual framebuffer
@@ -30,7 +26,6 @@ jobs:
           background: true
       - run:
           name: Run WebdriverIO tests
-          working_directory: ./app
           command: |
             npm run wdio
 

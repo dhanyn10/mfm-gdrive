@@ -90,12 +90,14 @@ async function listFiles(authClient, source, pageToken = null) {
 
     // Fetch files with pagination
     const fileData = await fetchDriveFiles(arrParentFolder[arrParentFolder.length - 1], 'folder, name', pageToken);
-    const arrListAllFiles = fileData.files.map(file => ({
-        id: file.id,
-        name: file.name,
-        type: file.mimeType,
-        checked: false
-    }));
+    const arrListAllFiles = fileData.files
+        .filter(file => file.mimeType !== mime) // Only show files, not folders
+        .map(file => ({
+            id: file.id,
+            name: file.name,
+            type: file.mimeType,
+            checked: false
+        }));
 
     // Update pagination state based on the fetched data
     updateState({
