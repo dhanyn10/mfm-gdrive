@@ -66,6 +66,13 @@ async function authorize() {
     client = await authenticate({
         scopes: SCOPES,
         keyfilePath: CREDENTIALS_PATH,
+        auth: {
+            // This is necessary to force the browser to open on desktop apps.
+            redirect_uri_placeholder: 1,
+        },
+        client: {
+            force_new_consent: true,
+        }
     });
     if (client.credentials) {
         await saveCredentials(client);
