@@ -1,6 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: npm
+  directory: "/" # Lokasi package.json
   schedule:
     interval: weekly
     time: "22:00"
