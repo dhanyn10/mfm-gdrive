@@ -1,6 +1,6 @@
 {
   "name": "mfm-gdrive",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -9,6 +9,25 @@
     "app:dir": "electron-builder --dir",
     "app:dist": "electron-builder --publish=never",
     "wdio": "wdio run ./wdio.conf.ts"
+  },
+  "build": {
+    "appId": "com.dhanyn.mfmgdrive",
+    "productName": "MFM GDrive",
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "asset/icon.png"
+    }
   },
   "repository": "https://github.com/dhanyn10/mfm-gdrive.git",
   "author": {
