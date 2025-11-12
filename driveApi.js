@@ -12,13 +12,21 @@ const { showToast } = require('./utils');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
-const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+
+// These paths will be initialized asynchronously
+let TOKEN_PATH;
+let CREDENTIALS_PATH;
 
 // Limiter to control the rate of requests to the Google Drive API
 const limiter = new Bottleneck({ minTime: 110 });
 
 let gdrive = null; // This will be initialized after successful authorization
+
+async function initializePaths() {
+    const userDataPath = await window.electronAPI.getUserDataPath();
+    TOKEN_PATH = path.join(userDataPath, 'token.json');
+    CREDENTIALS_PATH = path.join(userDataPath, 'credentials.json');
+}
 
 /**
  * Reads previously authorized credentials from the save file.
@@ -57,6 +65,7 @@ async function saveCredentials(client) {
  * @returns {Promise<OAuth2Client>} The authorized OAuth2 client.
  */
 async function authorize() {
+    if (!CREDENTIALS_PATH) await initializePaths();
     let client = await loadSavedCredentialsIfExist();
     if (client) {
         // Initialize gdrive here if saved credentials are found
@@ -141,6 +150,7 @@ async function fetchDriveFiles(parentId, orderBy, pageToken = null) {
 }
 
 module.exports = {
+    initializePaths,
     authorize,
     renameFile,
     fetchDriveFiles

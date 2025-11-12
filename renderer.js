@@ -1,12 +1,14 @@
 const {
     authorize,
-    fetchDriveFiles
+    fetchDriveFiles,
+    initializePaths
 } = require('./driveApi');
 const { updateState, getState } = require('./state');
 const { elemFactory } = require('./utils');
 const { createFolderListItem, createFileFolderListItem } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
+initializePaths(); // Initialize paths as soon as the app loads
 setupEventHandlers(listFiles);
 
 const prevPageButton = document.getElementById('prev-page');
