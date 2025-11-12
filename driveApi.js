@@ -5,6 +5,7 @@ const process = require('process');
 const { authenticate } = require('@google-cloud/local-auth');
 const { google } = require('googleapis');
 const Bottleneck = require('bottleneck');
+const { ipcRenderer } = require('electron');
 
 // Import showToast from utils
 // Ensure this path is correct relative to your driveApi.js file's location
@@ -23,9 +24,9 @@ const limiter = new Bottleneck({ minTime: 110 });
 let gdrive = null; // This will be initialized after successful authorization
 
 async function initializePaths() {
-    const userDataPath = await window.electronAPI.getUserDataPath();
+    const userDataPath = await ipcRenderer.invoke('get-user-data-path');
     TOKEN_PATH = path.join(userDataPath, 'token.json');
-    CREDENTIALS_PATH = path.join(userDataPath, 'credentials.json');
+    CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 }
 
 /**

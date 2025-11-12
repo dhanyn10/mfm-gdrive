@@ -1,15 +1,13 @@
-const {
-    authorize,
-    fetchDriveFiles,
-    initializePaths
-} = require('./driveApi');
+const { fetchDriveFiles, initializePaths } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { elemFactory } = require('./utils');
 const { createFolderListItem, createFileFolderListItem } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
-initializePaths(); // Initialize paths as soon as the app loads
-setupEventHandlers(listFiles);
+async function main() {
+  await initializePaths(); // Initialize paths as soon as the app loads
+  setupEventHandlers(listFiles);
+}
+main();
 
 const prevPageButton = document.getElementById('prev-page');
 const nextPageButton = document.getElementById('next-page');
@@ -49,16 +47,19 @@ function handleFileFolderClick(file, checkboxElement) {
 async function listFiles(authClient, source, pageToken = null) {
     let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
     // Upfolder element
-    const upcbFolders = elemFactory('input', {
+    const upcbFolders = document.createElement('input');
+    Object.assign(upcbFolders, {
         type: 'checkbox',
         "class": 'cbox-folders peer hidden',
         value: source
     });
-    const upSpFolders = elemFactory('span', {
+    const upSpFolders = document.createElement('span');
+    Object.assign(upSpFolders, {
         "class": 'inline-block w-full px-4 py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600',
         innerHTML: "...",
     });
-    const upListFolders = elemFactory('li', { child: [upcbFolders, upSpFolders] });
+    const upListFolders = document.createElement('li');
+    upListFolders.append(upcbFolders, upSpFolders);
 
     upListFolders.addEventListener("click", () => {
         if (arrParentFolder.length > 1) {
@@ -119,6 +120,7 @@ async function listFiles(authClient, source, pageToken = null) {
         document.getElementById('file-folder-list').appendChild(createFileFolderListItem(file, handleFileFolderClick));
     });
 
-    let firstchildFileList = elemFactory('div', {"class": "h-4 bg-gray-100"});
+    let firstchildFileList = document.createElement('div');
+    firstchildFileList.className = "h-4 bg-gray-100";
     document.getElementById('file-folder-list').prepend(firstchildFileList);
 }

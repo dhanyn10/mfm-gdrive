@@ -24,7 +24,6 @@
       "!**/*.ts",
       "!*.code-workspace",
       "!LICENSE.md",
-      "!package.json",
       "!package-lock.json",
       "!src/",
       "!e2e/",
