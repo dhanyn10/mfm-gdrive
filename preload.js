@@ -5,11 +5,11 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/sandbox
  */
-const { contextBridge, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('electronAPI', {
+window.electronAPI = {
   getUserDataPath: () => ipcRenderer.invoke('get-user-data-path'),
-});
+};
 
 window.addEventListener('DOMContentLoaded', () => {
   const replaceText = (selector, text) => {
