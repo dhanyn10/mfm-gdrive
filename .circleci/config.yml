@@ -20,7 +20,7 @@ jobs:
             npm run app:dist -- --linux
       - run:
           name: Put token.json
-          command: echo $TOKEN > /dist/linux-unpacked/token.json
+          command: echo $TOKEN > ./dist/linux-unpacked/token.json
       - run:
           name: Running X virtual framebuffer
           command: Xvfb :99 -ac & export DISPLAY=:99
