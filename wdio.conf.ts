@@ -59,7 +59,7 @@ export const config: WebdriverIO.Config = {
         'wdio:electronServiceOptions': {
             // custom application args
             appArgs: [],
-            appBinaryPath: './dist/linux-unpacked/mfm-gdrive',
+            appBinaryPath: './dist/linux-unpacked/MFM GDrive',
         }
     }],
 

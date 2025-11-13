@@ -15,29 +15,26 @@ function setupEventHandlers(listFiles) {
     const fileFolderList = document.getElementById('file-folder-list');
 
     authorizeButton.addEventListener('click', async () => {
-        const { isInitialAuthSuccessful } = getState();
-        showMainUI();
-        updateAuthorizeButton(isInitialAuthSuccessful, true);
+        updateAuthorizeButton(getState().isInitialAuthSuccessful, true);
 
-        // First, try to get the client without triggering a new auth flow.
-        // This will succeed if a valid token.json already exists.
+        // Check for an existing token first.
         let client = await authorizeAndGetDrive();
 
         if (client) {
-            // If client is available, it means token.json exists and is valid.
+            // Token exists, refresh file list.
             driveClient = client;
+            showMainUI();
             const { arrParentFolder } = getState();
             await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
             showToast('File list refreshed.', 'success');
             updateAuthorizeButton(true, false);
         } else {
-            // If no client, it means token.json is missing or invalid.
-            // Trigger the authorization flow in the background.
+            // No token found, so we need to authorize.
             triggerUserAuthorization();
 
             // Start polling for the token to be created.
             const pollingInterval = 2000; // Check every 2 seconds
-            const pollingTimeout = 120000; // Stop after 2 minutes
+            const pollingTimeout = 120000; // 2 minutes timeout
 
             let pollingHandle;
             const timeoutHandle = setTimeout(() => {
@@ -45,22 +42,23 @@ function setupEventHandlers(listFiles) {
                 showToast('Authorization timed out. Please try again.', 'error');
                 updateAuthorizeButton(false, false);
             }, pollingTimeout);
-
+    
             pollingHandle = setInterval(async () => {
                 try {
-                    client = await authorizeAndGetDrive(); // This will now only succeed if token.json exists
+                    client = await authorizeAndGetDrive();
                     if (client) {
                         clearInterval(pollingHandle);
                         clearTimeout(timeoutHandle);
                         driveClient = client;
-
+    
+                        showMainUI();
                         updateState({
                             currentPageToken: null,
                             nextPageTokenFromAPI: null,
                             prevPageTokensStack: []
                         });
                         const { arrParentFolder, currentPageToken } = getState();
-                        await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
+                        await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);                        
                         updateState({ isInitialAuthSuccessful: true });
                         showToast('Authorization successful. Ready to go!', 'success');
                         updateAuthorizeButton(true, false);

@@ -29,6 +29,12 @@ app.whenReady().then(() => {
     return app.getPath('userData');
   });
 
+  ipcMain.handle('get-local-token-base-path', () => {
+    // In development, it's the project root.
+    // In a packaged app, it's the directory containing the executable.
+    return app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
+  });
+
   createWindow()
 
   app.on('activate', function () {

@@ -16,15 +16,19 @@ const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 
 // These paths will be initialized asynchronously
 let TOKEN_PATH;
+let LOCAL_TOKEN_PATH;
 let CREDENTIALS_PATH;
 
 // Limiter to control the rate of requests to the Google Drive API
 const limiter = new Bottleneck({ minTime: 110 });
 
 async function initializePaths() {
+    if (TOKEN_PATH) return; // Already initialized
+    const localTokenBasePath = await ipcRenderer.invoke('get-local-token-base-path');
     const userDataPath = await ipcRenderer.invoke('get-user-data-path');
     TOKEN_PATH = path.join(userDataPath, 'token.json');
     CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
+    LOCAL_TOKEN_PATH = path.join(localTokenBasePath, 'token.json');
 }
 
 /**
@@ -33,12 +37,21 @@ async function initializePaths() {
  */
 async function loadSavedCredentialsIfExist() {
     try {
-        const content = await fs.readFile(TOKEN_PATH);
-        const credentials = JSON.parse(content);
-        return google.auth.fromJSON(credentials);
+        // Try reading from the local app directory first.
+        const content = await fs.readFile(LOCAL_TOKEN_PATH).catch(() => {
+            // If it fails, try reading from the user data path.
+            return fs.readFile(TOKEN_PATH);
+        });
+
+        if (content) {
+            const credentials = JSON.parse(content);
+            return google.auth.fromJSON(credentials);
+        }
     } catch (err) {
-        return null;
+        // If both fail, return null.
+        console.log('No valid token found in user data or local directory.');
     }
+    return null;
 }
 
 /**
