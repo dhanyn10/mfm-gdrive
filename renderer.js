@@ -64,20 +64,15 @@ function handleFileFolderClick(file, checkboxElement) {
  */
 async function listFiles(driveClient, source, pageToken = null) {
     let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
-    // Upfolder element
-    const upcbFolders = document.createElement('input');
-    Object.assign(upcbFolders, {
-        type: 'checkbox',
-        "class": 'cbox-folders peer hidden',
-        value: source
-    });
-    const upSpFolders = document.createElement('span');
+    // Upfolder element (tanpa checkbox)
+    const upSpFolders = document.createElement('div');
     Object.assign(upSpFolders, {
-        "class": 'inline-block w-full px-4 py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600',
-        innerHTML: "...",
+        "class": 'w-full flex items-center justify-center py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600 cursor-pointer',
+        innerHTML: `<i class="fas fa-ellipsis text-gray-500"></i>`,
     });
     const upListFolders = document.createElement('li');
-    upListFolders.append(upcbFolders, upSpFolders);
+    upListFolders.className = "flex justify-center";
+    upListFolders.append(upSpFolders);
 
     upListFolders.addEventListener("click", () => {
         if (arrParentFolder.length > 1) {
@@ -90,8 +85,6 @@ async function listFiles(driveClient, source, pageToken = null) {
             });
         }
         listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
-        document.querySelectorAll(".cbox-folders").forEach(cb => cb.checked = false);
-        upcbFolders.checked = true;
     });
 
     document.getElementById('folder-list').innerHTML = "";

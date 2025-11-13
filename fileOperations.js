@@ -50,7 +50,7 @@ function handleSliceText(driveClient, refreshFileList) {
         title: mfmOptChildren[2].innerHTML,
         html:
             '<input type="number" id="start" placeholder="start (position 1, 2, ...)" class="' + inputClass + '">' +
-            '<input type="number" id="end" placeholder="end (position 1, 2, ..., inclusive)" class="' + inputClass + '">', // 'end' is no longer optional
+            '<input type="number" id="end" placeholder="end (position 1, 2, ..., inclusive)" class="' + inputClass + '">',
         confirmButtonText: "RUN",
         inputAttributes: {
             maxlength: 10,
@@ -150,7 +150,7 @@ function handlePadFilename(driveClient, refreshFileList) {
     myswal.fire({
         title: mfmOptChildren[3].innerHTML,
         html:
-            '<input id="numprefix" placeholder="expected value" class="' + inputClass + '">',
+            '<input id="numprefix" placeholder="expected length" class="' + inputClass + '">',
         confirmButtonText: "RUN",
         inputAttributes: {
             maxlength: 10,
