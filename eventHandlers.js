@@ -1,9 +1,11 @@
 // eventHandlers.js
-const { authorize } = require('./driveApi');
+const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
 const { showToast, elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
 const { showMainUI, updateAuthorizeButton } = require('./ui');
 const { handleReplaceText, handleSliceText, handlePadFilename } = require('./fileOperations');
+
+let driveClient;
 
 function setupEventHandlers(listFiles) {
     const authorizeButton = document.getElementById('authorize');
@@ -13,28 +15,62 @@ function setupEventHandlers(listFiles) {
     const fileFolderList = document.getElementById('file-folder-list');
 
     authorizeButton.addEventListener('click', async () => {
-        const { isInitialAuthSuccessful } = getState();
-        showMainUI();
-        updateAuthorizeButton(isInitialAuthSuccessful, true);
+        updateAuthorizeButton(getState().isInitialAuthSuccessful, true);
 
-        try {
-            const authClient = await authorize();
-            updateState({
-                currentPageToken: null,
-                nextPageTokenFromAPI: null,
-                prevPageTokensStack: []
-            });
-            const { arrParentFolder, currentPageToken } = getState();
-            await listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
-            updateState({ isInitialAuthSuccessful: true });
-            showToast('Authorization successful. Ready to go!', 'success');
-        } catch (error) {
-            showToast('Authorization failed. Please try again.', 'error');
-            console.error('Error during authorization or listFiles:', error);
-            updateState({ isInitialAuthSuccessful: false });
-        } finally {
-            const { isInitialAuthSuccessful } = getState();
-            updateAuthorizeButton(isInitialAuthSuccessful, false);
+        // Check for an existing token first.
+        let client = await authorizeAndGetDrive();
+
+        if (client) {
+            // Token exists, refresh file list.
+            driveClient = client;
+            showMainUI();
+            const { arrParentFolder } = getState();
+            await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
+            showToast('File list refreshed.', 'success');
+            updateAuthorizeButton(true, false);
+        } else {
+            // No token found, so we need to authorize.
+            triggerUserAuthorization();
+
+            // Start polling for the token to be created.
+            const pollingInterval = 2000; // Check every 2 seconds
+            const pollingTimeout = 120000; // 2 minutes timeout
+
+            let pollingHandle;
+            const timeoutHandle = setTimeout(() => {
+                clearInterval(pollingHandle);
+                showToast('Authorization timed out. Please try again.', 'error');
+                updateAuthorizeButton(false, false);
+            }, pollingTimeout);
+    
+            pollingHandle = setInterval(async () => {
+                try {
+                    client = await authorizeAndGetDrive();
+                    if (client) {
+                        clearInterval(pollingHandle);
+                        clearTimeout(timeoutHandle);
+                        driveClient = client;
+    
+                        showMainUI();
+                        updateState({
+                            currentPageToken: null,
+                            nextPageTokenFromAPI: null,
+                            prevPageTokensStack: []
+                        });
+                        const { arrParentFolder, currentPageToken } = getState();
+                        await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);                        
+                        updateState({ isInitialAuthSuccessful: true });
+                        showToast('Authorization successful. Ready to go!', 'success');
+                        updateAuthorizeButton(true, false);
+                    }
+                } catch (error) {
+                    clearInterval(pollingHandle);
+                    clearTimeout(timeoutHandle);
+                    showToast('An error occurred. Please try again.', 'error');
+                    console.error('Error during polling or listFiles:', error);
+                    updateAuthorizeButton(false, false);
+                }
+            }, pollingInterval);
         }
     });
 
@@ -43,8 +79,7 @@ function setupEventHandlers(listFiles) {
         if (prevPageTokensStack.length > 0) {
             const prevToken = prevPageTokensStack.pop();
             updateState({ prevPageTokensStack });
-            const authClient = await authorize();
-            listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], prevToken);
+            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], prevToken);
         }
     });
 
@@ -55,9 +90,8 @@ function setupEventHandlers(listFiles) {
                 prevPageTokensStack.push(currentPageToken);
             }
             updateState({ prevPageTokensStack });
-            const authClient = await authorize();
             const { arrParentFolder } = getState();
-            listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], nextPageTokenFromAPI);
+            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], nextPageTokenFromAPI);
         } else {
             showToast('No more pages.', 'info');
             nextPageButton.disabled = true;
@@ -68,15 +102,14 @@ function setupEventHandlers(listFiles) {
         const child = document.getElementById('mfm-opt').children[0];
         const option = child.value;
         const { arrParentFolder, currentPageToken } = getState();
-        const refresh = async () => {
-            const authClient = await authorize();
-            await listFiles(authClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
+        const refresh = () => {
+            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
         };
 
         switch (option) {
-            case '1': handleReplaceText(refresh); break;
-            case '2': handleSliceText(refresh); break;
-            case '3': handlePadFilename(refresh); break;
+            case '1': handleReplaceText(driveClient, refresh); break;
+            case '2': handleSliceText(driveClient, refresh); break;
+            case '3': handlePadFilename(driveClient, refresh); break;
             default: showToast('No valid option selected.', 'info');
         }
     });
@@ -98,6 +131,10 @@ function setupEventHandlers(listFiles) {
         }
         updateState({ fromIndex: clickedIndex });
     });
+
+    return {
+        getDriveClient: (client) => { driveClient = client; }
+    };
 }
 
 module.exports = { setupEventHandlers };

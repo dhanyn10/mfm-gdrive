@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 
 function createWindow () {
@@ -9,9 +9,8 @@ function createWindow () {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
+      contextIsolation: false, // contextIsolation must be false for nodeIntegration to work
+      nodeIntegration: true // allow node integration in the renderer
     }
   })
 
@@ -26,6 +25,16 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  ipcMain.handle('get-user-data-path', () => {
+    return app.getPath('userData');
+  });
+
+  ipcMain.handle('get-local-token-base-path', () => {
+    // In development, it's the project root.
+    // In a packaged app, it's the directory containing the executable.
+    return app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
+  });
+
   createWindow()
 
   app.on('activate', function () {

@@ -5,6 +5,12 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/sandbox
  */
+const { ipcRenderer } = require('electron');
+
+window.electronAPI = {
+  getUserDataPath: () => ipcRenderer.invoke('get-user-data-path'),
+};
+
 window.addEventListener('DOMContentLoaded', () => {
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector)

@@ -1,23 +1,41 @@
-const {
-    authorize,
-    fetchDriveFiles
-} = require('./driveApi');
+const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { elemFactory } = require('./utils');
-const { createFolderListItem, createFileFolderListItem } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
-setupEventHandlers(listFiles);
+async function main() {
+  await initializePaths(); // Initialize paths as soon as the app loads
+  const eventHandlers = setupEventHandlers(listFiles);
+  await startup(eventHandlers.getDriveClient);
+}
+main();
 
 const prevPageButton = document.getElementById('prev-page');
 const nextPageButton = document.getElementById('next-page');
 
+async function startup(getDriveClient) {
+    try {
+        const drive = await authorizeAndGetDrive(); // Check for existing token
+        if (drive) {
+            showMainUI();
+            updateAuthorizeButton(true, false);
+            getDriveClient(drive); // Set the client in eventHandlers
+            const { arrParentFolder, currentPageToken } = getState();
+            await listFiles(drive, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
+            updateState({ isInitialAuthSuccessful: true });
+        }
+    } catch (error) {
+        console.error('Startup authorization failed, waiting for user action.', error);
+        updateAuthorizeButton(false, false);
+    }
+}
+
 /**
  * Handles the click event for folder list items.
  * @param {object} folder - The folder object.
- * @param {OAuth2Client} authClient - An authorized OAuth2 client.
+ * @param {object} driveClient - An authorized Google Drive client.
  */
-function handleFolderClick(folder, authClient) {
+function handleFolderClick(folder, driveClient) {
     let { arrParentFolder } = getState();
     arrParentFolder.push(folder.id);
     updateState({
@@ -26,7 +44,7 @@ function handleFolderClick(folder, authClient) {
         nextPageTokenFromAPI: null,
         prevPageTokensStack: []
     });
-    listFiles(authClient, folder.id);
+    listFiles(driveClient, folder.id);
 }
 
 function handleFileFolderClick(file, checkboxElement) {
@@ -40,23 +58,21 @@ function handleFileFolderClick(file, checkboxElement) {
 
 /**
  * Lists the names and IDs of files.
- * @param {OAuth2Client} authClient An authorized OAuth2 client.
+ * @param {object} driveClient An authorized Google Drive client.
  * @param {string} source - The ID of the parent folder.
  * @param {string} pageToken - The token for the current page of results.
  */
-async function listFiles(authClient, source, pageToken = null) {
+async function listFiles(driveClient, source, pageToken = null) {
     let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
     // Upfolder element
-    const upcbFolders = elemFactory('input', {
-        type: 'checkbox',
-        "class": 'cbox-folders peer hidden',
-        value: source
-    });
-    const upSpFolders = elemFactory('span', {
-        "class": 'inline-block w-full px-4 py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600',
-        innerHTML: "...",
-    });
-    const upListFolders = elemFactory('li', { child: [upcbFolders, upSpFolders] });
+    const upSpFolders = document.createElement('div');
+    // Using classList.add to avoid issues with Tailwind JIT/Purge
+    upSpFolders.classList.add('w-full', 'flex', 'items-center', 'justify-center', 'py-2', 'border-b', 'border-gray-200', 'hover:bg-gray-200', 'dark:border-gray-600', 'dark:hover:bg-gray-700', 'cursor-pointer', 'group');
+    upSpFolders.innerHTML = `<i class="fas fa-ellipsis text-gray-500 dark:text-gray-400 group-hover:text-white"></i>`;
+
+    const upListFolders = document.createElement('li');
+    upListFolders.className = "flex justify-center";
+    upListFolders.append(upSpFolders);
 
     upListFolders.addEventListener("click", () => {
         if (arrParentFolder.length > 1) {
@@ -68,28 +84,26 @@ async function listFiles(authClient, source, pageToken = null) {
                 prevPageTokensStack: []
             });
         }
-        listFiles(authClient, arrParentFolder[arrParentFolder.length - 1]);
-        document.querySelectorAll(".cbox-folders").forEach(cb => cb.checked = false);
-        upcbFolders.checked = true;
+        listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
     });
 
     document.getElementById('folder-list').innerHTML = "";
     document.getElementById('folder-list').appendChild(upListFolders);
 
     // Fetch folders (always from the first page, no pagination for folders)
-    const folderData = await fetchDriveFiles(arrParentFolder[arrParentFolder.length - 1], 'name');
+    const folderData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'name');
     const arrListFolders = folderData.files.filter(file => file.mimeType === mime)
                                      .map(file => ({ id: file.id, name: file.name }));
     updateState({ arrListFolders });
 
     arrListFolders.forEach(folder => {
         // The onClick handler for a folder needs to call handleFolderClick
-        const clickHandler = () => handleFolderClick(folder, authClient);
+        const clickHandler = () => handleFolderClick(folder, driveClient);
         document.getElementById('folder-list').appendChild(createFolderListItem(folder, clickHandler));
     });
 
     // Fetch files with pagination
-    const fileData = await fetchDriveFiles(arrParentFolder[arrParentFolder.length - 1], 'folder, name', pageToken);
+    const fileData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'folder, name', pageToken);
     const arrListAllFiles = fileData.files
         .filter(file => file.mimeType !== mime) // Only show files, not folders
         .map(file => ({
@@ -117,6 +131,7 @@ async function listFiles(authClient, source, pageToken = null) {
         document.getElementById('file-folder-list').appendChild(createFileFolderListItem(file, handleFileFolderClick));
     });
 
-    let firstchildFileList = elemFactory('div', {"class": "h-4 bg-gray-100"});
+    let firstchildFileList = document.createElement('div');
+    firstchildFileList.className = "h-4 bg-gray-100";
     document.getElementById('file-folder-list').prepend(firstchildFileList);
 }

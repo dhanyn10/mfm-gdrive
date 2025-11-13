@@ -1,14 +1,52 @@
 {
   "name": "mfm-gdrive",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "css": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify --watch",
     "css-gen": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify",
-    "app:dir": "electron-builder --dir",
+    "app:build": "electron-builder",
+    "postinstall": "electron-builder install-app-deps",
     "app:dist": "electron-builder --publish=never",
     "wdio": "wdio run ./wdio.conf.ts"
+  },
+  "build": {
+    "appId": "com.dhanyn.mfmgdrive",
+    "productName": "MFM GDrive",
+    "asar": true,
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!**/*.ts",
+      "!*.code-workspace",
+      "!LICENSE.md",
+      "!package-lock.json",
+      "!src/",
+      "!e2e/",
+      "!hooks/",
+      "!angular.json",
+      "!_config.yml",
+      "!karma.conf.js",
+      "!tsconfig.json",
+      "!tslint.json",
+      "!token.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": "deb",
+      "icon": "assets/icon.png"
+    }
   },
   "repository": "https://github.com/dhanyn10/mfm-gdrive.git",
   "author": {
