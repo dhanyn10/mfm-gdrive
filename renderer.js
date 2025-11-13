@@ -65,9 +65,8 @@ function handleFileFolderClick(file, checkboxElement) {
 async function listFiles(driveClient, source, pageToken = null) {
     let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
     // Upfolder element
-        // Upfolder element
     const upSpFolders = document.createElement('div');
-    // Menggunakan classList.add untuk menghindari masalah dengan Tailwind JIT/Purge
+    // Using classList.add to avoid issues with Tailwind JIT/Purge
     upSpFolders.classList.add('w-full', 'flex', 'items-center', 'justify-center', 'py-2', 'border-b', 'border-gray-200', 'hover:bg-gray-200', 'dark:border-gray-600', 'dark:hover:bg-gray-700', 'cursor-pointer', 'group');
     upSpFolders.innerHTML = `<i class="fas fa-ellipsis text-gray-500 dark:text-gray-400 group-hover:text-white"></i>`;
 
