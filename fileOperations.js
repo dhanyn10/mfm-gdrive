@@ -1,13 +1,13 @@
 // fileOperations.js
 const { myswal, inputClass } = require('./swal-helpers');
 const { showToast, padFilename } = require('./utils');
-const { renameFile, authorize, listFiles } = require('./driveApi');
+const { renameFile } = require('./driveApi');
 const { getState, getCheckedFiles } = require('./state');
 
 /**
  * Handles the "Replace Text" operation.
  */
-function handleReplaceText(refreshFileList) {
+function handleReplaceText(driveClient, refreshFileList) {
     const mfmOptChildren = document.getElementById('mfm-opt').children[0];
     myswal.fire({
         title: mfmOptChildren[1].innerHTML,
@@ -27,7 +27,7 @@ function handleReplaceText(refreshFileList) {
             const checkedFiles = getCheckedFiles();
             const renamePromises = checkedFiles.map(file => {
                 const newFilename = file.name.replace(from, to);
-                return renameFile(file.id, newFilename, file.name);
+                return renameFile(driveClient, file.id, newFilename, file.name);
             });
 
             try {
@@ -44,7 +44,7 @@ function handleReplaceText(refreshFileList) {
 /**
  * Handles the "Slice Text" operation.
  */
-function handleSliceText(refreshFileList) {
+function handleSliceText(driveClient, refreshFileList) {
     const mfmOptChildren = document.getElementById('mfm-opt').children[0];
     myswal.fire({
         title: mfmOptChildren[2].innerHTML,
@@ -125,7 +125,7 @@ function handleSliceText(refreshFileList) {
                 console.log(`Original: ${originalName}, Sliced Base: ${newBaseName}, Final New: ${finalNewName}`);
 
                 // Return the promise from the actual rename operation
-                return renameFile(file.id, finalNewName, originalName);
+                return renameFile(driveClient, file.id, finalNewName, originalName);
             });
 
             // --- Execute all rename operations and handle results ---
@@ -145,7 +145,7 @@ function handleSliceText(refreshFileList) {
 /**
  * Handles the "Pad Filename" operation.
  */
-function handlePadFilename(refreshFileList) {
+function handlePadFilename(driveClient, refreshFileList) {
     const mfmOptChildren = document.getElementById('mfm-opt').children[0];
     myswal.fire({
         title: mfmOptChildren[3].innerHTML,
@@ -163,7 +163,7 @@ function handlePadFilename(refreshFileList) {
             const checkedFiles = getCheckedFiles();
             const renamePromises = checkedFiles.map(file => {
                 const paddedFilename = padFilename(file.name, numPrefix);
-                return renameFile(file.id, paddedFilename, file.name);
+                return renameFile(driveClient, file.id, paddedFilename, file.name);
             });
 
             try {

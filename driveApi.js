@@ -21,8 +21,6 @@ let CREDENTIALS_PATH;
 // Limiter to control the rate of requests to the Google Drive API
 const limiter = new Bottleneck({ minTime: 110 });
 
-let gdrive = null; // This will be initialized after successful authorization
-
 async function initializePaths() {
     const userDataPath = await ipcRenderer.invoke('get-user-data-path');
     TOKEN_PATH = path.join(userDataPath, 'token.json');
@@ -65,31 +63,42 @@ async function saveCredentials(client) {
  * Loads or requests authorization to call APIs.
  * @returns {Promise<OAuth2Client>} The authorized OAuth2 client.
  */
-async function authorize() {
+async function authorizeAndGetDrive() {
     if (!CREDENTIALS_PATH) await initializePaths();
     let client = await loadSavedCredentialsIfExist();
     if (client) {
-        // Initialize gdrive here if saved credentials are found
-        gdrive = google.drive({ version: 'v3', auth: client });
-        return client;
+        return google.drive({ version: 'v3', auth: client });
     }
-    client = await authenticate({
+    // If no saved credentials, trigger interactive auth and poll for the token.
+    // This function will now primarily be for getting an existing client.
+    // The interactive part is handled by triggerUserAuthorization.
+    return null;
+}
+
+/**
+ * Triggers the user authorization flow which opens a browser window.
+ * It does not wait for the flow to complete.
+ */
+function triggerUserAuthorization() {
+    // This runs in the background. When the user completes the flow,
+    // @google-cloud/local-auth will save the token to TOKEN_PATH.
+    authenticate({
         scopes: SCOPES,
         keyfilePath: CREDENTIALS_PATH,
         auth: {
-            // This is necessary to force the browser to open on desktop apps.
             redirect_uri_placeholder: 1,
         },
         client: {
             force_new_consent: true,
         }
+    }).then(async (client) => {
+        if (client.credentials) {
+            await saveCredentials(client);
+            console.log('Credentials saved successfully by background process.');
+        }
+    }).catch(err => {
+        console.error('Background authorization process failed:', err);
     });
-    if (client.credentials) {
-        await saveCredentials(client);
-    }
-    // Initialize gdrive here after new credentials are obtained
-    gdrive = google.drive({ version: 'v3', auth: client });
-    return client;
 }
 
 /**
@@ -99,11 +108,7 @@ async function authorize() {
  * @param {string} oldTitle - The original name of the file, for the toast message.
  * @returns {Promise<object>} - A promise that resolves with the updated file data or rejects with an error.
  */
-function renameFile(fileId, newTitle, oldTitle) {
-    // Ensure gdrive is initialized before use
-    if (!gdrive) {
-        return Promise.reject(new Error("Google Drive client not authorized. Call authorize() first."));
-    }
+function renameFile(gdrive, fileId, newTitle, oldTitle) {
     return new Promise((resolve, reject) => {
         const body = { 'name': newTitle };
         limiter.schedule(() => {
@@ -131,11 +136,7 @@ function renameFile(fileId, newTitle, oldTitle) {
  * @param {string} pageToken - The page token for pagination.
  * @returns {Promise<object>} - An object containing files and nextPageToken.
  */
-async function fetchDriveFiles(parentId, orderBy, pageToken = null) {
-    // Ensure gdrive is initialized before use
-    if (!gdrive) {
-        throw new Error("Google Drive client not authorized. Call authorize() first.");
-    }
+async function fetchDriveFiles(gdrive, parentId, orderBy, pageToken = null) {
     const response = await limiter.schedule(() => gdrive.files.list({
         pageSize: 30, // Number of items per page
         q: `'${parentId}' in parents`,
@@ -152,7 +153,8 @@ async function fetchDriveFiles(parentId, orderBy, pageToken = null) {
 
 module.exports = {
     initializePaths,
-    authorize,
+    authorizeAndGetDrive,
+    triggerUserAuthorization,
     renameFile,
     fetchDriveFiles
 };

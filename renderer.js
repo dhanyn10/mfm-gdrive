@@ -1,23 +1,41 @@
-const { fetchDriveFiles, initializePaths } = require('./driveApi');
+const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
   await initializePaths(); // Initialize paths as soon as the app loads
-  setupEventHandlers(listFiles);
+  const eventHandlers = setupEventHandlers(listFiles);
+  await startup(eventHandlers.getDriveClient);
 }
 main();
 
 const prevPageButton = document.getElementById('prev-page');
 const nextPageButton = document.getElementById('next-page');
 
+async function startup(getDriveClient) {
+    try {
+        const drive = await authorizeAndGetDrive(); // Check for existing token
+        if (drive) {
+            showMainUI();
+            updateAuthorizeButton(true, false);
+            getDriveClient(drive); // Set the client in eventHandlers
+            const { arrParentFolder, currentPageToken } = getState();
+            await listFiles(drive, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
+            updateState({ isInitialAuthSuccessful: true });
+        }
+    } catch (error) {
+        console.error('Startup authorization failed, waiting for user action.', error);
+        updateAuthorizeButton(false, false);
+    }
+}
+
 /**
  * Handles the click event for folder list items.
  * @param {object} folder - The folder object.
- * @param {OAuth2Client} authClient - An authorized OAuth2 client.
+ * @param {object} driveClient - An authorized Google Drive client.
  */
-function handleFolderClick(folder, authClient) {
+function handleFolderClick(folder, driveClient) {
     let { arrParentFolder } = getState();
     arrParentFolder.push(folder.id);
     updateState({
@@ -26,7 +44,7 @@ function handleFolderClick(folder, authClient) {
         nextPageTokenFromAPI: null,
         prevPageTokensStack: []
     });
-    listFiles(authClient, folder.id);
+    listFiles(driveClient, folder.id);
 }
 
 function handleFileFolderClick(file, checkboxElement) {
@@ -40,11 +58,11 @@ function handleFileFolderClick(file, checkboxElement) {
 
 /**
  * Lists the names and IDs of files.
- * @param {OAuth2Client} authClient An authorized OAuth2 client.
+ * @param {object} driveClient An authorized Google Drive client.
  * @param {string} source - The ID of the parent folder.
  * @param {string} pageToken - The token for the current page of results.
  */
-async function listFiles(authClient, source, pageToken = null) {
+async function listFiles(driveClient, source, pageToken = null) {
     let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
     // Upfolder element
     const upcbFolders = document.createElement('input');
@@ -71,7 +89,7 @@ async function listFiles(authClient, source, pageToken = null) {
                 prevPageTokensStack: []
             });
         }
-        listFiles(authClient, arrParentFolder[arrParentFolder.length - 1]);
+        listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
         document.querySelectorAll(".cbox-folders").forEach(cb => cb.checked = false);
         upcbFolders.checked = true;
     });
@@ -80,19 +98,19 @@ async function listFiles(authClient, source, pageToken = null) {
     document.getElementById('folder-list').appendChild(upListFolders);
 
     // Fetch folders (always from the first page, no pagination for folders)
-    const folderData = await fetchDriveFiles(arrParentFolder[arrParentFolder.length - 1], 'name');
+    const folderData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'name');
     const arrListFolders = folderData.files.filter(file => file.mimeType === mime)
                                      .map(file => ({ id: file.id, name: file.name }));
     updateState({ arrListFolders });
 
     arrListFolders.forEach(folder => {
         // The onClick handler for a folder needs to call handleFolderClick
-        const clickHandler = () => handleFolderClick(folder, authClient);
+        const clickHandler = () => handleFolderClick(folder, driveClient);
         document.getElementById('folder-list').appendChild(createFolderListItem(folder, clickHandler));
     });
 
     // Fetch files with pagination
-    const fileData = await fetchDriveFiles(arrParentFolder[arrParentFolder.length - 1], 'folder, name', pageToken);
+    const fileData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'folder, name', pageToken);
     const arrListAllFiles = fileData.files
         .filter(file => file.mimeType !== mime) // Only show files, not folders
         .map(file => ({
