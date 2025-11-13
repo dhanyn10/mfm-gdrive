@@ -56,11 +56,22 @@ export const config: WebdriverIO.Config = {
         browserName: 'electron',
         // Electron service options
         // see https://webdriver.io/docs/desktop-testing/electron/configuration/#service-options
-        'wdio:electronServiceOptions': {
-            // custom application args
-            appArgs: [],
-            appBinaryPath: './dist/linux-unpacked/MFM GDrive',
-        }
+        // 'wdio:electronServiceOptions': {
+        //     // custom application args
+        //     appArgs: [],
+        //     appBinaryPath: './dist/linux-unpacked/mfm-gdrive',
+        // },
+        'goog:chromeOptions': {
+            binary: './dist/linux-unpacked/mfm-gdrive',
+            args: [
+            `--user-data-dir=/tmp/wdio-${Date.now()}`,
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            ],
+            prefs: { 'profile.password_manager_leak_detection': false },
+            windowTypes: ['app', 'webview'],
+        },
+        'wdio:enforceWebDriverClassic': true,
     }],
 
     //
