@@ -64,7 +64,7 @@ function handleFileFolderClick(file, checkboxElement) {
  */
 async function listFiles(driveClient, source, pageToken = null) {
     let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
-    // Upfolder element (tanpa checkbox)
+    // Upfolder element
     const upSpFolders = document.createElement('div');
     Object.assign(upSpFolders, {
         "class": 'w-full flex items-center justify-center py-2 border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600 cursor-pointer',
