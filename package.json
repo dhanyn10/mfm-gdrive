@@ -8,13 +8,20 @@
     "css-gen": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify",
     "app:build": "electron-builder",
     "postinstall": "electron-builder install-app-deps",
-    "app:dist": "electron-builder --publish=never",
+    "app:dist": "electron-builder --publish=always",
     "wdio": "wdio run ./wdio.conf.ts"
   },
   "build": {
     "appId": "com.dhanyn.mfmgdrive",
     "productName": "MFM GDrive",
     "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "dhanyn10",
+        "repo": "mfm-gdrive"
+      }
+    ],
     "directories": {
       "buildResources": "build",
       "output": "dist"
@@ -45,7 +52,8 @@
     },
     "linux": {
       "target": "deb",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "category": "Utility"
     }
   },
   "repository": "https://github.com/dhanyn10/mfm-gdrive.git",
