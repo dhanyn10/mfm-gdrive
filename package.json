@@ -15,6 +15,13 @@
     "appId": "com.dhanyn.mfmgdrive",
     "productName": "MFM GDrive",
     "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "dhanyn10",
+        "repo": "mfm-gdrive"
+      }
+    ],
     "directories": {
       "buildResources": "build",
       "output": "dist"
@@ -45,7 +52,8 @@
     },
     "linux": {
       "target": "deb",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "category": "Utility"
     }
   },
   "repository": "https://github.com/dhanyn10/mfm-gdrive.git",
