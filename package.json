@@ -8,7 +8,7 @@
     "css-gen": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify",
     "app:build": "electron-builder",
     "postinstall": "electron-builder install-app-deps",
-    "app:dist": "electron-builder --publish=always",
+    "app:dist": "electron-builder --publish=never",
     "wdio": "wdio run ./wdio.conf.ts"
   },
   "build": {
