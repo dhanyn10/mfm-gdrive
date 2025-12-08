@@ -83,7 +83,7 @@
     "google-auth-library": "^10.1.0",
     "googleapis": "^164.1.0",
     "node-abi": "^4.14.0",
-    "sweetalert2": "^11.14.3",
+    "sweetalert2": "^11.26.4",
     "toastify-js": "^1.12.0"
   }
 }
