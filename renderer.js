@@ -2,9 +2,11 @@ const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./dr
 const { updateState, getState } = require('./state');
 const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
+const { initModals } = require('./flowbite-helpers');
 
 async function main() {
   await initializePaths(); // Initialize paths as soon as the app loads
+  initModals();
   const eventHandlers = setupEventHandlers(listFiles);
   await startup(eventHandlers.getDriveClient);
 }
