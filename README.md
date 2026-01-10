@@ -2,75 +2,38 @@
 # mfm-gdrive
 Easy rename your files in Google Drive
 
-## Install
-1. Clone this repo
-    ```bash
-    git clone https://github.com/dhanyn10/mfm-gdrive.git
-    ```
-2. move to /app
-    ```
-    cd app
-    ```
-2. Install dependencies
-    ```bash
-    npm install
-    ```
-## Usage
-- generate css (optional)
-    ```bash
-    npm run css-gen
-    ```
-- run the application
-    ```bash
-    npm start
-    ```
 ## How to Use
-1. click button **authorize** to let the apps gain authorization to your Google Drive metadata
-2. **Left sidebar** shows you folder view; **right sidebar** shows you files and folder. If you need to return back to previous(parent) folder, you can click to folder **"..."**
-3. choose any files you needed to change the names. Also you can choose multiple files by using `shift + click`
-6. And finally, click **(play)** button to execute the rename function.
+1. **Download the Application:**
+   - Download the latest version of the application for your operating system from the [releases page](https://github.com/dhanyn10/mfm-gdrive/releases).
 
-## Features Example
+2. **Run the Application:**
+   - **Windows:** Double-click the downloaded `.exe` file.
+   - **macOS:** Open the downloaded `.dmg` file and drag the application to your `Applications` folder.
+   - **Linux:** Double-click the downloaded `.deb` file to install.
 
-### change filename by name
-you can change name for every file by typing file name you need to change. if you have file list like below:
-```
-my-file-1.pdf
-my-file-2.pdf
-my-file-3.pdf
-my-file-4.pdf
-```
-choose rename option **change filename by name**, then fill the input form **`from`** with `my` and **`to`** with `our`. Your filename list will change like below:
-```
-our-file-1.pdf
-our-file-2.pdf
-our-file-3.pdf
-our-file-4.pdf
-```
+3. **Authorize with Google Drive:**
+   - When you first launch the application, you'll see an "Authorize" button. Click it to allow the app to access your Google Drive files.
+   - ![Authorization Screen](screenshot-authorize.png)
 
-### change filename by Position
-#### Overview
-The "Change File Name by Position" operation enables precise manipulation of filenames by specifying a start and an end position. Characters within the specified range will be removed from the filename. This operation is particularly useful for cleaning up filenames that have unwanted prefixes, suffixes, or segments in the middle.
+4. **Navigate Your Files:**
+   - The left sidebar shows your folder structure.
+   - The right sidebar displays the files and folders within the selected folder.
+   - To go back to the parent folder, click the "..." entry.
 
-#### How It Works
-When you select "Change File Name by Position" and click "RUN", a dialog will appear prompting you to enter two values:
-- Start: The 1-based numerical position where you want to begin removing characters.
-- End: The 1-based numerical position where you want to end removing characters. The character at this 'end' position will also be removed.
+5. **Rename Files:**
+   - Select the files you want to rename. You can select multiple files by holding `Shift` and clicking.
+   - Click the "Play" button to open the renaming options.
+
+## Renaming Features
+
+### Change Filename by Name
+- This feature allows you to replace a specific string in the filenames.
+- For example, if you have files named `my-file-1.pdf`, `my-file-2.pdf`, etc., you can replace `my` with `our` to rename them to `our-file-1.pdf`, `our-file-2.pdf`, and so on.
+
+### Change Filename by Position
+- This feature removes characters from the filename based on their position.
+- You'll be prompted to enter a `start` and `end` position, and all characters within that range will be removed.
 
 ### Insert PadStart
-padStart is pads the current string with given string until meet the required length, you can read more details [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart). You can use padStart to solve problem like below:
-
-```
-file-997.pdf
-file-998.pdf
-file-999.pdf
-file-1000.pdf
-```
-From the list above, set expected value with `4`. The result will become:
-
-```
-file-0997.pdf
-file-0998.pdf
-file-0999.pdf
-file-1000.pdf
-```
+- This feature adds padding to the beginning of a string until it reaches a certain length.
+- For example, if you have `file-997.pdf`, `file-998.pdf`, etc., you can set the expected length to `4` to rename them to `file-0997.pdf`, `file-0998.pdf`, etc. You can read more about `padStart` [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart).
