@@ -6,9 +6,9 @@ const { initModals } = require('./flowbite-helpers');
 
 async function main() {
   await initializePaths(); // Initialize paths as soon as the app loads
-  initModals();
   const eventHandlers = setupEventHandlers(listFiles);
   await startup(eventHandlers.getDriveClient);
+  initModals();
 }
 main();
 
