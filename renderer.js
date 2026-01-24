@@ -10,7 +10,8 @@ async function main() {
   await startup(eventHandlers.getDriveClient);
   initModals();
 }
-main();
+
+window.addEventListener('DOMContentLoaded', main);
 
 const prevPageButton = document.getElementById('prev-page');
 const nextPageButton = document.getElementById('next-page');
