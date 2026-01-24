@@ -12,12 +12,18 @@ function initModals() {
 
     const replaceTextModalElement = document.getElementById('replace-text-modal');
     replaceTextModal = new Modal(replaceTextModalElement, options);
+    const replaceTextCloseButton = document.querySelector('[data-modal-hide="replace-text-modal"]');
+    replaceTextCloseButton.addEventListener('click', () => replaceTextModal.hide());
 
     const sliceTextModalElement = document.getElementById('slice-text-modal');
     sliceTextModal = new Modal(sliceTextModalElement, options);
+    const sliceTextCloseButton = document.querySelector('[data-modal-hide="slice-text-modal"]');
+    sliceTextCloseButton.addEventListener('click', () => sliceTextModal.hide());
 
     const padFilenameModalElement = document.getElementById('pad-filename-modal');
     padFilenameModal = new Modal(padFilenameModalElement, options);
+    const padFilenameCloseButton = document.querySelector('[data-modal-hide="pad-filename-modal"]');
+    padFilenameCloseButton.addEventListener('click', () => padFilenameModal.hide());
 }
 
 function showReplaceTextModal(callback) {
