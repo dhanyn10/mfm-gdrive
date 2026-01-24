@@ -1,5 +1,4 @@
-
-const { Toast } = require('flowbite');
+const Toastify = require('toastify-js');
 
 /**
  * Displays a toast notification.
@@ -7,16 +6,21 @@ const { Toast } = require('flowbite');
  * @param {string} [type='info'] - The type of toast (e.g., 'success', 'error', 'info').
  */
 function showToast(text, type = 'info') {
-    const toastId = `toast-${type}`;
-    const messageId = `toast-${type}-message`;
-    const toastElement = document.getElementById(toastId);
-    const messageElement = document.getElementById(messageId);
+    const classMap = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-slate-700'
+    };
 
-    if (toastElement && messageElement) {
-        messageElement.textContent = text;
-        const toast = new Toast(toastElement);
-        toast.show();
-    }
+    Toastify({
+        text: text,
+        duration: 5000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        stopOnFocus: true,
+        className: `text-white px-4 py-2 rounded-md shadow-lg ${classMap[type] || classMap['info']}`,
+    }).showToast();
 }
 /**
  * Creates a DOM element with specified attributes, class name, and children.
