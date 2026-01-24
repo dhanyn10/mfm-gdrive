@@ -44,15 +44,14 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "build/icon.ico"
     },
     "mac": {
       "target": "dmg",
-      "icon": "assets/icon.icns"
+      "icon": "build/icon.icns"
     },
     "linux": {
       "target": "deb",
-      "icon": "assets/icon.png",
       "category": "Utility"
     }
   },
@@ -69,21 +68,21 @@
     "@wdio/local-runner": "^9.16.2",
     "@wdio/mocha-framework": "^9.16.2",
     "@wdio/spec-reporter": "^9.16.2",
-    "electron": "^39.2.3",
+    "electron": "^40.0.0",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "postcss-cli": "^11.0.0",
-    "tailwindcss": "^4.1.16",
+    "tailwindcss": "^4.1.18",
     "wdio-electron-service": "^9.1.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@google-cloud/local-auth": "^3.0.1",
     "bottleneck": "^2.19.5",
+    "flowbite": "^4.0.1",
     "google-auth-library": "^10.1.0",
-    "googleapis": "^164.1.0",
+    "googleapis": "^167.0.0",
     "node-abi": "^4.14.0",
-    "sweetalert2": "^11.14.3",
     "toastify-js": "^1.12.0"
   }
 }
