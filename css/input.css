@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.bg-opacity-50 {
+    --tw-bg-opacity: 0.5;
+}
+
+.dark .dark\:bg-opacity-80 {
+    --tw-bg-opacity: 0.8;
+}

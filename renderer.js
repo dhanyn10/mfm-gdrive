@@ -8,7 +8,8 @@ async function main() {
   const eventHandlers = setupEventHandlers(listFiles);
   await startup(eventHandlers.getDriveClient);
 }
-main();
+
+window.addEventListener('DOMContentLoaded', main);
 
 const prevPageButton = document.getElementById('prev-page');
 const nextPageButton = document.getElementById('next-page');
