@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -129,9 +129,15 @@ async function listFiles(driveClient, source, pageToken = null) {
 
     // Update UI
     document.getElementById('file-folder-list').innerHTML = null;
-    arrListAllFiles.forEach(file => {
-        document.getElementById('file-folder-list').appendChild(createFileFolderListItem(file, handleFileFolderClick));
-    });
+    if (arrListAllFiles.length === 0) {
+        document.getElementById('file-folder-list').appendChild(renderEmptyFileList());
+        updateSelectionBlockVisibility(false);
+    } else {
+        arrListAllFiles.forEach(file => {
+            document.getElementById('file-folder-list').appendChild(createFileFolderListItem(file, handleFileFolderClick));
+        });
+        updateSelectionBlockVisibility(true);
+    }
 
     let firstchildFileList = document.createElement('div');
     firstchildFileList.className = "h-4 bg-gray-100";

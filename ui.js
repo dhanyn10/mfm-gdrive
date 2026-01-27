@@ -123,6 +123,37 @@ function updateExecuteButtonVisibility() {
     }
 }
 
+function updateSelectionBlockVisibility(isVisible) {
+    const selectionBlock = document.getElementById('selection-control-block');
+    if (!selectionBlock) return;
+
+    if (isVisible) {
+        selectionBlock.classList.remove('hidden');
+    } else {
+        selectionBlock.classList.add('hidden');
+    }
+}
+
+function renderEmptyFileList() {
+    const container = elemFactory('div', {
+        class: "flex flex-col items-center justify-center p-10 text-gray-500 dark:text-gray-400"
+    });
+
+    const icon = elemFactory('i', {
+        class: "fas fa-list-check fa-3x mb-4"
+    });
+
+    const text = elemFactory('p', {
+        class: "text-lg font-medium",
+        innerHTML: "No files available for display at this time."
+    });
+
+    container.appendChild(icon);
+    container.appendChild(text);
+
+    return container;
+}
+
 
 module.exports = {
     createFileIcon,
@@ -130,5 +161,7 @@ module.exports = {
     createFileFolderListItem,
     showMainUI,
     updateAuthorizeButton,
-    updateExecuteButtonVisibility
+    updateExecuteButtonVisibility,
+    updateSelectionBlockVisibility,
+    renderEmptyFileList
 };

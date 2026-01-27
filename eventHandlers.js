@@ -3,7 +3,6 @@ const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi')
 const { showToast, elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
 const { showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility } = require('./ui');
-const { handleReplaceText, handleSliceText, handlePadFilename } = require('./fileOperations');
 
 let driveClient;
 
