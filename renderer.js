@@ -130,16 +130,18 @@ async function listFiles(driveClient, source, pageToken = null) {
     // Update UI
     document.getElementById('file-folder-list').innerHTML = "";
     if (arrListAllFiles.length === 0) {
+        // Initially, or when empty, show the empty state (Google Drive icon)
+        // But we want to ensure the container looks right (no border if empty/initial)
         document.getElementById('file-folder-list').appendChild(renderEmptyFileList());
         updateSelectionBlockVisibility(false);
-        updateFileListBorderVisibility(false);
+        updateFileListBorderVisibility(false); // No border for empty state
         updatePaginationVisibility(false);
     } else {
         arrListAllFiles.forEach(file => {
             document.getElementById('file-folder-list').appendChild(createFileFolderListItem(file, handleFileFolderClick));
         });
         updateSelectionBlockVisibility(true);
-        updateFileListBorderVisibility(true);
+        updateFileListBorderVisibility(true); // Add border when files are present
         updatePaginationVisibility(true);
     }
 
