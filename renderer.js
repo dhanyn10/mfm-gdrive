@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -53,6 +53,7 @@ function handleFileFolderClick(file, checkboxElement) {
     if (file.type !== mime) {
         file.checked = !file.checked;
         checkboxElement.checked = file.checked;
+        updateExecuteButtonVisibility();
     }
 }
 
@@ -135,4 +136,6 @@ async function listFiles(driveClient, source, pageToken = null) {
     let firstchildFileList = document.createElement('div');
     firstchildFileList.className = "h-4 bg-gray-100";
     document.getElementById('file-folder-list').prepend(firstchildFileList);
+
+    updateExecuteButtonVisibility();
 }

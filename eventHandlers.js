@@ -2,7 +2,7 @@
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
 const { showToast, elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
-const { showMainUI, updateAuthorizeButton } = require('./ui');
+const { showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility } = require('./ui');
 const { handleReplaceText, handleSliceText, handlePadFilename } = require('./fileOperations');
 
 let driveClient;
@@ -110,10 +110,7 @@ function setupEventHandlers(listFiles) {
             }
         });
         updateState({ arrListAllFiles });
-    });
-
-    executeBtn.addEventListener('click', () => {
-        showToast('Execute clicked. Functionality coming soon!', 'info');
+        updateExecuteButtonVisibility();
     });
 
     selectNoneBtn.addEventListener('click', () => {
@@ -126,6 +123,11 @@ function setupEventHandlers(listFiles) {
             }
         });
         updateState({ arrListAllFiles });
+        updateExecuteButtonVisibility();
+    });
+
+    executeBtn.addEventListener('click', () => {
+        showToast('Execute functionality coming soon!', 'info');
     });
 
     fileFolderList.addEventListener('click', (evt) => {
@@ -144,6 +146,7 @@ function setupEventHandlers(listFiles) {
             }
         }
         updateState({ fromIndex: clickedIndex });
+        updateExecuteButtonVisibility();
     });
 
     return {

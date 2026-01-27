@@ -110,11 +110,25 @@ function updateAuthorizeButton(isAuthSuccessful, isLoading) {
     }
 }
 
+function updateExecuteButtonVisibility() {
+    const { arrListAllFiles } = getState();
+    const executeBtn = document.getElementById('execute-btn');
+    if (!executeBtn) return;
+
+    const hasSelected = arrListAllFiles.some(file => file.checked);
+    if (hasSelected) {
+        executeBtn.classList.remove('hidden');
+    } else {
+        executeBtn.classList.add('hidden');
+    }
+}
+
 
 module.exports = {
     createFileIcon,
     createFolderListItem,
     createFileFolderListItem,
     showMainUI,
-    updateAuthorizeButton
+    updateAuthorizeButton,
+    updateExecuteButtonVisibility
 };
