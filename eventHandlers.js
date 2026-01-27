@@ -13,7 +13,7 @@ function setupEventHandlers(listFiles) {
     const nextPageButton = document.getElementById('next-page');
     const selectAllBtn = document.getElementById('select-all');
     const selectNoneBtn = document.getElementById('select-none');
-    const executeBtn = document.getElementById('execute-btn');
+    const nextStepBtn = document.getElementById('next-step-btn');
     const navFolders = document.getElementById('nav-folders');
     const navExecute = document.getElementById('nav-execute');
     const operationSelect = document.getElementById('operation-select');
@@ -137,7 +137,7 @@ function setupEventHandlers(listFiles) {
         updateExecuteButtonVisibility();
     });
 
-    executeBtn.addEventListener('click', () => {
+    nextStepBtn.addEventListener('click', () => {
         setPanelVisibility('execute-sidebar', true);
     });
 

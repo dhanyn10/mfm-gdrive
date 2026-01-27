@@ -118,14 +118,22 @@ function updateAuthorizeButton(isAuthSuccessful, isLoading) {
 
 function updateExecuteButtonVisibility() {
     const { arrListAllFiles } = getState();
-    const executeBtn = document.getElementById('execute-btn');
-    if (!executeBtn) return;
+    const nextStepBtn = document.getElementById('next-step-btn');
+    const navExecuteBtn = document.getElementById('nav-execute');
+    
+    if (!nextStepBtn) return;
 
     const hasSelected = arrListAllFiles.some(file => file.checked);
     if (hasSelected) {
-        executeBtn.classList.remove('hidden');
+        nextStepBtn.classList.remove('hidden');
+        if (navExecuteBtn) {
+            navExecuteBtn.disabled = false;
+        }
     } else {
-        executeBtn.classList.add('hidden');
+        nextStepBtn.classList.add('hidden');
+        if (navExecuteBtn) {
+            navExecuteBtn.disabled = true;
+        }
     }
 }
 
