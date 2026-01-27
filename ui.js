@@ -170,20 +170,69 @@ function updatePaginationVisibility(isVisible) {
     }
 }
 
-function toggleExecuteSidebar(isVisible) {
+function updatePanelLayout() {
+    const folders = document.getElementById('folders');
+    const files = document.getElementById('files');
     const sidebar = document.getElementById('execute-sidebar');
-    const filesCol = document.getElementById('files');
-    if (!sidebar || !filesCol) return;
+    const navFolders = document.getElementById('nav-folders');
+    const navExecute = document.getElementById('nav-execute');
 
-    if (isVisible) {
-        sidebar.classList.remove('hidden');
-        filesCol.classList.remove('col-span-9');
-        filesCol.classList.add('col-span-6');
+    if (!folders || !files || !sidebar || !navFolders || !navExecute) return;
+
+    const foldersVisible = !folders.classList.contains('hidden');
+    const sidebarVisible = !sidebar.classList.contains('hidden');
+
+    // Update Navbar styles for Folders button
+    if (foldersVisible) {
+        navFolders.classList.add('bg-gray-100', 'text-blue-700');
+        navFolders.classList.remove('bg-white', 'text-gray-900');
     } else {
-        sidebar.classList.add('hidden');
-        filesCol.classList.remove('col-span-6');
-        filesCol.classList.add('col-span-9');
+        navFolders.classList.remove('bg-gray-100', 'text-blue-700');
+        navFolders.classList.add('bg-white', 'text-gray-900');
     }
+
+    // Update Navbar styles for Execute button
+    if (sidebarVisible) {
+        navExecute.classList.add('bg-gray-100', 'text-blue-700');
+        navExecute.classList.remove('bg-white', 'text-gray-900');
+    } else {
+        navExecute.classList.remove('bg-gray-100', 'text-blue-700');
+        navExecute.classList.add('bg-white', 'text-gray-900');
+    }
+
+    // Update Grid layout
+    files.classList.remove('col-span-12', 'col-span-9');
+    if (foldersVisible || sidebarVisible) {
+        files.classList.add('col-span-9');
+    } else {
+        files.classList.add('col-span-12');
+    }
+}
+
+function setPanelVisibility(panel, isVisible) {
+    const folders = document.getElementById('folders');
+    const sidebar = document.getElementById('execute-sidebar');
+
+    if (panel === 'folders') {
+        if (isVisible) {
+            folders.classList.remove('hidden');
+            sidebar.classList.add('hidden'); // Mutually exclusive
+        } else {
+            folders.classList.add('hidden');
+        }
+    } else if (panel === 'execute-sidebar') {
+        if (isVisible) {
+            sidebar.classList.remove('hidden');
+            folders.classList.add('hidden'); // Mutually exclusive
+        } else {
+            sidebar.classList.add('hidden');
+        }
+    }
+    updatePanelLayout();
+}
+
+function toggleExecuteSidebar(isVisible) {
+    setPanelVisibility('execute-sidebar', isVisible);
 }
 
 function renderSidebarForm(operationType) {
@@ -241,5 +290,7 @@ module.exports = {
     updateFileListBorderVisibility,
     updatePaginationVisibility,
     toggleExecuteSidebar,
-    renderSidebarForm
+    renderSidebarForm,
+    setPanelVisibility,
+    updatePanelLayout
 };

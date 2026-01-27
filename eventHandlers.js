@@ -2,7 +2,7 @@
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
 const { showToast, elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
-const { showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, toggleExecuteSidebar, renderSidebarForm } = require('./ui');
+const { showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, toggleExecuteSidebar, renderSidebarForm, setPanelVisibility } = require('./ui');
 const { executeReplace, executeSlice, executePad } = require('./fileOperations');
 
 let driveClient;
@@ -14,6 +14,8 @@ function setupEventHandlers(listFiles) {
     const selectAllBtn = document.getElementById('select-all');
     const selectNoneBtn = document.getElementById('select-none');
     const executeBtn = document.getElementById('execute-btn');
+    const navFolders = document.getElementById('nav-folders');
+    const navExecute = document.getElementById('nav-execute');
     const operationSelect = document.getElementById('operation-select');
     const closeSidebarBtn = document.getElementById('close-sidebar');
     const runSidebarExecuteBtn = document.getElementById('run-sidebar-execute');
@@ -136,11 +138,23 @@ function setupEventHandlers(listFiles) {
     });
 
     executeBtn.addEventListener('click', () => {
-        toggleExecuteSidebar(true);
+        setPanelVisibility('execute-sidebar', true);
+    });
+
+    navFolders.addEventListener('click', () => {
+        const folders = document.getElementById('folders');
+        const isVisible = !folders.classList.contains('hidden');
+        setPanelVisibility('folders', !isVisible);
+    });
+
+    navExecute.addEventListener('click', () => {
+        const sidebar = document.getElementById('execute-sidebar');
+        const isVisible = !sidebar.classList.contains('hidden');
+        setPanelVisibility('execute-sidebar', !isVisible);
     });
 
     closeSidebarBtn.addEventListener('click', () => {
-        toggleExecuteSidebar(false);
+        setPanelVisibility('execute-sidebar', false);
     });
 
     operationSelect.addEventListener('change', (e) => {
