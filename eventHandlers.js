@@ -17,7 +17,6 @@ function setupEventHandlers(listFiles) {
     const navFolders = document.getElementById('nav-folders');
     const navExecute = document.getElementById('nav-execute');
     const operationSelect = document.getElementById('operation-select');
-    const closeSidebarBtn = document.getElementById('close-sidebar');
     const runSidebarExecuteBtn = document.getElementById('run-sidebar-execute');
     const fileFolderList = document.getElementById('file-folder-list');
 
@@ -151,10 +150,6 @@ function setupEventHandlers(listFiles) {
         const sidebar = document.getElementById('execute-sidebar');
         const isVisible = !sidebar.classList.contains('hidden');
         setPanelVisibility('execute-sidebar', !isVisible);
-    });
-
-    closeSidebarBtn.addEventListener('click', () => {
-        setPanelVisibility('execute-sidebar', false);
     });
 
     operationSelect.addEventListener('change', (e) => {

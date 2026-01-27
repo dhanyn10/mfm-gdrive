@@ -77,28 +77,13 @@ function padFilename(filename, padLength) {
 }
 
 /**
- * Creates a span element with the filename where each character has a tooltip showing its index.
+ * Creates a span element with the filename.
  * @param {string} fileName - The name of the file.
- * @returns {HTMLElement} - The span element containing the filename with tooltips.
+ * @returns {HTMLElement} - The span element containing the filename.
  */
 function createFileNameWithTooltips(fileName) {
   let fullFileName = document.createElement('span');
-  for (let j = 0; j < fileName.length; j++) {
-    let fullCharTooltip = elemFactory('span', {"class": "relative group"});
-    let spanChar = elemFactory('span', {"class": "hover:ring ring-blue-200"});
-    let charNumTooltip = elemFactory("span", {"class":
-      "absolute left-1/2 transform -translate-x-1/2 top-[-25px] w-max \
-      px-2 py-1 text-sm text-white bg-black rounded opacity-0 group-hover:opacity-100 \
-      transition-opacity duration-300"});
-
-    spanChar.innerHTML = fileName.charAt(j) === " " ? "&nbsp;" : fileName.charAt(j);
-    spanChar.classList.add('font-mono', 'whitespace-normal');
-    charNumTooltip.innerHTML = j + 1;
-
-    fullCharTooltip.appendChild(spanChar);
-    fullCharTooltip.appendChild(charNumTooltip);
-    fullFileName.appendChild(fullCharTooltip);
-  }
+  fullFileName.textContent = fileName;
   return fullFileName;
 }
 
