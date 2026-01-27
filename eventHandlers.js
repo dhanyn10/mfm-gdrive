@@ -101,9 +101,13 @@ function setupEventHandlers(listFiles) {
 
     selectAllBtn.addEventListener('click', () => {
         const { arrListAllFiles } = getState();
-        const checkboxes = document.getElementsByClassName('cbox-file-folder');
+        const listContainer = document.getElementById('file-folder-list');
+        const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
+
         arrListAllFiles.forEach((file, index) => {
             file.checked = true;
+            // Safer mapping: find checkbox by value (file.id) if possible,
+            // but for now relying on list order which is strictly files here.
             if (checkboxes[index]) {
                 checkboxes[index].checked = true;
             }
@@ -114,7 +118,9 @@ function setupEventHandlers(listFiles) {
 
     selectNoneBtn.addEventListener('click', () => {
         const { arrListAllFiles } = getState();
-        const checkboxes = document.getElementsByClassName('cbox-file-folder');
+        const listContainer = document.getElementById('file-folder-list');
+        const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
+
         arrListAllFiles.forEach((file, index) => {
             file.checked = false;
             if (checkboxes[index]) {
@@ -133,14 +139,15 @@ function setupEventHandlers(listFiles) {
         const targetCheckbox = evt.target.closest('li')?.querySelector('.cbox-file-folder');
         if (!targetCheckbox) return;
 
-        const clickedIndex = Array.from(document.getElementsByClassName('cbox-file-folder')).indexOf(targetCheckbox);
+        const checkboxes = fileFolderList.querySelectorAll('.cbox-file-folder');
+        const clickedIndex = Array.from(checkboxes).indexOf(targetCheckbox);
         let { fromIndex, arrListAllFiles } = getState();
 
         if (evt.shiftKey && fromIndex !== null) {
             const toIndex = clickedIndex;
             const [low, high] = fromIndex < toIndex ? [fromIndex, toIndex] : [toIndex, fromIndex];
             for (let idx = low; idx <= high; idx++) {
-                document.getElementsByClassName('cbox-file-folder')[idx].checked = true;
+                checkboxes[idx].checked = true;
                 arrListAllFiles[idx].checked = true;
             }
         }

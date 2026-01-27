@@ -136,7 +136,7 @@ function updateSelectionBlockVisibility(isVisible) {
 
 function renderEmptyFileList() {
     const container = elemFactory('div', {
-        class: "flex flex-col items-center justify-center p-10 text-gray-500 dark:text-gray-400"
+        class: "flex flex-col items-center justify-center p-10 h-full text-gray-500 dark:text-gray-400"
     });
 
     const icon = elemFactory('i', {

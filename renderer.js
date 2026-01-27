@@ -128,7 +128,7 @@ async function listFiles(driveClient, source, pageToken = null) {
     nextPageButton.disabled = (nextPageTokenFromAPI === null);
 
     // Update UI
-    document.getElementById('file-folder-list').innerHTML = null;
+    document.getElementById('file-folder-list').innerHTML = "";
     if (arrListAllFiles.length === 0) {
         document.getElementById('file-folder-list').appendChild(renderEmptyFileList());
         updateSelectionBlockVisibility(false);
