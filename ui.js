@@ -159,6 +159,17 @@ function updateFileListBorderVisibility(isVisible) {
     }
 }
 
+function updatePaginationVisibility(isVisible) {
+    const pagination = document.getElementById('pagination-controls');
+    if (!pagination) return;
+
+    if (isVisible) {
+        pagination.classList.remove('hidden');
+    } else {
+        pagination.classList.add('hidden');
+    }
+}
+
 
 module.exports = {
     createFileIcon,
@@ -169,5 +180,6 @@ module.exports = {
     updateExecuteButtonVisibility,
     updateSelectionBlockVisibility,
     renderEmptyFileList,
-    updateFileListBorderVisibility
+    updateFileListBorderVisibility,
+    updatePaginationVisibility
 };
