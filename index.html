@@ -28,13 +28,13 @@
         <div id="authorize-container" class="col-span-4"></div>
       </div>
         <div class="grid grid-cols-12 gap-2">
-          <div id="folders" class="col-span-4">
+          <div id="folders" class="col-span-3">
             <div class="block max-w-sm bg-white border border-gray-200 shadow dark:bg-gray-800 divide-y">
                 <p class="px-6 py-2 text-white bg-blue-700">folders</p>
                 <ul class="overflow-y-scroll max-h-[calc(100vh-200px)] select-none" id="folder-list"></ul>
             </div>
           </div>
-          <div id="files" class="col-span-8">
+          <div id="files" class="col-span-9">
             <div id="selection-control-block" class="hidden ml-2 mb-2 p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 flex items-center justify-between">
                 <div class="inline-flex rounded-md shadow-sm" role="group">
                     <button id="select-all" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
@@ -68,6 +68,33 @@
                     <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
                     </svg>
+                </button>
+            </div>
+          </div>
+          <!-- Sidebar -->
+          <div id="execute-sidebar" class="hidden col-span-3">
+            <div class="block p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">Execute Menu</h5>
+                    <button id="close-sidebar" class="text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <label for="operation-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Operation</label>
+                <select id="operation-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    <option value="none" selected>Choose an operation</option>
+                    <option value="replace">Replace Text</option>
+                    <option value="slice">Slice Text</option>
+                    <option value="pad">Pad Filename</option>
+                </select>
+
+                <div id="sidebar-form-container" class="mt-4">
+                    <!-- Dynamic form content -->
+                </div>
+
+                <button id="run-sidebar-execute" class="hidden w-full mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    RUN
                 </button>
             </div>
           </div>

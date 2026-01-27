@@ -2,7 +2,8 @@
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
 const { showToast, elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
-const { showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility } = require('./ui');
+const { showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, toggleExecuteSidebar, renderSidebarForm } = require('./ui');
+const { executeReplace, executeSlice, executePad } = require('./fileOperations');
 
 let driveClient;
 
@@ -13,6 +14,9 @@ function setupEventHandlers(listFiles) {
     const selectAllBtn = document.getElementById('select-all');
     const selectNoneBtn = document.getElementById('select-none');
     const executeBtn = document.getElementById('execute-btn');
+    const operationSelect = document.getElementById('operation-select');
+    const closeSidebarBtn = document.getElementById('close-sidebar');
+    const runSidebarExecuteBtn = document.getElementById('run-sidebar-execute');
     const fileFolderList = document.getElementById('file-folder-list');
 
     authorizeButton.addEventListener('click', async () => {
@@ -132,7 +136,34 @@ function setupEventHandlers(listFiles) {
     });
 
     executeBtn.addEventListener('click', () => {
-        showToast('Execute functionality coming soon!', 'info');
+        toggleExecuteSidebar(true);
+    });
+
+    closeSidebarBtn.addEventListener('click', () => {
+        toggleExecuteSidebar(false);
+    });
+
+    operationSelect.addEventListener('change', (e) => {
+        renderSidebarForm(e.target.value);
+    });
+
+    runSidebarExecuteBtn.addEventListener('click', async () => {
+        const operation = operationSelect.value;
+        const { arrParentFolder, currentPageToken } = getState();
+        const refresh = () => listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
+
+        if (operation === 'replace') {
+            const from = document.getElementById('sidebar-from').value;
+            const to = document.getElementById('sidebar-to').value;
+            await executeReplace(driveClient, from, to, refresh);
+        } else if (operation === 'slice') {
+            const start = document.getElementById('sidebar-start').value;
+            const end = document.getElementById('sidebar-end').value;
+            await executeSlice(driveClient, parseInt(start), parseInt(end), refresh);
+        } else if (operation === 'pad') {
+            const length = document.getElementById('sidebar-pad-length').value;
+            await executePad(driveClient, parseInt(length), refresh);
+        }
     });
 
     fileFolderList.addEventListener('click', (evt) => {

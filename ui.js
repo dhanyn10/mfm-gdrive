@@ -170,6 +170,64 @@ function updatePaginationVisibility(isVisible) {
     }
 }
 
+function toggleExecuteSidebar(isVisible) {
+    const sidebar = document.getElementById('execute-sidebar');
+    const filesCol = document.getElementById('files');
+    if (!sidebar || !filesCol) return;
+
+    if (isVisible) {
+        sidebar.classList.remove('hidden');
+        filesCol.classList.remove('col-span-9');
+        filesCol.classList.add('col-span-6');
+    } else {
+        sidebar.classList.add('hidden');
+        filesCol.classList.remove('col-span-6');
+        filesCol.classList.add('col-span-9');
+    }
+}
+
+function renderSidebarForm(operationType) {
+    const container = document.getElementById('sidebar-form-container');
+    const runBtn = document.getElementById('run-sidebar-execute');
+    if (!container || !runBtn) return;
+
+    container.innerHTML = '';
+    runBtn.classList.add('hidden');
+
+    if (operationType === 'replace') {
+        const fromGroup = elemFactory('div', { class: 'mb-4' });
+        fromGroup.appendChild(elemFactory('label', { for: 'sidebar-from', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'From' }));
+        fromGroup.appendChild(elemFactory('input', { type: 'text', id: 'sidebar-from', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' }));
+
+        const toGroup = elemFactory('div', { class: 'mb-4' });
+        toGroup.appendChild(elemFactory('label', { for: 'sidebar-to', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'To' }));
+        toGroup.appendChild(elemFactory('input', { type: 'text', id: 'sidebar-to', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' }));
+
+        container.appendChild(fromGroup);
+        container.appendChild(toGroup);
+        runBtn.classList.remove('hidden');
+    } else if (operationType === 'slice') {
+        const startGroup = elemFactory('div', { class: 'mb-4' });
+        startGroup.appendChild(elemFactory('label', { for: 'sidebar-start', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Start Position' }));
+        startGroup.appendChild(elemFactory('input', { type: 'number', id: 'sidebar-start', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' }));
+
+        const endGroup = elemFactory('div', { class: 'mb-4' });
+        endGroup.appendChild(elemFactory('label', { for: 'sidebar-end', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'End Position' }));
+        endGroup.appendChild(elemFactory('input', { type: 'number', id: 'sidebar-end', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' }));
+
+        container.appendChild(startGroup);
+        container.appendChild(endGroup);
+        runBtn.classList.remove('hidden');
+    } else if (operationType === 'pad') {
+        const lengthGroup = elemFactory('div', { class: 'mb-4' });
+        lengthGroup.appendChild(elemFactory('label', { for: 'sidebar-pad-length', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Expected Length' }));
+        lengthGroup.appendChild(elemFactory('input', { type: 'number', id: 'sidebar-pad-length', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' }));
+
+        container.appendChild(lengthGroup);
+        runBtn.classList.remove('hidden');
+    }
+}
+
 
 module.exports = {
     createFileIcon,
@@ -181,5 +239,7 @@ module.exports = {
     updateSelectionBlockVisibility,
     renderEmptyFileList,
     updateFileListBorderVisibility,
-    updatePaginationVisibility
+    updatePaginationVisibility,
+    toggleExecuteSidebar,
+    renderSidebarForm
 };
