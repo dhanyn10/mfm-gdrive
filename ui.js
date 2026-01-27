@@ -92,20 +92,26 @@ function showMainUI() {
 function updateAuthorizeButton(isAuthSuccessful, isLoading) {
     const authorizeButton = document.getElementById('authorize');
     if (authorizeButton) {
-        authorizeButton.classList.add('flex', 'items-center', 'gap-2');
+        // Clear existing classes to apply new ones cleanly
+        authorizeButton.className = ''; 
+        authorizeButton.classList.add('px-2', 'py-1', 'text-sm', 'font-medium', 'text-white', 'bg-blue-700', 'rounded-lg', 'hover:bg-blue-800', 'focus:outline-none');
+
         if (isLoading) {
-            authorizeButton.innerHTML = isAuthSuccessful 
-                ? `<i class="fas fa-spinner fa-spin"></i> Refreshing...` 
-                : 'Loading...';
+            // Loading state: hourglass animation
+            authorizeButton.innerHTML = `<i class="fas fa-hourglass-half fa-spin"></i>`;
             authorizeButton.disabled = true;
+            authorizeButton.classList.add('cursor-wait');
         } else {
             if (isAuthSuccessful) {
+                // Success/Refresh state: simple refresh icon
                 authorizeButton.title = 'Refresh';
                 authorizeButton.innerHTML = `<i class="fas fa-sync-alt"></i>`;
             } else {
+                // Initial Authorize state (if needed elsewhere, though usually hidden in main view)
                 authorizeButton.textContent = 'Authorize';
             }
             authorizeButton.disabled = false;
+            authorizeButton.classList.add('cursor-pointer');
         }
     }
 }
@@ -201,9 +207,9 @@ function updatePanelLayout() {
     }
 
     // Update Grid layout
-    files.classList.remove('col-span-12', 'col-span-9');
+    files.classList.remove('col-span-12', 'col-span-8');
     if (foldersVisible || sidebarVisible) {
-        files.classList.add('col-span-9');
+        files.classList.add('col-span-8');
     } else {
         files.classList.add('col-span-12');
     }
