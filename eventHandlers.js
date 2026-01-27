@@ -11,7 +11,8 @@ function setupEventHandlers(listFiles) {
     const authorizeButton = document.getElementById('authorize');
     const prevPageButton = document.getElementById('prev-page');
     const nextPageButton = document.getElementById('next-page');
-    const mfmPlayButton = document.getElementById('mfm-play');
+    const selectAllBtn = document.getElementById('select-all');
+    const selectNoneBtn = document.getElementById('select-none');
     const fileFolderList = document.getElementById('file-folder-list');
 
     authorizeButton.addEventListener('click', async () => {
@@ -98,20 +99,28 @@ function setupEventHandlers(listFiles) {
         }
     });
 
-    mfmPlayButton.addEventListener('click', () => {
-        const child = document.getElementById('mfm-opt').children[0];
-        const option = child.value;
-        const { arrParentFolder, currentPageToken } = getState();
-        const refresh = () => {
-            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
-        };
+    selectAllBtn.addEventListener('click', () => {
+        const { arrListAllFiles } = getState();
+        const checkboxes = document.getElementsByClassName('cbox-file-folder');
+        arrListAllFiles.forEach((file, index) => {
+            file.checked = true;
+            if (checkboxes[index]) {
+                checkboxes[index].checked = true;
+            }
+        });
+        updateState({ arrListAllFiles });
+    });
 
-        switch (option) {
-            case '1': handleReplaceText(driveClient, refresh); break;
-            case '2': handleSliceText(driveClient, refresh); break;
-            case '3': handlePadFilename(driveClient, refresh); break;
-            default: showToast('No valid option selected.', 'info');
-        }
+    selectNoneBtn.addEventListener('click', () => {
+        const { arrListAllFiles } = getState();
+        const checkboxes = document.getElementsByClassName('cbox-file-folder');
+        arrListAllFiles.forEach((file, index) => {
+            file.checked = false;
+            if (checkboxes[index]) {
+                checkboxes[index].checked = false;
+            }
+        });
+        updateState({ arrListAllFiles });
     });
 
     fileFolderList.addEventListener('click', (evt) => {

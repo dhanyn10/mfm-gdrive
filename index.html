@@ -26,30 +26,6 @@
     <div id="main-view" class="hidden container mx-auto px-4 mt-4">
       <div class="grid grid-cols-12 gap-2">
         <div id="authorize-container" class="col-span-4"></div>
-        <div id="mfm-opt" class="col-span-7">
-          <select class="
-          bg-gray-50 border border-gray-300 text-gray-900 text-sm ml-2
-          focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 
-          dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
-          dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option selected value="0">Options</option>
-            <option value="1">change filename by name</option>
-            <option value="2">Delete name by position</option>
-            <option value="3">add leading zero to numbers</option>
-          </select>
-        </div>
-        <div id="mfm-play" class="col-span-1">
-          <button type="button" class="
-          text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 
-          focus:ring-4 focus:outline-none focus:ring-gray-100
-          px-5 py-2 text-center inline-flex items-center 
-          dark:focus:ring-gray-600 dark:bg-gray-800 dark:border-gray-700 
-          dark:text-white dark:hover:bg-gray-700 mr-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-            </svg>
-          </button>
-        </div>
       </div>
         <div class="grid grid-cols-12 gap-2">
           <div id="folders" class="col-span-4">
@@ -59,6 +35,16 @@
             </div>
           </div>
           <div id="files" class="col-span-8">
+            <div class="flex items-center justify-start ml-2 mb-2">
+                <div class="inline-flex rounded-md shadow-sm" role="group">
+                    <button id="select-all" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                        Select All
+                    </button>
+                    <button id="select-none" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                        Select None
+                    </button>
+                </div>
+            </div>
             <div class="ml-2 shadow w-full border">
               <ul class="overflow-y-scroll max-h-[calc(100vh-200px)]" id="file-folder-list"></ul>
             </div>
