@@ -19,6 +19,9 @@ function setupEventHandlers(listFiles) {
     const operationSelect = document.getElementById('operation-select');
     const runSidebarExecuteBtn = document.getElementById('run-sidebar-execute');
     const fileFolderList = document.getElementById('file-folder-list');
+    const dropdownButton = document.getElementById('dropdown-button');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
 
     authorizeButton.addEventListener('click', async () => {
         updateAuthorizeButton(getState().isInitialAuthSuccessful, true);
@@ -152,9 +155,39 @@ function setupEventHandlers(listFiles) {
         setPanelVisibility('execute-sidebar', !isVisible);
     });
 
-    operationSelect.addEventListener('change', (e) => {
-        renderSidebarForm(e.target.value);
-    });
+    // Dropdown logic
+    if (dropdownButton && dropdownMenu) {
+        dropdownButton.addEventListener('click', () => {
+            dropdownMenu.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const value = e.target.getAttribute('data-value');
+                const text = e.target.textContent;
+                
+                // Update hidden input value
+                operationSelect.value = value;
+                
+                // Update button text
+                dropdownButton.innerHTML = `${text} <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/></svg>`;
+                
+                // Trigger change logic
+                renderSidebarForm(value);
+                
+                // Close menu
+                dropdownMenu.classList.add('hidden');
+            });
+        });
+    }
 
     runSidebarExecuteBtn.addEventListener('click', async () => {
         const operation = operationSelect.value;

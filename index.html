@@ -95,13 +95,32 @@
                         <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">Execute Menu</h5>
                     </div>
 
-                    <label for="operation-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Operation</label>
-                    <select id="operation-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-                        <option value="none" selected>Choose an operation</option>
-                        <option value="replace">Replace Text</option>
-                        <option value="slice">Slice Text</option>
-                        <option value="pad">Pad Filename</option>
-                    </select>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Operation</label>
+
+                    <div class="relative">
+                        <button id="dropdown-button" class="text-gray-900 bg-gray-50 border border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-800" type="button">
+                            Choose an operation
+                            <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown menu -->
+                        <div id="dropdown-menu" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-full dark:bg-gray-700 absolute top-full mt-1 border border-gray-200 dark:border-gray-600">
+                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdown-button">
+                                <li>
+                                    <a href="#" data-value="replace" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white dropdown-item">Replace Text</a>
+                                </li>
+                                <li>
+                                    <a href="#" data-value="slice" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white dropdown-item">Slice Text</a>
+                                </li>
+                                <li>
+                                    <a href="#" data-value="pad" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white dropdown-item">Pad Filename</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <input type="hidden" id="operation-select" value="none">
 
                     <div id="sidebar-form-container" class="mt-4">
                         <!-- Dynamic form content -->
