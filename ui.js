@@ -140,18 +140,23 @@ function renderEmptyFileList() {
     });
 
     const icon = elemFactory('i', {
-        class: "fas fa-list-check fa-3x mb-4"
-    });
-
-    const text = elemFactory('p', {
-        class: "text-lg font-medium",
-        innerHTML: "No files available for display at this time."
+        class: "fab fa-google-drive fa-3x"
     });
 
     container.appendChild(icon);
-    container.appendChild(text);
 
     return container;
+}
+
+function updateFileListBorderVisibility(isVisible) {
+    const container = document.getElementById('file-list-container');
+    if (!container) return;
+
+    if (isVisible) {
+        container.classList.add('border');
+    } else {
+        container.classList.remove('border');
+    }
 }
 
 
@@ -163,5 +168,6 @@ module.exports = {
     updateAuthorizeButton,
     updateExecuteButtonVisibility,
     updateSelectionBlockVisibility,
-    renderEmptyFileList
+    renderEmptyFileList,
+    updateFileListBorderVisibility
 };
