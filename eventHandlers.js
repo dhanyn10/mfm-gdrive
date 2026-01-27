@@ -13,6 +13,7 @@ function setupEventHandlers(listFiles) {
     const nextPageButton = document.getElementById('next-page');
     const selectAllBtn = document.getElementById('select-all');
     const selectNoneBtn = document.getElementById('select-none');
+    const executeBtn = document.getElementById('execute-btn');
     const fileFolderList = document.getElementById('file-folder-list');
 
     authorizeButton.addEventListener('click', async () => {
@@ -109,6 +110,10 @@ function setupEventHandlers(listFiles) {
             }
         });
         updateState({ arrListAllFiles });
+    });
+
+    executeBtn.addEventListener('click', () => {
+        showToast('Execute clicked. Functionality coming soon!', 'info');
     });
 
     selectNoneBtn.addEventListener('click', () => {
