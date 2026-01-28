@@ -77,13 +77,24 @@ function padFilename(filename, padLength) {
 }
 
 /**
- * Creates a span element with the filename.
+ * Creates a span element with the filename, where each character is wrapped in a span.
+ * This allows for individual character highlighting/styling.
  * @param {string} fileName - The name of the file.
  * @returns {HTMLElement} - The span element containing the filename.
  */
 function createFileNameWithTooltips(fileName) {
   let fullFileName = document.createElement('span');
-  fullFileName.textContent = fileName;
+  fullFileName.className = "filename-wrapper"; // Class for easy selection
+  
+  // Split filename into characters and wrap each in a span
+  [...fileName].forEach((char, index) => {
+      let charSpan = document.createElement('span');
+      charSpan.textContent = char;
+      charSpan.className = "char-span transition-colors duration-150"; // Base class
+      charSpan.dataset.index = index;
+      fullFileName.appendChild(charSpan);
+  });
+
   return fullFileName;
 }
 
