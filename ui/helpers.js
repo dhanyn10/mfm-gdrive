@@ -10,17 +10,6 @@ function updateSelectionBlockVisibility(isVisible) {
     }
 }
 
-function updateFileListBorderVisibility(isVisible) {
-    const container = document.getElementById('file-list-container');
-    if (!container) return;
-
-    if (isVisible) {
-        container.classList.add('border');
-    } else {
-        container.classList.remove('border');
-    }
-}
-
 function updatePaginationVisibility(isVisible) {
     const pagination = document.getElementById('pagination-controls');
     if (!pagination) return;
@@ -58,7 +47,6 @@ function updateSlicePreview(start, end) {
 
 module.exports = {
     updateSelectionBlockVisibility,
-    updateFileListBorderVisibility,
     updatePaginationVisibility,
     updateSlicePreview
 };

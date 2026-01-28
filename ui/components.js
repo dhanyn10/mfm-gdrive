@@ -41,7 +41,7 @@ function createFileFolderListItem(file, onClick) {
     let spFileFolder = elemFactory('span', {
         "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
                     peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed \
-                    hover:bg-gray-100 hover:overflow-visible",
+                    hover:bg-gray-100 hover:overflow-visible font-mono",
     });
 
     const fileIcon = createFileIcon(file.type);
@@ -134,6 +134,7 @@ function renderSidebarForm(operationType) {
             
             if (previewBody) {
                 previewBody.innerHTML = '';
+                const fragment = document.createDocumentFragment();
                 selectedFiles.forEach(file => {
                     const beforeName = file.name;
                     const afterName = fromValue ? beforeName.replace(new RegExp(fromValue, 'g'), toValue) : beforeName;
@@ -143,8 +144,9 @@ function renderSidebarForm(operationType) {
                         <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">${beforeName}</td>
                         <td class="px-6 py-4">${afterName}</td>
                     `;
-                    previewBody.appendChild(row);
+                    fragment.appendChild(row);
                 });
+                previewBody.appendChild(fragment);
             }
         };
 
@@ -254,6 +256,7 @@ function renderSidebarForm(operationType) {
 
             if (previewBody) {
                 previewBody.innerHTML = '';
+                const fragment = document.createDocumentFragment();
                 selectedFiles.forEach(file => {
                     const beforeName = file.name;
                     const afterName = padLength ? padFilename(beforeName, padLength) : beforeName;
@@ -263,8 +266,9 @@ function renderSidebarForm(operationType) {
                         <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">${beforeName}</td>
                         <td class="px-6 py-4">${afterName}</td>
                     `;
-                    previewBody.appendChild(row);
+                    fragment.appendChild(row);
                 });
+                previewBody.appendChild(fragment);
             }
         };
 

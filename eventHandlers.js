@@ -1,14 +1,15 @@
 // eventHandlers.js
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
-const { showToast, elemFactory } = require('./utils');
+const { showToast } = require('./utils');
 const { updateState, getState } = require('./state');
-const { showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, toggleExecuteSidebar, renderSidebarForm, setPanelVisibility } = require('./ui');
+const { showMainUI, updateRefreshButton, updateExecuteButtonVisibility, renderSidebarForm, setPanelVisibility } = require('./ui');
 const { executeReplace, executeSlice, executePad } = require('./fileOperations');
 
 let driveClient;
 
 function setupEventHandlers(listFiles) {
-    const authorizeButton = document.getElementById('authorize');
+    const authorizeButton = document.getElementById('authorize-button');
+    const refreshButton = document.getElementById('refresh-button');
     const prevPageButton = document.getElementById('prev-page');
     const nextPageButton = document.getElementById('next-page');
     const selectAllBtn = document.getElementById('select-all');
@@ -24,87 +25,77 @@ function setupEventHandlers(listFiles) {
     const dropdownItems = document.querySelectorAll('.dropdown-item');
     const sidebarResizer = document.getElementById('sidebar-resizer');
     const foldersPanel = document.getElementById('folders');
-    const filesPanel = document.getElementById('files');
     const executeSidebar = document.getElementById('execute-sidebar');
 
-    authorizeButton.addEventListener('click', async () => {
-        updateAuthorizeButton(getState().isInitialAuthSuccessful, true);
+    // Initial authorization
+    authorizeButton.addEventListener('click', () => {
+        triggerUserAuthorization();
 
-        // Check for an existing token first.
-        let client = await authorizeAndGetDrive();
+        const pollingInterval = 2000;
+        const pollingTimeout = 120000;
 
-        if (client) {
-            // Token exists, refresh file list.
-            driveClient = client;
-            showMainUI();
-            const { arrParentFolder } = getState();
-            await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
-            showToast('File list refreshed.', 'success');
-            updateAuthorizeButton(true, false);
-        } else {
-            // No token found, so we need to authorize.
-            triggerUserAuthorization();
+        let pollingHandle;
+        const timeoutHandle = setTimeout(() => {
+            clearInterval(pollingHandle);
+            showToast('Authorization timed out. Please try again.', 'error');
+        }, pollingTimeout);
 
-            // Start polling for the token to be created.
-            const pollingInterval = 2000; // Check every 2 seconds
-            const pollingTimeout = 120000; // 2 minutes timeout
-
-            let pollingHandle;
-            const timeoutHandle = setTimeout(() => {
-                clearInterval(pollingHandle);
-                showToast('Authorization timed out. Please try again.', 'error');
-                updateAuthorizeButton(false, false);
-            }, pollingTimeout);
-    
-            pollingHandle = setInterval(async () => {
-                try {
-                    client = await authorizeAndGetDrive();
-                    if (client) {
-                        clearInterval(pollingHandle);
-                        clearTimeout(timeoutHandle);
-                        driveClient = client;
-    
-                        showMainUI();
-                        updateState({
-                            currentPageToken: null,
-                            nextPageTokenFromAPI: null,
-                            prevPageTokensStack: []
-                        });
-                        const { arrParentFolder, currentPageToken } = getState();
-                        await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);                        
-                        updateState({ isInitialAuthSuccessful: true });
-                        showToast('Authorization successful. Ready to go!', 'success');
-                        updateAuthorizeButton(true, false);
-                    }
-                } catch (error) {
+        pollingHandle = setInterval(async () => {
+            try {
+                const client = await authorizeAndGetDrive();
+                if (client) {
                     clearInterval(pollingHandle);
                     clearTimeout(timeoutHandle);
-                    showToast('An error occurred. Please try again.', 'error');
-                    console.error('Error during polling or listFiles:', error);
-                    updateAuthorizeButton(false, false);
+                    driveClient = client;
+
+                    showMainUI();
+                    updateState({ isAuthorized: true });
+                    const { folderIdStack, currentPageToken } = getState();
+                    await listFiles(driveClient, folderIdStack[folderIdStack.length - 1], currentPageToken);
+                    showToast('Authorization successful!', 'success');
                 }
-            }, pollingInterval);
+            } catch (error) {
+                clearInterval(pollingHandle);
+                clearTimeout(timeoutHandle);
+                showToast('An error occurred during authorization.', 'error');
+                console.error('Error during authorization polling:', error);
+            }
+        }, pollingInterval);
+    });
+
+    // Refresh button in header
+    refreshButton.addEventListener('click', async () => {
+        updateRefreshButton(true);
+        try {
+            const { folderIdStack, currentPageToken } = getState();
+            await listFiles(driveClient, folderIdStack[folderIdStack.length - 1], currentPageToken);
+            showToast('File list refreshed.', 'success');
+        } catch (error) {
+            console.error('Error refreshing file list:', error);
+            showToast('Failed to refresh file list.', 'error');
+        } finally {
+            updateRefreshButton(false);
         }
     });
 
     prevPageButton.addEventListener('click', async () => {
-        const { prevPageTokensStack, arrParentFolder } = getState();
-        if (prevPageTokensStack.length > 0) {
-            const prevToken = prevPageTokensStack.pop();
-            updateState({ prevPageTokensStack });
-            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], prevToken);
+        const { prevPageTokens, folderIdStack } = getState();
+        if (prevPageTokens.length > 0) {
+            const prevToken = prevPageTokens.pop();
+            updateState({ prevPageTokens });
+            listFiles(driveClient, folderIdStack[folderIdStack.length - 1], prevToken);
         }
     });
 
     nextPageButton.addEventListener('click', async () => {
-        const { nextPageTokenFromAPI, currentPageToken, prevPageTokensStack } = getState();
-        if (nextPageTokenFromAPI) {
-            if (currentPageToken !== null || prevPageTokensStack.length === 0) {
-                prevPageTokensStack.push(currentPageToken);
+        const { nextPageToken, currentPageToken, prevPageTokens } = getState();
+        if (nextPageToken) {
+            if (currentPageToken !== null || prevPageTokens.length === 0) {
+                prevPageTokens.push(currentPageToken);
             }
-            updateState({ prevPageTokensStack });
-            const { arrParentFolder } = getState();
-            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], nextPageTokenFromAPI);
+            updateState({ prevPageTokens });
+            const { folderIdStack } = getState();
+            listFiles(driveClient, folderIdStack[folderIdStack.length - 1], nextPageToken);
         } else {
             showToast('No more pages.', 'info');
             nextPageButton.disabled = true;
@@ -112,34 +103,32 @@ function setupEventHandlers(listFiles) {
     });
 
     selectAllBtn.addEventListener('click', () => {
-        const { arrListAllFiles } = getState();
+        const { currentFileList } = getState();
         const listContainer = document.getElementById('file-folder-list');
         const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
 
-        arrListAllFiles.forEach((file, index) => {
+        currentFileList.forEach((file, index) => {
             file.checked = true;
-            // Safer mapping: find checkbox by value (file.id) if possible,
-            // but for now relying on list order which is strictly files here.
             if (checkboxes[index]) {
                 checkboxes[index].checked = true;
             }
         });
-        updateState({ arrListAllFiles });
+        updateState({ currentFileList });
         updateExecuteButtonVisibility();
     });
 
     selectNoneBtn.addEventListener('click', () => {
-        const { arrListAllFiles } = getState();
+        const { currentFileList } = getState();
         const listContainer = document.getElementById('file-folder-list');
         const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
 
-        arrListAllFiles.forEach((file, index) => {
+        currentFileList.forEach((file, index) => {
             file.checked = false;
             if (checkboxes[index]) {
                 checkboxes[index].checked = false;
             }
         });
-        updateState({ arrListAllFiles });
+        updateState({ currentFileList });
         updateExecuteButtonVisibility();
     });
 
@@ -159,13 +148,11 @@ function setupEventHandlers(listFiles) {
         setPanelVisibility('execute-sidebar', !isVisible);
     });
 
-    // Dropdown logic
     if (dropdownButton && dropdownMenu) {
         dropdownButton.addEventListener('click', () => {
             dropdownMenu.classList.toggle('hidden');
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', (event) => {
             if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
                 dropdownMenu.classList.add('hidden');
@@ -178,16 +165,9 @@ function setupEventHandlers(listFiles) {
                 const value = e.target.getAttribute('data-value');
                 const text = e.target.textContent;
                 
-                // Update hidden input value
                 operationSelect.value = value;
-                
-                // Update button text
                 dropdownButton.innerHTML = `${text} <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/></svg>`;
-                
-                // Trigger change logic
                 renderSidebarForm(value);
-                
-                // Close menu
                 dropdownMenu.classList.add('hidden');
             });
         });
@@ -195,8 +175,8 @@ function setupEventHandlers(listFiles) {
 
     runSidebarExecuteBtn.addEventListener('click', async () => {
         const operation = operationSelect.value;
-        const { arrParentFolder, currentPageToken } = getState();
-        const refresh = () => listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);
+        const { folderIdStack, currentPageToken } = getState();
+        const refresh = () => listFiles(driveClient, folderIdStack[folderIdStack.length - 1], currentPageToken);
 
         if (operation === 'replace') {
             const from = document.getElementById('sidebar-from').value;
@@ -218,23 +198,21 @@ function setupEventHandlers(listFiles) {
 
         const checkboxes = fileFolderList.querySelectorAll('.cbox-file-folder');
         const clickedIndex = Array.from(checkboxes).indexOf(targetCheckbox);
-        let { fromIndex, arrListAllFiles } = getState();
+        let { selectionStartIndex, currentFileList } = getState();
 
-        if (evt.shiftKey && fromIndex !== null) {
+        if (evt.shiftKey && selectionStartIndex !== null) {
             const toIndex = clickedIndex;
-            const [low, high] = fromIndex < toIndex ? [fromIndex, toIndex] : [toIndex, fromIndex];
+            const [low, high] = selectionStartIndex < toIndex ? [selectionStartIndex, toIndex] : [toIndex, selectionStartIndex];
             for (let idx = low; idx <= high; idx++) {
                 checkboxes[idx].checked = true;
-                arrListAllFiles[idx].checked = true;
+                currentFileList[idx].checked = true;
             }
         }
-        updateState({ fromIndex: clickedIndex });
+        updateState({ selectionStartIndex: clickedIndex });
         updateExecuteButtonVisibility();
     });
 
-    // Resizer Logic
     let isResizing = false;
-
     sidebarResizer.addEventListener('mousedown', (e) => {
         isResizing = true;
         document.body.style.cursor = 'col-resize';
@@ -248,23 +226,16 @@ function setupEventHandlers(listFiles) {
         const x = e.clientX;
         const containerLeft = document.querySelector('.container').getBoundingClientRect().left;
         
-        // Calculate width for files panel (left side of resizer)
-        // We need to account for the folders panel if it's visible
         let foldersWidth = 0;
         if (!foldersPanel.classList.contains('hidden')) {
             foldersWidth = foldersPanel.offsetWidth;
         }
-
-        // The new width of the files panel is roughly the mouse position minus the container start and folders width
-        // But since we are using flex-1 for files, we mainly want to adjust the sidebar width
-        // Let's calculate the new width for the sidebar (right side)
         
         const newSidebarWidth = containerWidth - (x - containerLeft);
         
-        // Enforce min/max constraints
         if (newSidebarWidth > 200 && newSidebarWidth < containerWidth - foldersWidth - 200) {
              executeSidebar.style.width = `${newSidebarWidth}px`;
-             executeSidebar.style.flex = 'none'; // Disable flex-grow/shrink to respect width
+             executeSidebar.style.flex = 'none';
         }
     });
 

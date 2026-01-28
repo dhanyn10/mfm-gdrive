@@ -3,10 +3,15 @@ module.exports = {
     "./index.html",
     "./renderer.js",
     "./ui.js",
+    "./ui/components.js",
     "./node_modules/flowbite/**/*.js"
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'mono': ['"Ubuntu Mono"', 'monospace'],
+      },
+    },
   },
   plugins: [
     require('flowbite/plugin')

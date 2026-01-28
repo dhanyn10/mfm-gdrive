@@ -2,17 +2,20 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ;style-src 'self' 'unsafe-inline'; ">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' * ;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <link rel="stylesheet" href="./css/output.css">
     <link rel="stylesheet" href="./node_modules/toastify-js/src/toastify.css">
     <link rel="stylesheet" href="./node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <title>MFM Gdrive</title>
   </head>
   <body>
     <div id="app-container" class="flex justify-center items-center h-screen">
-      <!-- The authorize button is initially centered. Its parent will be changed on auth. -->
-      <div id="authorize" class="flex justify-center items-center w-full max-w-sm mx-auto cursor-pointer">
+      <!-- The authorize button is initially centered. -->
+      <div id="authorize-button" class="flex justify-center items-center w-full max-w-sm mx-auto cursor-pointer">
         <div class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
             <div class="flex flex-col items-center justify-center pt-5 pb-6">
                 <i class="fab fa-google-drive fa-3x text-gray-500 dark:text-gray-400 mb-4"></i>
@@ -54,7 +57,9 @@
                 <div class="block bg-white border border-gray-200 dark:bg-gray-800 divide-y">
                     <div class="flex justify-between items-center px-6 py-2 bg-blue-700">
                         <p class="text-white">folders</p>
-                        <div id="authorize-container"></div>
+                        <button id="refresh-button" class="hidden px-2 py-1 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:outline-none">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
                     </div>
                     <ul class="overflow-y-scroll max-h-[calc(100vh-200px)] select-none" id="folder-list"></ul>
                 </div>
@@ -76,9 +81,9 @@
                 <div id="file-list-container" class="w-full">
                   <ul class="overflow-y-auto h-[calc(100vh-200px)]" id="file-folder-list"></ul>
                 </div>
-                <div id="pagination-controls" class="hidden mt-2 flex items-center justify-between">
+                <div id="pagination-controls" class="hidden mt-2 mb-4 flex items-center justify-between">
                     <button id="prev-page" type="button" class="
-                        inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-gray-100 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700
+                        inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-gray-100 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed
                         " disabled>
                         <svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
@@ -87,7 +92,7 @@
                     </button>
                     <span id="page-info" class="text-sm font-medium text-gray-700 dark:text-gray-300"></span>
                     <button id="next-page" type="button" class="
-                        inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-gray-100 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700
+                        inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-gray-100 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed
                         " disabled>
                         Next
                         <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">

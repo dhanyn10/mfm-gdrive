@@ -1,37 +1,29 @@
 // ui/buttons.js
 const { getState } = require('../state');
 
-function updateAuthorizeButton(isAuthSuccessful, isLoading) {
-    const authorizeButton = document.getElementById('authorize');
-    if (authorizeButton) {
-        authorizeButton.className = ''; 
-        authorizeButton.classList.add('px-2', 'py-1', 'text-sm', 'font-medium', 'text-white', 'bg-blue-700', 'rounded-lg', 'hover:bg-blue-800', 'focus:outline-none');
-
+function updateRefreshButton(isLoading) {
+    const refreshButton = document.getElementById('refresh-button');
+    if (refreshButton) {
         if (isLoading) {
-            authorizeButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
-            authorizeButton.disabled = true;
-            authorizeButton.classList.add('cursor-wait');
+            refreshButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+            refreshButton.disabled = true;
+            refreshButton.classList.add('cursor-wait');
         } else {
-            if (isAuthSuccessful) {
-                authorizeButton.title = 'Refresh';
-                authorizeButton.innerHTML = `<i class="fas fa-sync-alt"></i>`;
-            } else {
-                authorizeButton.textContent = 'Authorize';
-            }
-            authorizeButton.disabled = false;
-            authorizeButton.classList.add('cursor-pointer');
+            refreshButton.innerHTML = `<i class="fas fa-sync-alt"></i>`;
+            refreshButton.disabled = false;
+            refreshButton.classList.remove('cursor-wait');
         }
     }
 }
 
 function updateExecuteButtonVisibility() {
-    const { arrListAllFiles } = getState();
+    const { currentFileList } = getState();
     const nextStepBtn = document.getElementById('next-step-btn');
     const navExecuteBtn = document.getElementById('nav-execute');
     
     if (!nextStepBtn) return;
 
-    const hasSelected = arrListAllFiles.some(file => file.checked);
+    const hasSelected = currentFileList.some(file => file.checked);
     if (hasSelected) {
         nextStepBtn.classList.remove('hidden');
         if (navExecuteBtn) {
@@ -46,6 +38,6 @@ function updateExecuteButtonVisibility() {
 }
 
 module.exports = {
-    updateAuthorizeButton,
+    updateRefreshButton,
     updateExecuteButtonVisibility
 };

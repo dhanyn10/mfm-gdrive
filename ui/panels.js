@@ -2,13 +2,13 @@
 function showMainUI() {
     const appContainer = document.getElementById('app-container');
     const mainView = document.getElementById('main-view');
-    const authorizeButton = document.getElementById('authorize');
-    const authorizeContainer = document.getElementById('authorize-container');
-
-    authorizeContainer.appendChild(authorizeButton);
+    const refreshButton = document.getElementById('refresh-button');
 
     appContainer.classList.add('hidden');
     mainView.classList.remove('hidden');
+    if(refreshButton) {
+        refreshButton.classList.remove('hidden');
+    }
 }
 
 function updatePanelLayout() {
