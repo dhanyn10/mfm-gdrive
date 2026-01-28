@@ -5,23 +5,37 @@ describe('Electron Testing', () => {
         const title = await browser.getTitle()
         await expect(title).toEqual("MFM Gdrive")
     })
+
     it('should show button authorize', async () => {
-        const btnauthorize = await $("#authorize")
-        await expect(btnauthorize).toBeDisplayed()
+        const btnAuthorize = await $("#authorize")
+        await btnAuthorize.waitForDisplayed({ timeout: 10000, timeoutMsg: "Authorize button was not displayed" })
+        await expect(btnAuthorize).toBeDisplayed()
     })
 
-    // This test is skipped because it requires an interactive OAuth flow,
-    // which is not possible in a CI environment.
-    it.skip('click authorize and get mfm-test folder', async () => {
-        const btnauthorize = await $("#authorize")
-        await btnauthorize.click()
+    // This test requires an interactive OAuth flow and is best run locally.
+    // It now includes scrolling to find the folder.
+    it('click authorize and get mfm-test folder', async () => {
+        const btnAuthorize = await $("#authorize")
+        // This click is only necessary if the button is actually there (clean environment)
+        if (await btnAuthorize.isDisplayed()) {
+            await btnAuthorize.click()
+        }
+
         const folderList = await $("#folder-list")
+        
+        // Wait until the folder list is populated and scroll until "mfm-test" is found
         await browser.waitUntil(async function () {
-            let res = await folderList.getText()
-            return res.includes("mfm-test")
+            // Scroll down within the folder list element
+            await browser.execute((el) => {
+                el.scrollTop = el.scrollHeight;
+            }, folderList);
+
+            // Check if the text is now visible
+            const listText = await folderList.getText()
+            return listText.includes("mfm-test")
           }, {
-            timeout: 5000,
-            timeoutMsg: 'failed to get mfm-test'
+            timeout: 15000, // Increased timeout to allow for auth and scrolling
+            timeoutMsg: 'failed to find "mfm-test" in folder list after scrolling'
         })
     })
 
