@@ -30,7 +30,7 @@ function createFolderListItem(folder, onClick) {
     return listItem;
 }
 
-function createFileFolderListItem(file, onClick) {
+function createFileFolderListItem(file) {
     let cbFileFolder = elemFactory('input', {
         type: "checkbox",
         "class": "cbox-file-folder peer hidden",
@@ -40,8 +40,7 @@ function createFileFolderListItem(file, onClick) {
 
     let spFileFolder = elemFactory('span', {
         "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
-                    peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed \
-                    hover:bg-gray-100 hover:overflow-visible font-mono",
+                    peer-checked:bg-blue-500 peer-checked:text-white",
     });
 
     const fileIcon = createFileIcon(file.type);
@@ -50,13 +49,10 @@ function createFileFolderListItem(file, onClick) {
         let sptextNode = document.createTextNode(file.name);
         spFileFolder.appendChild(sptextNode);
     } else {
-        spFileFolder.classList.remove('cursor-not-allowed');
-        spFileFolder.classList.add('cursor-pointer');
         spFileFolder.appendChild(createFileNameWithTooltips(file.name));
     }
 
     let liFileFolder = elemFactory('li', { child: [cbFileFolder, spFileFolder] });
-    liFileFolder.addEventListener("click", () => onClick(file, cbFileFolder));
     return liFileFolder;
 }
 
@@ -128,8 +124,8 @@ function renderSidebarForm(operationType) {
         const updatePreview = () => {
             const fromValue = fromInput.value;
             const toValue = toInput.value;
-            const { arrListAllFiles } = getState();
-            const selectedFiles = arrListAllFiles.filter(f => f.checked);
+            const { currentFileList } = getState();
+            const selectedFiles = currentFileList.filter(f => f.checked);
             const previewBody = document.getElementById('replace-preview-body');
             
             if (previewBody) {
@@ -155,60 +151,58 @@ function renderSidebarForm(operationType) {
         updatePreview();
 
     } else if (operationType === 'slice') {
-        let maxLen = 100;
-        const { arrListAllFiles } = getState();
-        if (arrListAllFiles && arrListAllFiles.length > 0) {
-             maxLen = Math.max(...arrListAllFiles.filter(f => f.checked).map(f => f.name.length));
-             if (maxLen === -Infinity) maxLen = 100;
+        const { currentFileList } = getState();
+        const selectedFiles = currentFileList ? currentFileList.filter(f => f.checked) : [];
+        let maxLen = 0;
+        if (selectedFiles.length > 0) {
+            maxLen = Math.max(...selectedFiles.map(f => f.name.length));
         }
 
         const startGroup = elemFactory('div', { class: 'mb-4' });
         startGroup.appendChild(elemFactory('label', { for: 'sidebar-start', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Start Position' }));
         
         const startWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
-        const startRange = elemFactory('input', { type: 'range', id: 'sidebar-start', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLen, value: 0 });
-        const startNumber = elemFactory('input', { type: 'number', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0 });
+        const startRange = elemFactory('input', { type: 'range', id: 'sidebar-start-range', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLen, value: 0 });
+        const startNumber = elemFactory('input', { type: 'number', id: 'sidebar-start', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0, min: 0, max: maxLen });
         
         const endGroup = elemFactory('div', { class: 'mb-4' });
         endGroup.appendChild(elemFactory('label', { for: 'sidebar-end', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'End Position' }));
         
         const endWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
-        const endRange = elemFactory('input', { type: 'range', id: 'sidebar-end', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLen, value: 0 });
-        const endNumber = elemFactory('input', { type: 'number', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0 });
+        const endRange = elemFactory('input', { type: 'range', id: 'sidebar-end-range', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLen, value: 0 }); // Changed value to 0
+        const endNumber = elemFactory('input', { type: 'number', id: 'sidebar-end', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0, min: 0, max: maxLen }); // Changed value to 0
 
-        const updateStart = () => {
-            const startVal = parseInt(startRange.value);
-            const endVal = parseInt(endRange.value);
-            
-            startNumber.value = startVal;
-            
+        const syncAndUpdate = () => {
+            let startVal = parseInt(startNumber.value);
+            let endVal = parseInt(endNumber.value);
+
+            // Clamp values
+            startVal = isNaN(startVal) ? 0 : Math.max(0, Math.min(startVal, maxLen));
+            endVal = isNaN(endVal) ? 0 : Math.max(0, Math.min(endVal, maxLen)); // Changed default to 0
+
             if (startVal > endVal) {
-                endRange.value = startVal;
-                endNumber.value = startVal;
+                endVal = startVal;
             }
+
+            startNumber.value = startVal;
+            startRange.value = startVal;
+            endNumber.value = endVal;
+            endRange.value = endVal;
             
-            updateSlicePreview(startVal, parseInt(endRange.value));
+            updateSlicePreview(startVal, endVal);
         };
 
-        const updateEnd = () => {
-            const startVal = parseInt(startRange.value);
-            const endVal = parseInt(endRange.value);
-            
-            if (endVal < startVal) {
-                endRange.value = startVal;
-                endNumber.value = startVal;
-            } else {
-                endNumber.value = endVal;
-            }
-            
-            updateSlicePreview(startVal, parseInt(endRange.value));
-        };
+        startRange.addEventListener('input', () => {
+            startNumber.value = startRange.value;
+            syncAndUpdate();
+        });
+        startNumber.addEventListener('input', syncAndUpdate);
 
-        startRange.addEventListener('input', updateStart);
-        startNumber.addEventListener('input', () => { startRange.value = startNumber.value; updateStart(); });
-
-        endRange.addEventListener('input', updateEnd);
-        endNumber.addEventListener('input', () => { endRange.value = endNumber.value; updateEnd(); });
+        endRange.addEventListener('input', () => {
+            endNumber.value = endRange.value;
+            syncAndUpdate();
+        });
+        endNumber.addEventListener('input', syncAndUpdate);
 
         startWrapper.appendChild(startRange);
         startWrapper.appendChild(startNumber);
@@ -221,6 +215,9 @@ function renderSidebarForm(operationType) {
         container.appendChild(startGroup);
         container.appendChild(endGroup);
         runBtn.classList.remove('hidden');
+
+        // Initial preview
+        syncAndUpdate();
     } else if (operationType === 'pad') {
         const lengthGroup = elemFactory('div', { class: 'mb-4' });
         lengthGroup.appendChild(elemFactory('label', { for: 'sidebar-pad-length', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Expected Length' }));
@@ -250,8 +247,8 @@ function renderSidebarForm(operationType) {
 
         const updatePreview = () => {
             const padLength = lengthNumber.value;
-            const { arrListAllFiles } = getState();
-            const selectedFiles = arrListAllFiles.filter(f => f.checked);
+            const { currentFileList } = getState();
+            const selectedFiles = currentFileList.filter(f => f.checked);
             const previewBody = document.getElementById('pad-preview-body');
 
             if (previewBody) {

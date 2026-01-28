@@ -2,7 +2,7 @@
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
 const { showToast } = require('./utils');
 const { updateState, getState } = require('./state');
-const { showMainUI, updateRefreshButton, updateExecuteButtonVisibility, renderSidebarForm, setPanelVisibility } = require('./ui');
+const { showMainUI, updateRefreshButton, updateExecuteButtonVisibility, renderSidebarForm, setPanelVisibility, updateFileListItemStyles } = require('./ui');
 const { executeReplace, executeSlice, executePad } = require('./fileOperations');
 
 let driveClient;
@@ -115,6 +115,7 @@ function setupEventHandlers(listFiles) {
         });
         updateState({ currentFileList });
         updateExecuteButtonVisibility();
+        updateFileListItemStyles();
     });
 
     selectNoneBtn.addEventListener('click', () => {
@@ -130,6 +131,7 @@ function setupEventHandlers(listFiles) {
         });
         updateState({ currentFileList });
         updateExecuteButtonVisibility();
+        updateFileListItemStyles();
     });
 
     nextStepBtn.addEventListener('click', () => {
@@ -193,23 +195,37 @@ function setupEventHandlers(listFiles) {
     });
 
     fileFolderList.addEventListener('click', (evt) => {
-        const targetCheckbox = evt.target.closest('li')?.querySelector('.cbox-file-folder');
-        if (!targetCheckbox) return;
+        const listItem = evt.target.closest('li');
+        if (!listItem) return;
 
-        const checkboxes = fileFolderList.querySelectorAll('.cbox-file-folder');
-        const clickedIndex = Array.from(checkboxes).indexOf(targetCheckbox);
-        let { selectionStartIndex, currentFileList } = getState();
+        const { currentFileList, FOLDER_MIME_TYPE } = getState();
+        const listItems = Array.from(fileFolderList.children);
+        const clickedIndex = listItems.indexOf(listItem);
+        const file = currentFileList[clickedIndex];
+
+        if (!file || file.type === FOLDER_MIME_TYPE) return;
+
+        const checkbox = listItem.querySelector('.cbox-file-folder');
+        if (!checkbox) return;
+
+        let { selectionStartIndex } = getState();
 
         if (evt.shiftKey && selectionStartIndex !== null) {
             const toIndex = clickedIndex;
             const [low, high] = selectionStartIndex < toIndex ? [selectionStartIndex, toIndex] : [toIndex, selectionStartIndex];
             for (let idx = low; idx <= high; idx++) {
-                checkboxes[idx].checked = true;
                 currentFileList[idx].checked = true;
+                const chk = listItems[idx].querySelector('.cbox-file-folder');
+                if (chk) chk.checked = true;
             }
+        } else {
+            file.checked = !file.checked;
+            checkbox.checked = file.checked;
         }
-        updateState({ selectionStartIndex: clickedIndex });
+
+        updateState({ currentFileList, selectionStartIndex: clickedIndex });
         updateExecuteButtonVisibility();
+        updateFileListItemStyles();
     });
 
     let isResizing = false;

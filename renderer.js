@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateRefreshButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updatePaginationVisibility } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateRefreshButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updatePaginationVisibility, updateFileListItemStyles } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -45,16 +45,6 @@ function handleFolderClick(folder, driveClient) {
     });
     listFiles(driveClient, folder.id);
 }
-
-function handleFileFolderClick(file, checkboxElement) {
-    const { FOLDER_MIME_TYPE } = getState();
-    if (file.type !== FOLDER_MIME_TYPE) {
-        file.checked = !file.checked;
-        checkboxElement.checked = file.checked;
-        updateExecuteButtonVisibility();
-    }
-}
-
 
 /**
  * Lists the names and IDs of files.
@@ -138,11 +128,12 @@ async function listFiles(driveClient, source, pageToken = null) {
         updatePaginationVisibility(false);
     } else {
         currentFileList.forEach(file => {
-            fileListContainer.appendChild(createFileFolderListItem(file, handleFileFolderClick));
+            fileListContainer.appendChild(createFileFolderListItem(file));
         });
         updateSelectionBlockVisibility(true);
         updatePaginationVisibility(true);
     }
 
     updateExecuteButtonVisibility();
+    updateFileListItemStyles(); // Apply styles after rendering
 }
