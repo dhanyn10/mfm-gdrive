@@ -5,15 +5,21 @@ describe('Electron Testing', () => {
         const title = await browser.getTitle()
         await expect(title).toEqual("MFM Gdrive")
     })
-    it('should show button authorize', async () => {
-        const btnauthorize = await $("#authorize")
-        await expect(btnauthorize).toBeDisplayed()
+
+    // This test assumes the app is already authorized,
+    // as is common in a local test environment with a cached token.
+    it('should show refresh button', async () => {
+        const btnRefresh = await $("#refresh-button")
+        // The main view can take a moment to appear after authorization
+        await btnRefresh.waitForDisplayed({ timeout: 5000 })
+        await expect(btnRefresh).toBeDisplayed()
     })
 
     // This test is skipped because it requires an interactive OAuth flow,
     // which is not possible in a CI environment.
+    // It's kept here for local testing on a clean environment.
     it.skip('click authorize and get mfm-test folder', async () => {
-        const btnauthorize = await $("#authorize")
+        const btnauthorize = await $("#authorize-button") // Fixed selector
         await btnauthorize.click()
         const folderList = await $("#folder-list")
         await browser.waitUntil(async function () {
