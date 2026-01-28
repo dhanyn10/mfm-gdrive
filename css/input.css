@@ -1,5 +1,11 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+
+@font-face {
+  font-family: 'Ubuntu Mono';
+  src: url('../assets/fonts/UbuntuMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 .hidden {
   display: none !important;

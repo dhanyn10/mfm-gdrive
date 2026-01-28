@@ -39,7 +39,7 @@ function createFileFolderListItem(file) {
     cbFileFolder.checked = file.checked;
 
     let spFileFolder = elemFactory('span', {
-        "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
+        "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none font-mono \
                     peer-checked:bg-blue-500 peer-checked:text-white",
     });
 
