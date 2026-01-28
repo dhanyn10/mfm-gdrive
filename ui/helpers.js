@@ -24,24 +24,37 @@ function updatePaginationVisibility(isVisible) {
 }
 
 function updateSlicePreview(start, end) {
-    const fileList = document.getElementById('file-folder-list');
-    if (!fileList) return;
+    const { currentFileList } = getState();
+    const fileListContainer = document.getElementById('file-folder-list');
+    if (!fileListContainer) return;
 
-    const filenameWrappers = fileList.querySelectorAll('.filename-wrapper');
-    filenameWrappers.forEach(wrapper => {
+    const listItems = fileListContainer.querySelectorAll('li');
+
+    listItems.forEach((li, itemIndex) => {
+        const file = currentFileList[itemIndex];
+        if (!file) return; // Skip if no corresponding file data
+
+        const wrapper = li.querySelector('.filename-wrapper');
+        if (!wrapper) return; // Skip if not a file item
+
         const chars = wrapper.querySelectorAll('.char-span');
-        chars.forEach((char, index) => {
-            char.classList.remove('bg-blue-200', 'text-blue-800', 'border-l-2', 'border-blue-500', 'border-r-2');
-            
-            if (index >= start && index < end) {
-                char.classList.add('bg-blue-200', 'text-blue-800');
-            }
+        const isChecked = file.checked;
 
-            if (index === parseInt(start)) {
-                char.classList.add('border-l-2', 'border-blue-500');
-            }
-            if (index === parseInt(end)) {
-                char.classList.add('border-l-2', 'border-red-500');
+        chars.forEach((char, charIndex) => {
+            // Always remove previous styling first
+            char.classList.remove('bg-blue-200', 'text-blue-800', 'border-l-2', 'border-blue-500', 'border-r-2');
+
+            // Apply new styling only if the item is checked
+            if (isChecked) {
+                if (charIndex >= start && charIndex < end) {
+                    char.classList.add('bg-blue-200', 'text-blue-800');
+                }
+                if (charIndex === parseInt(start)) {
+                    char.classList.add('border-l-2', 'border-blue-500');
+                }
+                if (charIndex === parseInt(end)) {
+                    char.classList.add('border-l-2', 'border-red-500');
+                }
             }
         });
     });
