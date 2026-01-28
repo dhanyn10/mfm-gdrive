@@ -98,8 +98,8 @@ function updateAuthorizeButton(isAuthSuccessful, isLoading) {
         authorizeButton.classList.add('px-2', 'py-1', 'text-sm', 'font-medium', 'text-white', 'bg-blue-700', 'rounded-lg', 'hover:bg-blue-800', 'focus:outline-none');
 
         if (isLoading) {
-            // Loading state: hourglass animation
-            authorizeButton.innerHTML = `<i class="fas fa-hourglass-half fa-spin"></i>`;
+            // Loading state: spinner animation
+            authorizeButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
             authorizeButton.disabled = true;
             authorizeButton.classList.add('cursor-wait');
         } else {
@@ -156,6 +156,20 @@ function renderEmptyFileList() {
 
     const icon = elemFactory('i', {
         class: "fab fa-google-drive fa-3x"
+    });
+
+    container.appendChild(icon);
+
+    return container;
+}
+
+function renderLoadingIndicator() {
+    const container = elemFactory('div', {
+        class: "flex flex-col items-center justify-center p-10 h-full text-gray-500 dark:text-gray-400"
+    });
+
+    const icon = elemFactory('i', {
+        class: "fas fa-spinner fa-spin fa-3x" // Changed to spinner icon
     });
 
     container.appendChild(icon);
@@ -391,6 +405,7 @@ module.exports = {
     updateExecuteButtonVisibility,
     updateSelectionBlockVisibility,
     renderEmptyFileList,
+    renderLoadingIndicator,
     updateFileListBorderVisibility,
     updatePaginationVisibility,
     toggleExecuteSidebar,

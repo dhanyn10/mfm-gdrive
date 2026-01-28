@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -65,6 +65,10 @@ function handleFileFolderClick(file, checkboxElement) {
  * @param {string} pageToken - The token for the current page of results.
  */
 async function listFiles(driveClient, source, pageToken = null) {
+    const fileListContainer = document.getElementById('file-folder-list');
+    fileListContainer.innerHTML = ''; // Clear previous content
+    fileListContainer.appendChild(renderLoadingIndicator()); // Show loading animation
+
     let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
     // Upfolder element
     const upSpFolders = document.createElement('div');
@@ -128,17 +132,17 @@ async function listFiles(driveClient, source, pageToken = null) {
     nextPageButton.disabled = (nextPageTokenFromAPI === null);
 
     // Update UI
-    document.getElementById('file-folder-list').innerHTML = "";
+    fileListContainer.innerHTML = ""; // Clear loading indicator
     if (arrListAllFiles.length === 0) {
         // Initially, or when empty, show the empty state (Google Drive icon)
         // But we want to ensure the container looks right (no border if empty/initial)
-        document.getElementById('file-folder-list').appendChild(renderEmptyFileList());
+        fileListContainer.appendChild(renderEmptyFileList());
         updateSelectionBlockVisibility(false);
         updateFileListBorderVisibility(false); // No border for empty state
         updatePaginationVisibility(false);
     } else {
         arrListAllFiles.forEach(file => {
-            document.getElementById('file-folder-list').appendChild(createFileFolderListItem(file, handleFileFolderClick));
+            fileListContainer.appendChild(createFileFolderListItem(file, handleFileFolderClick));
         });
         updateSelectionBlockVisibility(true);
         updateFileListBorderVisibility(true); // Add border when files are present
@@ -148,7 +152,7 @@ async function listFiles(driveClient, source, pageToken = null) {
     if (arrListAllFiles.length > 0) {
         let firstchildFileList = document.createElement('li');
         firstchildFileList.className = "h-4 bg-gray-100";
-        document.getElementById('file-folder-list').prepend(firstchildFileList);
+        fileListContainer.prepend(firstchildFileList);
     }
 
     updateExecuteButtonVisibility();
