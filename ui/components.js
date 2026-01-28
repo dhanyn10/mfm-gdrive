@@ -1,5 +1,5 @@
 // ui/components.js
-const { elemFactory, createFileNameWithTooltips } = require('../utils');
+const { elemFactory, createFileNameWithTooltips, padFilename } = require('../utils');
 const { getState } = require('../state');
 const { updateSlicePreview } = require('./helpers');
 
@@ -222,10 +222,61 @@ function renderSidebarForm(operationType) {
     } else if (operationType === 'pad') {
         const lengthGroup = elemFactory('div', { class: 'mb-4' });
         lengthGroup.appendChild(elemFactory('label', { for: 'sidebar-pad-length', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Expected Length' }));
-        lengthGroup.appendChild(elemFactory('input', { type: 'number', id: 'sidebar-pad-length', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' }));
+        
+        const lengthWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
+        const lengthRange = elemFactory('input', { type: 'range', id: 'sidebar-pad-length-range', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 1, max: 10, value: 1 });
+        const lengthNumber = elemFactory('input', { type: 'number', id: 'sidebar-pad-length', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 1 });
+        
+        lengthWrapper.appendChild(lengthRange);
+        lengthWrapper.appendChild(lengthNumber);
+        lengthGroup.appendChild(lengthWrapper);
+
+        const previewTable = elemFactory('table', { class: 'w-full text-sm text-left text-gray-500 dark:text-gray-400 mt-4' });
+        previewTable.innerHTML = `
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Before</th>
+                    <th scope="col" class="px-6 py-3">After</th>
+                </tr>
+            </thead>
+            <tbody id="pad-preview-body"></tbody>
+        `;
 
         container.appendChild(lengthGroup);
+        container.appendChild(previewTable);
         runBtn.classList.remove('hidden');
+
+        const updatePreview = () => {
+            const padLength = lengthNumber.value;
+            const { arrListAllFiles } = getState();
+            const selectedFiles = arrListAllFiles.filter(f => f.checked);
+            const previewBody = document.getElementById('pad-preview-body');
+
+            if (previewBody) {
+                previewBody.innerHTML = '';
+                selectedFiles.forEach(file => {
+                    const beforeName = file.name;
+                    const afterName = padLength ? padFilename(beforeName, padLength) : beforeName;
+                    
+                    const row = elemFactory('tr', { class: 'bg-white border-b dark:bg-gray-800 dark:border-gray-700' });
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">${beforeName}</td>
+                        <td class="px-6 py-4">${afterName}</td>
+                    `;
+                    previewBody.appendChild(row);
+                });
+            }
+        };
+
+        lengthRange.addEventListener('input', () => {
+            lengthNumber.value = lengthRange.value;
+            updatePreview();
+        });
+        lengthNumber.addEventListener('input', () => {
+            lengthRange.value = lengthNumber.value;
+            updatePreview();
+        });
+        updatePreview();
     }
 }
 
