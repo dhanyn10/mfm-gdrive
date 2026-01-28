@@ -15,8 +15,10 @@ function updateAuthorizeButton(isAuthSuccessful, isLoading) {
             if (isAuthSuccessful) {
                 authorizeButton.title = 'Refresh';
                 authorizeButton.innerHTML = `<i class="fas fa-sync-alt"></i>`;
+                authorizeButton.setAttribute('data-testid', 'refresh-button');
             } else {
                 authorizeButton.textContent = 'Authorize';
+                authorizeButton.setAttribute('data-testid', 'auth-button');
             }
             authorizeButton.disabled = false;
             authorizeButton.classList.add('cursor-pointer');
