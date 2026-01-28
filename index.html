@@ -90,19 +90,19 @@
               </div>
 
               <!-- Resizer -->
-              <div id="sidebar-resizer" class="w-px cursor-col-resize bg-gray-300 hover:bg-blue-500 transition-colors hidden mx-4"></div>
+              <div id="sidebar-resizer" class="w-px cursor-col-resize bg-gray-300 hover:bg-blue-500 transition-colors hidden mx-2"></div>
 
               <!-- Sidebar -->
               <div id="execute-sidebar" class="hidden w-1/3 min-w-[300px]">
                 <div class="block p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
                     <div class="flex items-center justify-between mb-4">
-                        <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">Execute Menu</h5>
+                        <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white select-none">Execute Menu</h5>
                     </div>
 
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Operation</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none">Select Operation</label>
 
                     <div class="relative">
-                        <button id="dropdown-button" class="text-gray-900 bg-gray-50 border border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-800" type="button">
+                        <button id="dropdown-button" class="text-gray-900 bg-gray-50 border border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-800 select-none" type="button">
                             Choose an operation
                             <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
@@ -111,7 +111,7 @@
 
                         <!-- Dropdown menu -->
                         <div id="dropdown-menu" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-full dark:bg-gray-700 absolute top-full mt-1 border border-gray-200 dark:border-gray-600">
-                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdown-button">
+                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 select-none" aria-labelledby="dropdown-button">
                                 <li>
                                     <a href="#" data-value="replace" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white dropdown-item">Replace Text</a>
                                 </li>
