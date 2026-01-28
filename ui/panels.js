@@ -1,4 +1,6 @@
 // ui/panels.js
+const { updateSlicePreview } = require('./helpers');
+
 function showMainUI() {
     const appContainer = document.getElementById('app-container');
     const mainView = document.getElementById('main-view');
@@ -52,6 +54,8 @@ function setPanelVisibility(panel, isVisible) {
         } else {
             folders.classList.add('hidden');
         }
+        // Clear slice preview when folder panel is toggled
+        updateSlicePreview(-1, -1);
     } else if (panel === 'execute-sidebar') {
         if (isVisible) {
             sidebar.classList.remove('hidden');
@@ -60,6 +64,8 @@ function setPanelVisibility(panel, isVisible) {
         } else {
             sidebar.classList.add('hidden');
             if (resizer) resizer.classList.add('hidden');
+            // Clear slice preview when sidebar is closed
+            updateSlicePreview(-1, -1);
         }
     }
     updatePanelLayout();

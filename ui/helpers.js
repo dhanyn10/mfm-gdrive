@@ -70,21 +70,20 @@ function updateFileListItemStyles() {
 
     listItems.forEach((li, index) => {
         const file = currentFileList[index];
-        if (!file) return; // Skip items like the "up" folder button
+        if (!file) return;
         const span = li.querySelector('span');
         if (!span) return;
 
-        // All files are always interactive.
+        // Ensure interactivity is always on
         span.classList.add('cursor-pointer', 'hover:bg-gray-100');
-        span.classList.remove('cursor-not-allowed');
+        span.classList.remove('cursor-not-allowed', 'opacity-50');
 
-        // The only thing that changes is opacity.
-        // If a selection is active and this item is NOT selected, dim it.
+        // If a selection is active and this item is NOT selected, dim its background.
         if (isSelectionActive && !file.checked) {
-            span.classList.add('opacity-50');
+            span.classList.add('bg-gray-50');
         } else {
-            // Otherwise (no selection, or this item is selected), it's full opacity.
-            span.classList.remove('opacity-50');
+            // Otherwise (no selection, or this item is selected), it has a transparent background.
+            span.classList.remove('bg-gray-50');
         }
     });
 }
