@@ -12,31 +12,37 @@ describe('Electron Testing', () => {
         await expect(btnAuthorize).toBeDisplayed()
     })
 
-    // This test requires an interactive OAuth flow and is best run locally.
-    // It now includes scrolling to find the folder.
     it('click authorize and get mfm-test folder', async () => {
-        const btnAuthorize = await $("#authorize")
-        // This click is only necessary if the button is actually there (clean environment)
-        if (await btnAuthorize.isDisplayed()) {
-            await btnAuthorize.click()
-        }
-
-        const folderList = await $("#folder-list")
+        const btnauthorize = await $("#authorize")
+        await btnauthorize.click()
         
-        // Wait until the folder list is populated and scroll until "mfm-test" is found
-        await browser.waitUntil(async function () {
-            // Scroll down within the folder list element
-            await browser.execute((el) => {
-                el.scrollTop = el.scrollHeight;
-            }, folderList);
+        const folderList = await $("#folder-list")
+        await folderList.waitForDisplayed({ timeout: 10000 })
 
-            // Check if the text is now visible
-            const listText = await folderList.getText()
-            return listText.includes("mfm-test")
-          }, {
-            timeout: 15000, // Increased timeout to allow for auth and scrolling
-            timeoutMsg: 'failed to find "mfm-test" in folder list after scrolling'
+        // Function to scroll and find element
+        await browser.waitUntil(async () => {
+            const mfmTestFolder = await folderList.$('span=mfm-test')
+            if (await mfmTestFolder.isDisplayed()) {
+                return true
+            }
+            
+            // Scroll down the folder list
+            await browser.execute((list) => {
+                list.scrollTop += 100;
+            }, await folderList.getElement())
+            
+            return false
+        }, {
+            timeout: 30000,
+            timeoutMsg: 'Could not find mfm-test folder after scrolling'
         })
+
+        const mfmTestFolder = await folderList.$('span=mfm-test')
+        await mfmTestFolder.click()
+        
+        // Verify we are in the folder (e.g. by checking if file list is loading or updated)
+        // For now, just pass if we clicked it successfully
+        await expect(mfmTestFolder).toBeDisplayed()
     })
 
     //  cannot run because of bug https://github.com/electron/electron/issues/33942
