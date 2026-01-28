@@ -22,6 +22,10 @@ function setupEventHandlers(listFiles) {
     const dropdownButton = document.getElementById('dropdown-button');
     const dropdownMenu = document.getElementById('dropdown-menu');
     const dropdownItems = document.querySelectorAll('.dropdown-item');
+    const sidebarResizer = document.getElementById('sidebar-resizer');
+    const foldersPanel = document.getElementById('folders');
+    const filesPanel = document.getElementById('files');
+    const executeSidebar = document.getElementById('execute-sidebar');
 
     authorizeButton.addEventListener('click', async () => {
         updateAuthorizeButton(getState().isInitialAuthSuccessful, true);
@@ -226,6 +230,50 @@ function setupEventHandlers(listFiles) {
         }
         updateState({ fromIndex: clickedIndex });
         updateExecuteButtonVisibility();
+    });
+
+    // Resizer Logic
+    let isResizing = false;
+
+    sidebarResizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        sidebarResizer.classList.add('bg-blue-500');
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+
+        const containerWidth = document.querySelector('.container').offsetWidth;
+        const x = e.clientX;
+        const containerLeft = document.querySelector('.container').getBoundingClientRect().left;
+        
+        // Calculate width for files panel (left side of resizer)
+        // We need to account for the folders panel if it's visible
+        let foldersWidth = 0;
+        if (!foldersPanel.classList.contains('hidden')) {
+            foldersWidth = foldersPanel.offsetWidth;
+        }
+
+        // The new width of the files panel is roughly the mouse position minus the container start and folders width
+        // But since we are using flex-1 for files, we mainly want to adjust the sidebar width
+        // Let's calculate the new width for the sidebar (right side)
+        
+        const newSidebarWidth = containerWidth - (x - containerLeft);
+        
+        // Enforce min/max constraints
+        if (newSidebarWidth > 200 && newSidebarWidth < containerWidth - foldersWidth - 200) {
+             executeSidebar.style.width = `${newSidebarWidth}px`;
+             executeSidebar.style.flex = 'none'; // Disable flex-grow/shrink to respect width
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = 'default';
+            sidebarResizer.classList.remove('bg-blue-500');
+        }
     });
 
     return {
