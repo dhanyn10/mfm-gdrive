@@ -5,9 +5,11 @@ describe('Electron Testing', () => {
         const title = await browser.getTitle()
         await expect(title).toEqual("MFM Gdrive")
     })
+
     it('should show button authorize', async () => {
-        const btnauthorize = await $("#authorize")
-        await expect(btnauthorize).toBeDisplayed()
+        const btnAuthorize = await $("#authorize")
+        await btnAuthorize.waitForDisplayed({ timeout: 10000, timeoutMsg: "Authorize button was not displayed" })
+        await expect(btnAuthorize).toBeDisplayed()
     })
 
     it('click authorize and get mfm-test folder', async () => {
