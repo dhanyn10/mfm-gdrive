@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateRefreshButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateRefreshButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updatePaginationVisibility } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -133,17 +133,14 @@ async function listFiles(driveClient, source, pageToken = null) {
     fileListContainer.innerHTML = ""; // Clear loading indicator
     if (currentFileList.length === 0) {
         // Initially, or when empty, show the empty state (Google Drive icon)
-        // But we want to ensure the container looks right (no border if empty/initial)
         fileListContainer.appendChild(renderEmptyFileList());
         updateSelectionBlockVisibility(false);
-        updateFileListBorderVisibility(false); // No border for empty state
         updatePaginationVisibility(false);
     } else {
         currentFileList.forEach(file => {
             fileListContainer.appendChild(createFileFolderListItem(file, handleFileFolderClick));
         });
         updateSelectionBlockVisibility(true);
-        updateFileListBorderVisibility(true); // Add border when files are present
         updatePaginationVisibility(true);
     }
 
