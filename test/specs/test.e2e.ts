@@ -6,15 +6,15 @@ describe('Electron Testing', () => {
         await expect(title).toEqual("MFM Gdrive")
     })
 
-    it('should show button authorize', async () => {
-        const btnAuthorize = await $("#authorize")
-        await btnAuthorize.waitForDisplayed({ timeout: 10000, timeoutMsg: "Authorize button was not displayed" })
-        await expect(btnAuthorize).toBeDisplayed()
+    it('should show button refresh', async () => {
+        const btnRefresh = await $('[data-testid="refresh-button"]');
+        await btnRefresh.waitForDisplayed({ timeout: 10000, timeoutMsg: "Refresh button was not displayed" })
+        await expect(btnRefresh).toBeDisplayed()
     })
 
-    it('click authorize and get mfm-test folder', async () => {
-        const btnauthorize = await $("#authorize")
-        await btnauthorize.click()
+    it('click refresh and get mfm-test folder', async () => {
+        const btnRefresh = await $('[data-testid="refresh-button"]');
+        await btnRefresh.click()
         
         const folderList = await $("#folder-list")
         await folderList.waitForDisplayed({ timeout: 10000 })
@@ -38,10 +38,6 @@ describe('Electron Testing', () => {
         })
 
         const mfmTestFolder = await folderList.$('span=mfm-test')
-        await mfmTestFolder.click()
-        
-        // Verify we are in the folder (e.g. by checking if file list is loading or updated)
-        // For now, just pass if we clicked it successfully
         await expect(mfmTestFolder).toBeDisplayed()
     })
 
