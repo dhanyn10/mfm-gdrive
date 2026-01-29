@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -68,86 +68,94 @@ async function listFiles(driveClient, source, pageToken = null) {
     const fileListContainer = document.getElementById('file-folder-list');
     fileListContainer.innerHTML = ''; // Clear previous content
     fileListContainer.appendChild(renderLoadingIndicator()); // Show loading animation
+    setRefreshButtonLoading(true);
 
-    let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
-    // Upfolder element
-    const upSpFolders = document.createElement('div');
-    // Using classList.add to avoid issues with Tailwind JIT/Purge
-    upSpFolders.classList.add('w-full', 'flex', 'items-center', 'justify-center', 'py-2', 'border-b', 'border-gray-200', 'hover:bg-gray-200', 'dark:border-gray-600', 'dark:hover:bg-gray-700', 'cursor-pointer', 'group');
-    upSpFolders.innerHTML = `<i class="fas fa-ellipsis text-gray-500 dark:text-gray-400 group-hover:text-white"></i>`;
+    try {
+        let { arrParentFolder, mime, currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState();
+        // Upfolder element
+        const upSpFolders = document.createElement('div');
+        // Using classList.add to avoid issues with Tailwind JIT/Purge
+        upSpFolders.classList.add('w-full', 'flex', 'items-center', 'justify-center', 'py-2', 'border-b', 'border-gray-200', 'hover:bg-gray-200', 'dark:border-gray-600', 'dark:hover:bg-gray-700', 'cursor-pointer', 'group');
+        upSpFolders.innerHTML = `<i class="fas fa-ellipsis text-gray-500 dark:text-gray-400 group-hover:text-white"></i>`;
 
-    const upListFolders = document.createElement('li');
-    upListFolders.className = "flex justify-center";
-    upListFolders.append(upSpFolders);
+        const upListFolders = document.createElement('li');
+        upListFolders.className = "flex justify-center";
+        upListFolders.append(upSpFolders);
 
-    upListFolders.addEventListener("click", () => {
-        if (arrParentFolder.length > 1) {
-            arrParentFolder.pop();
-            updateState({
-                arrParentFolder,
-                currentPageToken: null,
-                nextPageTokenFromAPI: null,
-                prevPageTokensStack: []
-            });
-        }
-        listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
-    });
-
-    document.getElementById('folder-list').innerHTML = "";
-    document.getElementById('folder-list').appendChild(upListFolders);
-
-    // Fetch folders (always from the first page, no pagination for folders)
-    const folderData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'name');
-    const arrListFolders = folderData.files.filter(file => file.mimeType === mime)
-                                     .map(file => ({ id: file.id, name: file.name }));
-    updateState({ arrListFolders });
-
-    arrListFolders.forEach(folder => {
-        // The onClick handler for a folder needs to call handleFolderClick
-        const clickHandler = () => handleFolderClick(folder, driveClient);
-        document.getElementById('folder-list').appendChild(createFolderListItem(folder, clickHandler));
-    });
-
-    // Fetch files with pagination
-    const fileData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'folder, name', pageToken);
-    const arrListAllFiles = fileData.files
-        .filter(file => file.mimeType !== mime) // Only show files, not folders
-        .map(file => ({
-            id: file.id,
-            name: file.name,
-            type: file.mimeType,
-            checked: false
-        }));
-
-    // Update pagination state based on the fetched data
-    updateState({
-        arrListAllFiles,
-        currentPageToken: pageToken,
-        nextPageTokenFromAPI: fileData.nextPageToken
-    });
-
-    // Update button states
-    ({ currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState());
-    prevPageButton.disabled = (currentPageToken === null && prevPageTokensStack.length === 0);
-    nextPageButton.disabled = (nextPageTokenFromAPI === null);
-
-    // Update UI
-    fileListContainer.innerHTML = ""; // Clear loading indicator
-    if (arrListAllFiles.length === 0) {
-        // Initially, or when empty, show the empty state (Google Drive icon)
-        // But we want to ensure the container looks right (no border if empty/initial)
-        fileListContainer.appendChild(renderEmptyFileList());
-        updateSelectionBlockVisibility(false);
-        updateFileListBorderVisibility(false); // No border for empty state
-        updatePaginationVisibility(false);
-    } else {
-        arrListAllFiles.forEach(file => {
-            fileListContainer.appendChild(createFileFolderListItem(file, handleFileFolderClick));
+        upListFolders.addEventListener("click", () => {
+            if (arrParentFolder.length > 1) {
+                arrParentFolder.pop();
+                updateState({
+                    arrParentFolder,
+                    currentPageToken: null,
+                    nextPageTokenFromAPI: null,
+                    prevPageTokensStack: []
+                });
+            }
+            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
         });
-        updateSelectionBlockVisibility(true);
-        updateFileListBorderVisibility(true); // Add border when files are present
-        updatePaginationVisibility(true);
-    }
 
-    updateExecuteButtonVisibility();
+        document.getElementById('folder-list').innerHTML = "";
+        document.getElementById('folder-list').appendChild(upListFolders);
+
+        // Fetch folders (always from the first page, no pagination for folders)
+        const folderData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'name');
+        const arrListFolders = folderData.files.filter(file => file.mimeType === mime)
+                                         .map(file => ({ id: file.id, name: file.name }));
+        updateState({ arrListFolders });
+
+        arrListFolders.forEach(folder => {
+            // The onClick handler for a folder needs to call handleFolderClick
+            const clickHandler = () => handleFolderClick(folder, driveClient);
+            document.getElementById('folder-list').appendChild(createFolderListItem(folder, clickHandler));
+        });
+
+        // Fetch files with pagination
+        const fileData = await fetchDriveFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], 'folder, name', pageToken);
+        const arrListAllFiles = fileData.files
+            .filter(file => file.mimeType !== mime) // Only show files, not folders
+            .map(file => ({
+                id: file.id,
+                name: file.name,
+                type: file.mimeType,
+                checked: false
+            }));
+
+        // Update pagination state based on the fetched data
+        updateState({
+            arrListAllFiles,
+            currentPageToken: pageToken,
+            nextPageTokenFromAPI: fileData.nextPageToken
+        });
+
+        // Update button states
+        ({ currentPageToken, prevPageTokensStack, nextPageTokenFromAPI } = getState());
+        prevPageButton.disabled = (currentPageToken === null && prevPageTokensStack.length === 0);
+        nextPageButton.disabled = (nextPageTokenFromAPI === null);
+
+        // Update UI
+        fileListContainer.innerHTML = ""; // Clear loading indicator
+        if (arrListAllFiles.length === 0) {
+            // Initially, or when empty, show the empty state (Google Drive icon)
+            // But we want to ensure the container looks right (no border if empty/initial)
+            fileListContainer.appendChild(renderEmptyFileList());
+            updateSelectionBlockVisibility(false);
+            updateFileListBorderVisibility(false); // No border for empty state
+            updatePaginationVisibility(false);
+        } else {
+            arrListAllFiles.forEach(file => {
+                fileListContainer.appendChild(createFileFolderListItem(file, handleFileFolderClick));
+            });
+            updateSelectionBlockVisibility(true);
+            updateFileListBorderVisibility(true); // Add border when files are present
+            updatePaginationVisibility(true);
+        }
+
+        updateExecuteButtonVisibility();
+    } catch (error) {
+        console.error('Error listing files:', error);
+        // Handle error state in UI if necessary
+    } finally {
+        setRefreshButtonLoading(false);
+    }
 }

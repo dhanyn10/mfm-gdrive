@@ -3,25 +3,47 @@ const { getState } = require('../state');
 
 function updateAuthorizeButton(isAuthSuccessful, isLoading) {
     const authorizeButton = document.getElementById('authorize');
-    if (authorizeButton) {
-        authorizeButton.className = ''; 
-        authorizeButton.classList.add('px-2', 'py-1', 'text-sm', 'font-medium', 'text-white', 'bg-blue-700', 'rounded-lg', 'hover:bg-blue-800', 'focus:outline-none');
+    const refreshButton = document.getElementById('refresh-button');
 
+    if (authorizeButton) {
         if (isLoading) {
-            authorizeButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+            // When authorizing, show spinner on the big button
+            authorizeButton.innerHTML = `<div class="flex flex-col items-center justify-center pt-5 pb-6"><i class="fas fa-spinner fa-spin fa-3x text-gray-500 dark:text-gray-400"></i></div>`;
             authorizeButton.disabled = true;
-            authorizeButton.classList.add('cursor-wait');
         } else {
             if (isAuthSuccessful) {
-                authorizeButton.title = 'Refresh';
-                authorizeButton.innerHTML = `<i class="fas fa-sync-alt"></i>`;
-                authorizeButton.setAttribute('data-testid', 'refresh-button');
+                authorizeButton.classList.add('hidden');
+                if (refreshButton) {
+                    refreshButton.classList.remove('hidden');
+                }
             } else {
-                authorizeButton.textContent = 'Authorize';
-                authorizeButton.setAttribute('data-testid', 'auth-button');
+                // Reset to original state if auth fails or is needed
+                authorizeButton.innerHTML = `<div class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fab fa-google-drive fa-3x text-gray-500 dark:text-gray-400 mb-4"></i>
+                        <p class="mb-2 text-lg font-bold text-gray-700 dark:text-gray-300">Authorize with Google</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 text-center px-4">Click here to sign in and grant permission to access your Google Drive files.</p>
+                    </div>
+                </div>`;
+                authorizeButton.classList.remove('hidden');
+                if (refreshButton) {
+                    refreshButton.classList.add('hidden');
+                }
             }
             authorizeButton.disabled = false;
-            authorizeButton.classList.add('cursor-pointer');
+        }
+    }
+}
+
+function setRefreshButtonLoading(isLoading) {
+    const refreshButton = document.getElementById('refresh-button');
+    if (refreshButton) {
+        if (isLoading) {
+            refreshButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+            refreshButton.disabled = true;
+        } else {
+            refreshButton.innerHTML = `<i class="fas fa-sync-alt"></i>`;
+            refreshButton.disabled = false;
         }
     }
 }
@@ -49,5 +71,6 @@ function updateExecuteButtonVisibility() {
 
 module.exports = {
     updateAuthorizeButton,
+    setRefreshButtonLoading,
     updateExecuteButtonVisibility
 };

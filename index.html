@@ -46,7 +46,12 @@
                 <div class="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y">
                     <div class="flex justify-between items-center px-6 py-2 bg-blue-700">
                         <p class="text-white">folders</p>
-                        <div id="authorize-container"></div>
+                        <div class="flex items-center">
+                          <div id="authorize-container"></div>
+                          <button id="refresh-button" data-testid="refresh-button" class="hidden ml-2 px-2 py-1 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:outline-none" title="Refresh">
+                              <i class="fas fa-sync-alt"></i>
+                          </button>
+                        </div>
                     </div>
                     <ul class="overflow-y-scroll max-h-[calc(100vh-200px)] select-none" id="folder-list"></ul>
                 </div>
