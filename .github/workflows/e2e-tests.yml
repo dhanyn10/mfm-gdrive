@@ -1,0 +1,33 @@
+name: Electron E2E Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create Google Token from Secret
+        # IMPORTANT: Create a secret in your GitHub repository settings named GOOGLE_TOKEN_JSON
+        # with the content of your token.json file.
+        run: echo "${{ secrets.GOOGLE_TOKEN_JSON }}" > token.json
+
+      - name: Run E2E tests with Virtual Display
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: npm run wdio
