@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "npm run css-gen && electron .",
     "css": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify --watch",
     "css-gen": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify",
     "app:build": "electron-builder",
