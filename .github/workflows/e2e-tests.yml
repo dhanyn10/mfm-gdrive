@@ -22,6 +22,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Build Electron App
+        # This step creates the distributable app in the 'dist' folder
+        # which wdio-electron-service needs to run the tests.
+        run: npm run app:dist
+
       - name: Create Google Token from Secret
         # IMPORTANT: Create a secret in your GitHub repository settings named GOOGLE_TOKEN_JSON
         # with the content of your token.json file.
