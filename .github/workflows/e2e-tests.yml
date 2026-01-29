@@ -23,7 +23,7 @@ jobs:
         # Electron requires these shared libraries to run on Linux
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-0 libnss3 libasound2
+          sudo apt-get install -y libgtk-3-0 libnss3 libasound2 libgbm-dev libxshmfence-dev
 
       - name: Install Dependencies
         run: npm install
