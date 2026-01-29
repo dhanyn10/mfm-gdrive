@@ -52,11 +52,22 @@ function updateSelectionButtons() {
     const { arrListAllFiles } = getState();
     const nextStepBtn = document.getElementById('next-step-btn');
     const navExecuteBtn = document.getElementById('nav-execute');
+    const selectAllBtn = document.getElementById('select-all');
     const selectNoneBtn = document.getElementById('select-none');
     
-    if (!nextStepBtn || !selectNoneBtn) return;
+    if (!nextStepBtn || !selectAllBtn || !selectNoneBtn) return;
 
     const hasSelected = arrListAllFiles.some(file => file.checked);
+    const allSelected = arrListAllFiles.length > 0 && arrListAllFiles.every(file => file.checked);
+
+    // Update Select All button icon
+    if (allSelected) {
+        selectAllBtn.innerHTML = `<i class="fa-solid fa-square-check mr-2"></i> Select All`;
+    } else {
+        selectAllBtn.innerHTML = `<i class="fa-regular fa-square-check mr-2"></i> Select All`;
+    }
+
+    // Update visibility for Next Step and Select None buttons
     if (hasSelected) {
         nextStepBtn.classList.remove('hidden');
         selectNoneBtn.classList.remove('hidden');

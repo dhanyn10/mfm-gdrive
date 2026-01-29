@@ -40,7 +40,7 @@ function createFileFolderListItem(file, onClick) {
 
     let spFileFolder = elemFactory('span', {
         "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
-                    peer-checked:bg-blue-500 peer-checked:text-white cursor-not-allowed \
+                    peer-checked:bg-blue-500 peer-checked:text-white peer-checked:hover:bg-blue-500 \
                     hover:bg-gray-100 hover:overflow-visible",
     });
 

@@ -131,13 +131,16 @@ function setupEventHandlers(listFiles) {
 
     selectAllBtn.addEventListener('click', () => {
         const { arrListAllFiles } = getState();
+        const allSelected = arrListAllFiles.length > 0 && arrListAllFiles.every(file => file.checked);
+        const shouldSelectAll = !allSelected;
+
         const listContainer = document.getElementById('file-folder-list');
         const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
 
         arrListAllFiles.forEach((file, index) => {
-            file.checked = true;
+            file.checked = shouldSelectAll;
             if (checkboxes[index]) {
-                checkboxes[index].checked = true;
+                checkboxes[index].checked = shouldSelectAll;
             }
         });
         updateState({ arrListAllFiles });
