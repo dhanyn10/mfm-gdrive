@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateSelectionButtons, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateSelectionButtons, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility, updatePreviewCard } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -49,11 +49,32 @@ function handleFolderClick(folder, driveClient) {
 }
 
 function handleFileFolderClick(file, checkboxElement) {
-    const { mime } = getState();
-    if (file.type !== mime) {
-        file.checked = !file.checked;
-        checkboxElement.checked = file.checked;
-        updateSelectionButtons();
+    const { mime, arrListAllFiles } = getState();
+    if (file.type === mime) return;
+
+    // Create a new array with the updated checked status for the clicked file
+    const newArrListAllFiles = arrListAllFiles.map(f => {
+        if (f.id === file.id) {
+            return { ...f, checked: !f.checked };
+        }
+        return f;
+    });
+
+    // Update the global state with the new array
+    updateState({ arrListAllFiles: newArrListAllFiles });
+
+    // Update the DOM to reflect the new state
+    const updatedFile = newArrListAllFiles.find(f => f.id === file.id);
+    if (updatedFile) {
+        checkboxElement.checked = updatedFile.checked;
+    }
+
+    updateSelectionButtons();
+
+    // Also update the preview card
+    const operationType = document.getElementById('sidebar-operation-select').value;
+    if (['replace', 'pad', 'slice'].includes(operationType)) {
+        updatePreviewCard(operationType);
     }
 }
 

@@ -88,6 +88,69 @@ function renderLoadingIndicator() {
     return container;
 }
 
+function createPreviewCard() {
+    const card = elemFactory('div', { id: 'preview-card', class: 'mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700' });
+    const title = elemFactory('h3', { class: 'text-lg font-semibold mb-2 text-gray-900 dark:text-white', innerHTML: 'Preview' });
+    const table = elemFactory('table', { class: 'w-full text-sm text-left text-gray-500 dark:text-gray-400' });
+    table.innerHTML = `
+        <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-800 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">Before</th>
+                <th scope="col" class="px-6 py-3">After</th>
+            </tr>
+        </thead>
+        <tbody id="preview-body"></tbody>
+    `;
+    card.appendChild(title);
+    card.appendChild(table);
+    return card;
+}
+
+function updatePreviewCard(operationType) {
+    const previewBody = document.getElementById('preview-body');
+    if (!previewBody) return;
+
+    const { arrListAllFiles } = getState();
+    const selectedFiles = arrListAllFiles.filter(f => f.checked);
+    previewBody.innerHTML = '';
+
+    selectedFiles.forEach(file => {
+        const beforeName = file.name;
+        let afterName = beforeName;
+
+        if (operationType === 'replace') {
+            const fromValue = document.getElementById('sidebar-from')?.value || '';
+            const toValue = document.getElementById('sidebar-to')?.value || '';
+            if (fromValue) {
+                try {
+                    afterName = beforeName.replace(new RegExp(fromValue, 'g'), toValue);
+                } catch (e) {
+                    // Invalid regex, keep original name
+                }
+            }
+        } else if (operationType === 'pad') {
+            const padLength = document.getElementById('sidebar-pad-length')?.value;
+            if (padLength) {
+                afterName = padFilename(beforeName, padLength);
+            }
+        } else if (operationType === 'slice') {
+            const startVal = parseInt(document.getElementById('sidebar-start')?.value || 0);
+            const endVal = parseInt(document.getElementById('sidebar-end')?.value || 0);
+            if (!isNaN(startVal) && !isNaN(endVal) && endVal > 0) {
+                 afterName = beforeName.slice(startVal, endVal);
+            }
+        }
+
+        const row = elemFactory('tr', { class: 'bg-white border-b dark:bg-gray-800 dark:border-gray-700' });
+        row.innerHTML = `
+            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">${beforeName}</td>
+            <td class="px-6 py-4">${afterName}</td>
+        `;
+        previewBody.appendChild(row);
+    });
+}
+
+
 function renderSidebarForm(operationType) {
     const container = document.getElementById('sidebar-form-container');
     const runBtn = document.getElementById('run-sidebar-execute');
@@ -101,6 +164,8 @@ function renderSidebarForm(operationType) {
         updateSlicePreview(-1, -1);
     }
 
+    const updateAllPreviews = () => updatePreviewCard(operationType);
+
     if (operationType === 'replace') {
         const fromGroup = elemFactory('div', { class: 'mb-4' });
         fromGroup.appendChild(elemFactory('label', { for: 'sidebar-from', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'From' }));
@@ -111,49 +176,12 @@ function renderSidebarForm(operationType) {
         toGroup.appendChild(elemFactory('label', { for: 'sidebar-to', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'To' }));
         const toInput = elemFactory('input', { type: 'text', id: 'sidebar-to', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' });
         toGroup.appendChild(toInput);
-        
-        const previewTable = elemFactory('table', { class: 'w-full text-sm text-left text-gray-500 dark:text-gray-400 mt-4' });
-        previewTable.innerHTML = `
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="px-6 py-3">Before</th>
-                    <th scope="col" class="px-6 py-3">After</th>
-                </tr>
-            </thead>
-            <tbody id="replace-preview-body"></tbody>
-        `;
 
         container.appendChild(fromGroup);
         container.appendChild(toGroup);
-        container.appendChild(previewTable);
-        runBtn.classList.remove('hidden');
-
-        const updatePreview = () => {
-            const fromValue = fromInput.value;
-            const toValue = toInput.value;
-            const { arrListAllFiles } = getState();
-            const selectedFiles = arrListAllFiles.filter(f => f.checked);
-            const previewBody = document.getElementById('replace-preview-body');
-            
-            if (previewBody) {
-                previewBody.innerHTML = '';
-                selectedFiles.forEach(file => {
-                    const beforeName = file.name;
-                    const afterName = fromValue ? beforeName.replace(new RegExp(fromValue, 'g'), toValue) : beforeName;
-                    
-                    const row = elemFactory('tr', { class: 'bg-white border-b dark:bg-gray-800 dark:border-gray-700' });
-                    row.innerHTML = `
-                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">${beforeName}</td>
-                        <td class="px-6 py-4">${afterName}</td>
-                    `;
-                    previewBody.appendChild(row);
-                });
-            }
-        };
-
-        fromInput.addEventListener('input', updatePreview);
-        toInput.addEventListener('input', updatePreview);
-        updatePreview();
+        
+        fromInput.addEventListener('input', updateAllPreviews);
+        toInput.addEventListener('input', updateAllPreviews);
 
     } else if (operationType === 'slice') {
         let maxLen = 100;
@@ -179,30 +207,32 @@ function renderSidebarForm(operationType) {
 
         const updateStart = () => {
             const startVal = parseInt(startRange.value);
-            const endVal = parseInt(endRange.value);
+            let endVal = parseInt(endRange.value);
             
             startNumber.value = startVal;
             
             if (startVal > endVal) {
-                endRange.value = startVal;
-                endNumber.value = startVal;
+                endVal = startVal;
+                endRange.value = endVal;
+                endNumber.value = endVal;
             }
             
-            updateSlicePreview(startVal, parseInt(endRange.value));
+            updateSlicePreview(startVal, endVal);
+            updateAllPreviews();
         };
 
         const updateEnd = () => {
             const startVal = parseInt(startRange.value);
-            const endVal = parseInt(endRange.value);
+            let endVal = parseInt(endRange.value);
             
             if (endVal < startVal) {
-                endRange.value = startVal;
-                endNumber.value = startVal;
-            } else {
-                endNumber.value = endVal;
+                endVal = startVal;
+                endRange.value = endVal;
             }
+            endNumber.value = endVal;
             
-            updateSlicePreview(startVal, parseInt(endRange.value));
+            updateSlicePreview(startVal, endVal);
+            updateAllPreviews();
         };
 
         startRange.addEventListener('input', updateStart);
@@ -221,7 +251,7 @@ function renderSidebarForm(operationType) {
 
         container.appendChild(startGroup);
         container.appendChild(endGroup);
-        runBtn.classList.remove('hidden');
+
     } else if (operationType === 'pad') {
         const lengthGroup = elemFactory('div', { class: 'mb-4' });
         lengthGroup.appendChild(elemFactory('label', { for: 'sidebar-pad-length', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Expected Length' }));
@@ -234,52 +264,24 @@ function renderSidebarForm(operationType) {
         lengthWrapper.appendChild(lengthNumber);
         lengthGroup.appendChild(lengthWrapper);
 
-        const previewTable = elemFactory('table', { class: 'w-full text-sm text-left text-gray-500 dark:text-gray-400 mt-4' });
-        previewTable.innerHTML = `
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="px-6 py-3">Before</th>
-                    <th scope="col" class="px-6 py-3">After</th>
-                </tr>
-            </thead>
-            <tbody id="pad-preview-body"></tbody>
-        `;
-
         container.appendChild(lengthGroup);
-        container.appendChild(previewTable);
-        runBtn.classList.remove('hidden');
 
-        const updatePreview = () => {
-            const padLength = lengthNumber.value;
-            const { arrListAllFiles } = getState();
-            const selectedFiles = arrListAllFiles.filter(f => f.checked);
-            const previewBody = document.getElementById('pad-preview-body');
-
-            if (previewBody) {
-                previewBody.innerHTML = '';
-                selectedFiles.forEach(file => {
-                    const beforeName = file.name;
-                    const afterName = padLength ? padFilename(beforeName, padLength) : beforeName;
-                    
-                    const row = elemFactory('tr', { class: 'bg-white border-b dark:bg-gray-800 dark:border-gray-700' });
-                    row.innerHTML = `
-                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">${beforeName}</td>
-                        <td class="px-6 py-4">${afterName}</td>
-                    `;
-                    previewBody.appendChild(row);
-                });
-            }
-        };
-
-        lengthRange.addEventListener('input', () => {
+        const updatePad = () => {
             lengthNumber.value = lengthRange.value;
-            updatePreview();
-        });
+            updateAllPreviews();
+        };
+        lengthRange.addEventListener('input', updatePad);
         lengthNumber.addEventListener('input', () => {
             lengthRange.value = lengthNumber.value;
-            updatePreview();
+            updateAllPreviews();
         });
-        updatePreview();
+    }
+
+    // Add preview card for relevant operations
+    if (['replace', 'pad', 'slice'].includes(operationType)) {
+        container.appendChild(createPreviewCard());
+        updateAllPreviews();
+        runBtn.classList.remove('hidden');
     }
 }
 
@@ -289,5 +291,6 @@ module.exports = {
     createFileFolderListItem,
     renderEmptyFileList,
     renderLoadingIndicator,
-    renderSidebarForm
+    renderSidebarForm,
+    updatePreviewCard
 };
