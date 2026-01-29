@@ -37,23 +37,36 @@ function updateSlicePreview(start, end) {
     const fileList = document.getElementById('file-folder-list');
     if (!fileList) return;
 
-    const filenameWrappers = fileList.querySelectorAll('.filename-wrapper');
-    filenameWrappers.forEach(wrapper => {
-        const chars = wrapper.querySelectorAll('.char-span');
-        chars.forEach((char, index) => {
-            char.classList.remove('bg-blue-200', 'text-blue-800', 'border-l-2', 'border-blue-500', 'border-r-2');
-            
-            if (index >= start && index < end) {
-                char.classList.add('bg-blue-200', 'text-blue-800');
-            }
+    const listItems = fileList.querySelectorAll('li');
 
-            if (index === parseInt(start)) {
-                char.classList.add('border-l-2', 'border-blue-500');
-            }
-            if (index === parseInt(end)) {
-                char.classList.add('border-l-2', 'border-red-500');
-            }
+    listItems.forEach(li => {
+        const checkbox = li.querySelector('.cbox-file-folder');
+        const wrapper = li.querySelector('.filename-wrapper');
+
+        if (!checkbox || !wrapper) return;
+
+        const chars = wrapper.querySelectorAll('.char-span');
+        
+        // First, clear any existing styles from this item
+        chars.forEach((char) => {
+            char.classList.remove('bg-blue-200', 'text-blue-800', 'border-l-2', 'border-blue-500', 'border-r-2', 'border-red-500');
         });
+
+        // Apply new styles only if the checkbox is checked
+        if (checkbox.checked) {
+            chars.forEach((char, index) => {
+                if (index >= start && index < end) {
+                    char.classList.add('bg-blue-200', 'text-blue-800');
+                }
+
+                if (index === parseInt(start)) {
+                    char.classList.add('border-l-2', 'border-blue-500');
+                }
+                if (index === parseInt(end)) {
+                    char.classList.add('border-l-2', 'border-red-500');
+                }
+            });
+        }
     });
 }
 

@@ -1,4 +1,6 @@
 // ui/panels.js
+const { updateSlicePreview } = require('./helpers');
+
 function showMainUI() {
     const appContainer = document.getElementById('app-container');
     const mainView = document.getElementById('main-view');
@@ -49,6 +51,7 @@ function setPanelVisibility(panel, isVisible) {
             folders.classList.remove('hidden');
             sidebar.classList.add('hidden');
             if (resizer) resizer.classList.add('hidden');
+            updateSlicePreview(-1, -1);
         } else {
             folders.classList.add('hidden');
         }
@@ -60,6 +63,7 @@ function setPanelVisibility(panel, isVisible) {
         } else {
             sidebar.classList.add('hidden');
             if (resizer) resizer.classList.add('hidden');
+            updateSlicePreview(-1, -1);
         }
     }
     updatePanelLayout();

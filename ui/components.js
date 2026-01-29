@@ -96,7 +96,10 @@ function renderSidebarForm(operationType) {
     container.innerHTML = '';
     runBtn.classList.add('hidden');
 
-    updateSlicePreview(-1, -1);
+    // Reset slice preview when changing operations
+    if (operationType !== 'slice') {
+        updateSlicePreview(-1, -1);
+    }
 
     if (operationType === 'replace') {
         const fromGroup = elemFactory('div', { class: 'mb-4' });
