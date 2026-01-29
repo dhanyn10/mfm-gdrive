@@ -15,9 +15,10 @@ function updateFileListBorderVisibility(isVisible) {
     if (!container) return;
 
     if (isVisible) {
-        container.classList.add('border');
-    } else {
         container.classList.remove('border');
+        container.classList.add('shadow-sm', 'rounded-lg');
+    } else {
+        container.classList.remove('border', 'shadow-sm', 'rounded-lg');
     }
 }
 

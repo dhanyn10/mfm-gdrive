@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['Ubuntu Mono', 'sans-serif'],
         mono: ['Ubuntu Mono', 'monospace'],
       },
     },

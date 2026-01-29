@@ -149,11 +149,5 @@ async function listFiles(driveClient, source, pageToken = null) {
         updatePaginationVisibility(true);
     }
 
-    if (arrListAllFiles.length > 0) {
-        let firstchildFileList = document.createElement('li');
-        firstchildFileList.className = "h-4 bg-gray-100";
-        fileListContainer.prepend(firstchildFileList);
-    }
-
     updateExecuteButtonVisibility();
 }
