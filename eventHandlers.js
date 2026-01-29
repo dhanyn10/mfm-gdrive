@@ -2,7 +2,7 @@
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
 const { showToast, elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
-const { showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateExecuteButtonVisibility, toggleExecuteSidebar, renderSidebarForm, setPanelVisibility } = require('./ui');
+const { showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateSelectionButtons, toggleExecuteSidebar, renderSidebarForm, setPanelVisibility } = require('./ui');
 const { executeReplace, executeSlice, executePad } = require('./fileOperations');
 
 let driveClient;
@@ -141,7 +141,7 @@ function setupEventHandlers(listFiles) {
             }
         });
         updateState({ arrListAllFiles });
-        updateExecuteButtonVisibility();
+        updateSelectionButtons();
     });
 
     selectNoneBtn.addEventListener('click', () => {
@@ -156,7 +156,7 @@ function setupEventHandlers(listFiles) {
             }
         });
         updateState({ arrListAllFiles });
-        updateExecuteButtonVisibility();
+        updateSelectionButtons();
     });
 
     nextStepBtn.addEventListener('click', () => {
@@ -236,7 +236,7 @@ function setupEventHandlers(listFiles) {
             }
         }
         updateState({ fromIndex: clickedIndex });
-        updateExecuteButtonVisibility();
+        updateSelectionButtons();
     });
 
     let isResizing = false;

@@ -48,21 +48,24 @@ function setRefreshButtonLoading(isLoading) {
     }
 }
 
-function updateExecuteButtonVisibility() {
+function updateSelectionButtons() {
     const { arrListAllFiles } = getState();
     const nextStepBtn = document.getElementById('next-step-btn');
     const navExecuteBtn = document.getElementById('nav-execute');
+    const selectNoneBtn = document.getElementById('select-none');
     
-    if (!nextStepBtn) return;
+    if (!nextStepBtn || !selectNoneBtn) return;
 
     const hasSelected = arrListAllFiles.some(file => file.checked);
     if (hasSelected) {
         nextStepBtn.classList.remove('hidden');
+        selectNoneBtn.classList.remove('hidden');
         if (navExecuteBtn) {
             navExecuteBtn.disabled = false;
         }
     } else {
         nextStepBtn.classList.add('hidden');
+        selectNoneBtn.classList.add('hidden');
         if (navExecuteBtn) {
             navExecuteBtn.disabled = true;
         }
@@ -72,5 +75,5 @@ function updateExecuteButtonVisibility() {
 module.exports = {
     updateAuthorizeButton,
     setRefreshButtonLoading,
-    updateExecuteButtonVisibility
+    updateSelectionButtons
 };

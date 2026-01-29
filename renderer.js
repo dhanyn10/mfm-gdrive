@@ -1,6 +1,6 @@
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
-const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateExecuteButtonVisibility, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
+const { createFolderListItem, createFileFolderListItem, showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateSelectionButtons, updateSelectionBlockVisibility, renderEmptyFileList, renderLoadingIndicator, updateFileListBorderVisibility, updatePaginationVisibility } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
 async function main() {
@@ -53,7 +53,7 @@ function handleFileFolderClick(file, checkboxElement) {
     if (file.type !== mime) {
         file.checked = !file.checked;
         checkboxElement.checked = file.checked;
-        updateExecuteButtonVisibility();
+        updateSelectionButtons();
     }
 }
 
@@ -151,7 +151,7 @@ async function listFiles(driveClient, source, pageToken = null) {
             updatePaginationVisibility(true);
         }
 
-        updateExecuteButtonVisibility();
+        updateSelectionButtons();
     } catch (error) {
         console.error('Error listing files:', error);
         // Handle error state in UI if necessary
