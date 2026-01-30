@@ -11,7 +11,7 @@ function handleReplaceText(driveClient, refreshFileList) {
     showReplaceTextModal(async (from, to) => {
         const checkedFiles = getCheckedFiles();
         const renamePromises = checkedFiles.map(file => {
-            const newFilename = file.name.replace(from, to);
+            const newFilename = file.name.replace(new RegExp(from, 'g'), to);
             return renameFile(driveClient, file.id, newFilename, file.name);
         });
 
@@ -33,12 +33,12 @@ function handleSliceText(driveClient, refreshFileList) {
         const startNum = parseInt(start);
         const endNum = parseInt(end);
 
-        if (isNaN(startNum) || startNum < 1) {
-            showToast('Please enter a valid start position (1 or greater).', 'error');
+        if (isNaN(startNum) || startNum < 0) {
+            showToast('Please enter a valid start position (0 or greater).', 'error');
             return;
         }
-        if (isNaN(endNum) || endNum < 1) {
-            showToast('Please enter a valid end position (1 or greater).', 'error');
+        if (isNaN(endNum) || endNum < 0) {
+            showToast('Please enter a valid end position (0 or greater).', 'error');
             return;
         }
         if (startNum > endNum) {
@@ -54,27 +54,8 @@ function handleSliceText(driveClient, refreshFileList) {
 
         const renamePromises = checkedFiles.map(file => {
             const originalName = file.name;
-            const lastDotIndex = originalName.lastIndexOf('.');
-            let baseName = originalName;
-            let extension = '';
-
-            if (lastDotIndex > 0) {
-                baseName = originalName.substring(0, lastDotIndex);
-                extension = originalName.substring(lastDotIndex);
-            }
-
-            const len = baseName.length;
-            let actualStart = startNum - 1;
-            let actualEndForSlice = endNum;
-
-            if (actualStart < 0) actualStart = 0;
-            if (actualStart > len) actualStart = len;
-            if (actualEndForSlice < actualStart) actualEndForSlice = actualStart;
-            if (actualEndForSlice > len) actualEndForSlice = len;
-
-            const newBaseName = baseName.slice(0, actualStart) + baseName.slice(actualEndForSlice);
-            const finalNewName = newBaseName + extension;
-            return renameFile(driveClient, file.id, finalNewName, originalName);
+            const newName = originalName.slice(0, startNum) + originalName.slice(endNum);
+            return renameFile(driveClient, file.id, newName, originalName);
         });
 
         try {
@@ -115,7 +96,7 @@ function handlePadFilename(driveClient, refreshFileList) {
 async function executeReplace(driveClient, from, to, refreshFileList) {
     const checkedFiles = getCheckedFiles();
     const renamePromises = checkedFiles.map(file => {
-        const newFilename = file.name.replace(from, to);
+        const newFilename = file.name.replace(new RegExp(from, 'g'), to);
         return renameFile(driveClient, file.id, newFilename, file.name);
     });
 
@@ -141,27 +122,8 @@ async function executeSlice(driveClient, startNum, endNum, refreshFileList) {
 
     const renamePromises = checkedFiles.map(file => {
         const originalName = file.name;
-        const lastDotIndex = originalName.lastIndexOf('.');
-        let baseName = originalName;
-        let extension = '';
-
-        if (lastDotIndex > 0) {
-            baseName = originalName.substring(0, lastDotIndex);
-            extension = originalName.substring(lastDotIndex);
-        }
-
-        const len = baseName.length;
-        let actualStart = startNum - 1;
-        let actualEndForSlice = endNum;
-
-        if (actualStart < 0) actualStart = 0;
-        if (actualStart > len) actualStart = len;
-        if (actualEndForSlice < actualStart) actualEndForSlice = actualStart;
-        if (actualEndForSlice > len) actualEndForSlice = len;
-
-        const newBaseName = baseName.slice(0, actualStart) + baseName.slice(actualEndForSlice);
-        const finalNewName = newBaseName + extension;
-        return renameFile(driveClient, file.id, finalNewName, originalName);
+        const newName = originalName.slice(0, startNum) + originalName.slice(endNum);
+        return renameFile(driveClient, file.id, newName, originalName);
     });
 
     try {

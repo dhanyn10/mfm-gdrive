@@ -1,5 +1,6 @@
 // ui/panels.js
 const { updateSlicePreview } = require('./helpers');
+const { resetFileListItemStyles } = require('./components');
 
 function showMainUI() {
     const appContainer = document.getElementById('app-container');
@@ -52,6 +53,7 @@ function setPanelVisibility(panel, isVisible) {
             sidebar.classList.add('hidden');
             if (resizer) resizer.classList.add('hidden');
             updateSlicePreview(-1, -1);
+            resetFileListItemStyles(); // Reset styles when switching to folders panel
         } else {
             folders.classList.add('hidden');
         }
@@ -64,6 +66,7 @@ function setPanelVisibility(panel, isVisible) {
             sidebar.classList.add('hidden');
             if (resizer) resizer.classList.add('hidden');
             updateSlicePreview(-1, -1);
+            resetFileListItemStyles(); // Reset styles when execute sidebar is closed
         }
     }
     updatePanelLayout();
