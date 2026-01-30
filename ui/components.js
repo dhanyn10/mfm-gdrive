@@ -3,17 +3,28 @@ const { elemFactory, createFileNameWithTooltips, padFilename } = require('../uti
 const { getState } = require('../state');
 const { updateSlicePreview } = require('./helpers');
 
+/**
+ * Creates a folder icon element if the file type matches the folder MIME type.
+ * @param {string} fileType - The MIME type of the file.
+ * @returns {HTMLElement|null} A span element containing a folder icon, or null.
+ */
 function createFileIcon(fileType) {
     const { mime } = getState();
     if (fileType === mime) {
-        const spFolderIcon = document.createElement('span');
-        spFolderIcon.className = "float-left pr-2";
-        spFolderIcon.innerHTML = `<i class="fas fa-folder w-5 h-5"></i>`;
-        return spFolderIcon;
+        const folderIconSpan = document.createElement('span');
+        folderIconSpan.className = "float-left pr-2";
+        folderIconSpan.innerHTML = `<i class="fas fa-folder w-5 h-5"></i>`;
+        return folderIconSpan;
     }
     return null;
 }
 
+/**
+ * Creates a list item element for a folder.
+ * @param {object} folder - The folder object, containing id and name.
+ * @param {function} onClick - The callback function to execute when the item is clicked.
+ * @returns {HTMLElement} A list item (`<li>`) element for the folder.
+ */
 function createFolderListItem(folder, onClick) {
     let checkbox = elemFactory('input', {
         type: "checkbox",
@@ -30,15 +41,21 @@ function createFolderListItem(folder, onClick) {
     return listItem;
 }
 
+/**
+ * Creates a list item element for a file, including checkbox, name, and preview functionality.
+ * @param {object} file - The file object, containing id, name, type, and checked status.
+ * @param {function} onClick - The callback function to execute when the item is clicked.
+ * @returns {HTMLElement} A list item (`<li>`) element for the file.
+ */
 function createFileFolderListItem(file, onClick) {
-    let cbFileFolder = elemFactory('input', {
+    let fileFolderCheckbox = elemFactory('input', {
         type: "checkbox",
         "class": "cbox-file-folder peer hidden",
         value: file.id
     });
-    cbFileFolder.checked = file.checked;
+    fileFolderCheckbox.checked = file.checked;
 
-    let spFileFolder = elemFactory('span', {
+    let fileFolderSpan = elemFactory('span', {
         "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
                     peer-checked:bg-blue-500 peer-checked:text-white \
                     hover:bg-gray-100 hover:overflow-visible",
@@ -46,15 +63,16 @@ function createFileFolderListItem(file, onClick) {
 
     const fileIcon = createFileIcon(file.type);
     if (fileIcon) {
-        spFileFolder.appendChild(fileIcon);
-        let sptextNode = document.createTextNode(file.name);
-        spFileFolder.appendChild(sptextNode);
+        // This branch is for items that are folders (based on MIME type).
+        fileFolderSpan.appendChild(fileIcon);
+        let fileNameTextNode = document.createTextNode(file.name);
+        fileFolderSpan.appendChild(fileNameTextNode);
     } else {
-        spFileFolder.classList.remove('cursor-not-allowed');
-        spFileFolder.classList.add('cursor-pointer');
+        // This branch is for files, adding preview functionality.
+        fileFolderSpan.classList.remove('cursor-not-allowed');
+        fileFolderSpan.classList.add('cursor-pointer');
         
         const nameWrapper = elemFactory('div', { class: 'flex flex-col w-full' });
-        
         const topRow = elemFactory('div', { class: 'flex justify-between items-center' });
         topRow.appendChild(createFileNameWithTooltips(file.name));
         
@@ -63,7 +81,6 @@ function createFileFolderListItem(file, onClick) {
             innerHTML: 'Preview'
         });
         topRow.appendChild(previewButton);
-        
         nameWrapper.appendChild(topRow);
         
         const previewDiv = elemFactory('div', { 
@@ -71,14 +88,14 @@ function createFileFolderListItem(file, onClick) {
             innerHTML: '' 
         });
         nameWrapper.appendChild(previewDiv);
-        
-        spFileFolder.appendChild(nameWrapper);
+        fileFolderSpan.appendChild(nameWrapper);
 
         previewButton.addEventListener('click', (e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent the li's click handler from firing.
             const isExpanded = previewDiv.classList.toggle('expanded');
             previewButton.innerHTML = isExpanded ? 'Hide' : 'Preview';
             
+            // Re-render the sidebar form to update the detailed preview.
             const currentOperation = document.querySelector('input[name="operation"]:checked');
             if (currentOperation) {
                 renderSidebarForm(currentOperation.value);
@@ -86,42 +103,40 @@ function createFileFolderListItem(file, onClick) {
         });
     }
 
-    let liFileFolder = elemFactory('li', { child: [cbFileFolder, spFileFolder] });
-    liFileFolder.addEventListener("click", () => onClick(file, cbFileFolder));
-    return liFileFolder;
+    let fileFolderListItem = elemFactory('li', { child: [fileFolderCheckbox, fileFolderSpan] });
+    fileFolderListItem.addEventListener("click", () => onClick(file, fileFolderCheckbox));
+    return fileFolderListItem;
 }
 
+/**
+ * Renders a placeholder element to display when the file list is empty.
+ * @returns {HTMLElement} A div element with a Google Drive icon.
+ */
 function renderEmptyFileList() {
     const container = elemFactory('div', {
         class: "flex flex-col items-center justify-center p-10 h-full text-gray-500 dark:text-gray-400"
     });
-
-    const icon = elemFactory('i', {
-        class: "fab fa-google-drive fa-3x"
-    });
-
+    const icon = elemFactory('i', { class: "fab fa-google-drive fa-3x" });
     container.appendChild(icon);
-
-    return container;
-}
-
-function renderLoadingIndicator() {
-    const container = elemFactory('div', {
-        class: "flex flex-col items-center justify-center p-10 h-full text-gray-500 dark:text-gray-400"
-    });
-
-    const icon = elemFactory('i', {
-        class: "fas fa-spinner fa-spin fa-3x"
-    });
-
-    container.appendChild(icon);
-
     return container;
 }
 
 /**
- * Mengembalikan semua item file ke Tampilan 1 (status seleksi default).
- * Panggil fungsi ini saat sidebar ditutup.
+ * Renders a loading indicator element to display while files are being fetched.
+ * @returns {HTMLElement} A div element with a spinning spinner icon.
+ */
+function renderLoadingIndicator() {
+    const container = elemFactory('div', {
+        class: "flex flex-col items-center justify-center p-10 h-full text-gray-500 dark:text-gray-400"
+    });
+    const icon = elemFactory('i', { class: "fas fa-spinner fa-spin fa-3x" });
+    container.appendChild(icon);
+    return container;
+}
+
+/**
+ * Resets the visual styles of all file list items to their default state.
+ * This is typically called when the sidebar is closed or the panel is changed.
  */
 function resetFileListItemStyles() {
     const fileList = document.getElementById('file-folder-list');
@@ -129,13 +144,13 @@ function resetFileListItemStyles() {
 
     const listItems = fileList.querySelectorAll('li');
     listItems.forEach(li => {
-        const spFileFolder = li.querySelector('span:first-of-type');
-        if (spFileFolder) {
-            // Hapus kelas Tampilan 2 untuk memastikan Tampilan 1 (peer-checked) aktif.
-            spFileFolder.classList.remove('bg-transparent', 'text-red-600');
+        const fileFolderSpan = li.querySelector('span:first-of-type');
+        if (fileFolderSpan) {
+            // Remove special styling to revert to the default peer-checked behavior.
+            fileFolderSpan.classList.remove('bg-transparent', 'text-red-600');
         }
         
-        // Sembunyikan dan bersihkan semua elemen pratinjau.
+        // Hide and clear all preview elements.
         const previewDiv = li.querySelector('.preview-change');
         if (previewDiv) {
             previewDiv.classList.add('hidden');
@@ -150,24 +165,33 @@ function resetFileListItemStyles() {
     });
 }
 
+/**
+ * Renders the appropriate form inside the sidebar based on the selected operation type.
+ * @param {string} operationType - The type of operation (e.g., 'replace', 'slice', 'pad').
+ */
 function renderSidebarForm(operationType) {
     const container = document.getElementById('sidebar-form-container');
-    const runBtn = document.getElementById('run-sidebar-execute');
-    if (!container || !runBtn) return;
+    const runButton = document.getElementById('run-sidebar-execute');
+    if (!container || !runButton) return;
 
     container.innerHTML = '';
-    runBtn.classList.add('hidden');
+    runButton.classList.add('hidden');
 
-    // Jika sidebar ditutup, panggil fungsi reset.
+    // If no operation is selected (e.g., sidebar is closing), reset styles and exit.
     if (!operationType) {
         resetFileListItemStyles();
         return;
     }
 
+    // Clear slice preview highlights if the operation is not 'slice'.
     if (operationType !== 'slice') {
         updateSlicePreview(-1, -1);
     }
 
+    /**
+     * Updates the inline preview for each selected file item.
+     * @param {function(string): string} transformer - A function that takes the original name and returns the new name.
+     */
     const updateInlinePreviews = (transformer) => {
         const fileList = document.getElementById('file-folder-list');
         if (!fileList) return;
@@ -178,24 +202,24 @@ function renderSidebarForm(operationType) {
             const previewDiv = li.querySelector('.preview-change');
             const nameWrapper = li.querySelector('.filename-wrapper');
             const previewButton = li.querySelector('.preview-toggle-button');
-            const spFileFolder = li.querySelector('span:first-of-type');
+            const fileFolderSpan = li.querySelector('span:first-of-type');
 
-            if (!spFileFolder) return;
+            if (!fileFolderSpan) return;
 
-            // Selalu reset dengan menghapus kelas Tampilan 2 di awal.
-            spFileFolder.classList.remove('bg-transparent', 'text-red-600');
+            // Always reset special styling first.
+            fileFolderSpan.classList.remove('bg-transparent', 'text-red-600');
 
             if (checkbox && checkbox.checked && previewDiv && nameWrapper && previewButton) {
                 const originalName = nameWrapper.textContent;
                 const newName = transformer(originalName);
                 
-                // Jika ada perubahan, terapkan Tampilan 2.
+                // If the name changes, apply special styling and show the preview.
                 if (newName !== originalName) {
-                    spFileFolder.classList.add('bg-transparent', 'text-red-600');
-
+                    fileFolderSpan.classList.add('bg-transparent', 'text-red-600'); // Indicates a pending change.
                     previewButton.classList.remove('hidden');
                     previewDiv.classList.remove('hidden');
 
+                    // Show detailed before/after if expanded.
                     if (previewDiv.classList.contains('expanded')) {
                         previewDiv.innerHTML = `
                             <div class="font-semibold text-gray-500">Before:</div>
@@ -207,160 +231,137 @@ function renderSidebarForm(operationType) {
                         previewDiv.innerHTML = `<i class="fas fa-arrow-right mr-1"></i> <span class="text-green-600">${newName}</span>`;
                     }
                 } else {
-                    // Jika tidak ada perubahan, Tampilan 1 (peer-checked) akan otomatis aktif.
+                    // If no change, revert to default state.
                     previewDiv.classList.add('hidden');
                     previewButton.classList.add('hidden');
                     previewDiv.classList.remove('expanded');
                     previewButton.innerHTML = 'Preview';
                 }
             } else if (previewDiv) {
+                // Hide previews for non-selected items.
                 previewDiv.classList.add('hidden');
                 if(previewButton) previewButton.classList.add('hidden');
             }
         });
     };
 
+    // Dynamically create and append form elements based on operationType.
     if (operationType === 'replace') {
-        const fromGroup = elemFactory('div', { class: 'mb-4' });
-        fromGroup.appendChild(elemFactory('label', { for: 'sidebar-from', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'From' }));
+        const fromGroupContainer = elemFactory('div', { class: 'mb-4' });
+        fromGroupContainer.appendChild(elemFactory('label', { for: 'sidebar-from', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'From' }));
         const fromInput = elemFactory('input', { type: 'text', id: 'sidebar-from', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' });
-        fromGroup.appendChild(fromInput);
+        fromGroupContainer.appendChild(fromInput);
 
-        const toGroup = elemFactory('div', { class: 'mb-4' });
-        toGroup.appendChild(elemFactory('label', { for: 'sidebar-to', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'To' }));
+        const toGroupContainer = elemFactory('div', { class: 'mb-4' });
+        toGroupContainer.appendChild(elemFactory('label', { for: 'sidebar-to', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'To' }));
         const toInput = elemFactory('input', { type: 'text', id: 'sidebar-to', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white' });
-        toGroup.appendChild(toInput);
+        toGroupContainer.appendChild(toInput);
         
-        container.appendChild(fromGroup);
-        container.appendChild(toGroup);
-        runBtn.classList.remove('hidden');
+        container.appendChild(fromGroupContainer);
+        container.appendChild(toGroupContainer);
+        runButton.classList.remove('hidden');
 
         const updatePreview = () => {
             const fromValue = fromInput.value;
             const toValue = toInput.value;
-            
-            updateInlinePreviews((name) => {
-                return fromValue ? name.replace(new RegExp(fromValue, 'g'), toValue) : name;
-            });
+            updateInlinePreviews((name) => fromValue ? name.replace(new RegExp(fromValue, 'g'), toValue) : name);
         };
 
         fromInput.addEventListener('input', updatePreview);
         toInput.addEventListener('input', updatePreview);
-        updatePreview();
+        updatePreview(); // Initial call.
 
     } else if (operationType === 'slice') {
-        let maxLen = 100;
+        let maxLength = 100;
         const { arrListAllFiles } = getState();
         if (arrListAllFiles && arrListAllFiles.length > 0) {
-             maxLen = Math.max(...arrListAllFiles.filter(f => f.checked).map(f => f.name.length));
-             if (maxLen === -Infinity) maxLen = 100;
+             const checkedFiles = arrListAllFiles.filter(f => f.checked);
+             if (checkedFiles.length > 0) {
+                 maxLength = Math.max(...checkedFiles.map(f => f.name.length));
+             }
         }
 
-        const startGroup = elemFactory('div', { class: 'mb-4' });
-        startGroup.appendChild(elemFactory('label', { for: 'sidebar-start', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Start Position' }));
+        const startGroupContainer = elemFactory('div', { class: 'mb-4' });
+        startGroupContainer.appendChild(elemFactory('label', { for: 'sidebar-start', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Start Position' }));
+        const startInputWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
+        const startRangeSlider = elemFactory('input', { type: 'range', id: 'sidebar-start', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLength, value: 0 });
+        const startNumberInput = elemFactory('input', { type: 'number', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0 });
         
-        const startWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
-        const startRange = elemFactory('input', { type: 'range', id: 'sidebar-start', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLen, value: 0 });
-        const startNumber = elemFactory('input', { type: 'number', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0 });
-        
-        const endGroup = elemFactory('div', { class: 'mb-4' });
-        endGroup.appendChild(elemFactory('label', { for: 'sidebar-end', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'End Position' }));
-        
-        const endWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
-        const endRange = elemFactory('input', { type: 'range', id: 'sidebar-end', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLen, value: 0 });
-        const endNumber = elemFactory('input', { type: 'number', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0 });
+        const endGroupContainer = elemFactory('div', { class: 'mb-4' });
+        endGroupContainer.appendChild(elemFactory('label', { for: 'sidebar-end', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'End Position' }));
+        const endInputWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
+        const endRangeSlider = elemFactory('input', { type: 'range', id: 'sidebar-end', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 0, max: maxLength, value: 0 });
+        const endNumberInput = elemFactory('input', { type: 'number', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 0 });
+
+        const sliceTransformer = (name) => {
+            const s = parseInt(startRangeSlider.value);
+            const e = parseInt(endRangeSlider.value);
+            if (s >= e) return name;
+            return name.slice(0, s) + name.slice(e);
+        };
 
         const updateStart = () => {
-            const startVal = parseInt(startRange.value);
-            const endVal = parseInt(endRange.value);
-            
-            startNumber.value = startVal;
-            
-            if (startVal > endVal) {
-                endRange.value = startVal;
-                endNumber.value = startVal;
+            const startValue = parseInt(startRangeSlider.value);
+            const endValue = parseInt(endRangeSlider.value);
+            startNumberInput.value = startValue;
+            if (startValue > endValue) {
+                endRangeSlider.value = startValue;
+                endNumberInput.value = startValue;
             }
-            
-            updateSlicePreview(startVal, parseInt(endRange.value));
-            
-            updateInlinePreviews((name) => {
-                const s = parseInt(startRange.value);
-                const e = parseInt(endRange.value);
-                if (s >= e) return name;
-                return name.slice(0, s) + name.slice(e);
-            });
+            updateSlicePreview(startValue, parseInt(endRangeSlider.value));
+            updateInlinePreviews(sliceTransformer);
         };
 
         const updateEnd = () => {
-            const startVal = parseInt(startRange.value);
-            const endVal = parseInt(endRange.value);
-            
-            if (endVal < startVal) {
-                endRange.value = startVal;
-                endNumber.value = startVal;
+            const startValue = parseInt(startRangeSlider.value);
+            const endValue = parseInt(endRangeSlider.value);
+            if (endValue < startValue) {
+                endRangeSlider.value = startValue;
+                endNumberInput.value = startValue;
             } else {
-                endNumber.value = endVal;
+                endNumberInput.value = endValue;
             }
-            
-            updateSlicePreview(startVal, parseInt(endRange.value));
-            
-            updateInlinePreviews((name) => {
-                const s = parseInt(startRange.value);
-                const e = parseInt(endRange.value);
-                if (s >= e) return name;
-                return name.slice(0, s) + name.slice(e);
-            });
+            updateSlicePreview(startValue, parseInt(endRangeSlider.value));
+            updateInlinePreviews(sliceTransformer);
         };
 
-        startRange.addEventListener('input', updateStart);
-        startNumber.addEventListener('input', () => { startRange.value = startNumber.value; updateStart(); });
+        startRangeSlider.addEventListener('input', updateStart);
+        startNumberInput.addEventListener('input', () => { startRangeSlider.value = startNumberInput.value; updateStart(); });
+        endRangeSlider.addEventListener('input', updateEnd);
+        endNumberInput.addEventListener('input', () => { endRangeSlider.value = endNumberInput.value; updateEnd(); });
 
-        endRange.addEventListener('input', updateEnd);
-        endNumber.addEventListener('input', () => { endRange.value = endNumber.value; updateEnd(); });
+        startInputWrapper.appendChild(startRangeSlider);
+        startInputWrapper.appendChild(startNumberInput);
+        startGroupContainer.appendChild(startInputWrapper);
+        endInputWrapper.appendChild(endRangeSlider);
+        endInputWrapper.appendChild(endNumberInput);
+        endGroupContainer.appendChild(endInputWrapper);
 
-        startWrapper.appendChild(startRange);
-        startWrapper.appendChild(startNumber);
-        startGroup.appendChild(startWrapper);
+        container.appendChild(startGroupContainer);
+        container.appendChild(endGroupContainer);
+        runButton.classList.remove('hidden');
 
-        endWrapper.appendChild(endRange);
-        endWrapper.appendChild(endNumber);
-        endGroup.appendChild(endWrapper);
-
-        container.appendChild(startGroup);
-        container.appendChild(endGroup);
-        runBtn.classList.remove('hidden');
     } else if (operationType === 'pad') {
-        const lengthGroup = elemFactory('div', { class: 'mb-4' });
-        lengthGroup.appendChild(elemFactory('label', { for: 'sidebar-pad-length', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Expected Length' }));
+        const lengthGroupContainer = elemFactory('div', { class: 'mb-4' });
+        lengthGroupContainer.appendChild(elemFactory('label', { for: 'sidebar-pad-length', class: 'block mb-2 text-sm font-medium text-gray-900 dark:text-white', innerHTML: 'Expected Length' }));
+        const lengthInputWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
+        const lengthRangeSlider = elemFactory('input', { type: 'range', id: 'sidebar-pad-length-range', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 1, max: 10, value: 1 });
+        const lengthNumberInput = elemFactory('input', { type: 'number', id: 'sidebar-pad-length', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 1 });
         
-        const lengthWrapper = elemFactory('div', { class: 'flex items-center gap-2' });
-        const lengthRange = elemFactory('input', { type: 'range', id: 'sidebar-pad-length-range', class: 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700', min: 1, max: 10, value: 1 });
-        const lengthNumber = elemFactory('input', { type: 'number', id: 'sidebar-pad-length', class: 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-16 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white', value: 1 });
-        
-        lengthWrapper.appendChild(lengthRange);
-        lengthWrapper.appendChild(lengthNumber);
-        lengthGroup.appendChild(lengthWrapper);
-
-        container.appendChild(lengthGroup);
-        runBtn.classList.remove('hidden');
+        lengthInputWrapper.appendChild(lengthRangeSlider);
+        lengthInputWrapper.appendChild(lengthNumberInput);
+        lengthGroupContainer.appendChild(lengthInputWrapper);
+        container.appendChild(lengthGroupContainer);
+        runButton.classList.remove('hidden');
 
         const updatePreview = () => {
-            const padLength = lengthNumber.value;
-            
-            updateInlinePreviews((name) => {
-                return padLength ? padFilename(name, padLength) : name;
-            });
+            const paddingLength = lengthNumberInput.value;
+            updateInlinePreviews((name) => paddingLength ? padFilename(name, paddingLength) : name);
         };
 
-        lengthRange.addEventListener('input', () => {
-            lengthNumber.value = lengthRange.value;
-            updatePreview();
-        });
-        lengthNumber.addEventListener('input', () => {
-            lengthRange.value = lengthNumber.value;
-            updatePreview();
-        });
-        updatePreview();
+        lengthRangeSlider.addEventListener('input', () => { lengthNumberInput.value = lengthRangeSlider.value; updatePreview(); });
+        lengthNumberInput.addEventListener('input', () => { lengthRangeSlider.value = lengthNumberInput.value; updatePreview(); });
+        updatePreview(); // Initial call.
     }
 }
 

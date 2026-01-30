@@ -6,24 +6,26 @@ const { authenticate } = require('@google-cloud/local-auth');
 const { google } = require('googleapis');
 const Bottleneck = require('bottleneck');
 const { ipcRenderer } = require('electron');
-
-// Import showToast from utils
-// Ensure this path is correct relative to your driveApi.js file's location
 const { showToast } = require('./utils');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 
-// These paths will be initialized asynchronously
+// These paths will be initialized asynchronously.
 let TOKEN_PATH;
 let LOCAL_TOKEN_PATH;
 let CREDENTIALS_PATH;
 
-// Limiter to control the rate of requests to the Google Drive API
+// Limiter to control the rate of requests to the Google Drive API.
 const limiter = new Bottleneck({ minTime: 110 });
 
+/**
+ * Initializes the paths for token and credentials files.
+ * This function is called asynchronously to get paths from the main process.
+ * @returns {Promise<void>}
+ */
 async function initializePaths() {
-    if (TOKEN_PATH) return; // Already initialized
+    if (TOKEN_PATH) return; // Already initialized.
     const localTokenBasePath = await ipcRenderer.invoke('get-local-token-base-path');
     const userDataPath = await ipcRenderer.invoke('get-user-data-path');
     TOKEN_PATH = path.join(userDataPath, 'token.json');
@@ -33,7 +35,8 @@ async function initializePaths() {
 
 /**
  * Reads previously authorized credentials from the save file.
- * @return {Promise<OAuth2Client|null>}
+ * It first checks the local application directory, then the user data path.
+ * @returns {Promise<import('google-auth-library').OAuth2Client|null>} A Google OAuth2 client or null if no token exists.
  */
 async function loadSavedCredentialsIfExist() {
     try {
@@ -55,9 +58,10 @@ async function loadSavedCredentialsIfExist() {
 }
 
 /**
- * Serializes credentials to a file compatible with GoogleAUth.fromJSON.
- * @param {OAuth2Client} client
- * @return {Promise<void>}
+ * Serializes credentials to a file compatible with GoogleAuth.fromJSON.
+ * This saves the refresh token, allowing for repeated authorization.
+ * @param {import('google-auth-library').OAuth2Client} client The authorized client.
+ * @returns {Promise<void>}
  */
 async function saveCredentials(client) {
     const content = await fs.readFile(CREDENTIALS_PATH);
@@ -73,8 +77,9 @@ async function saveCredentials(client) {
 }
 
 /**
- * Loads or requests authorization to call APIs.
- * @returns {Promise<OAuth2Client>} The authorized OAuth2 client.
+ * Loads existing credentials and returns an authorized Google Drive client.
+ * If no credentials exist, it returns null, and the UI should trigger authorization.
+ * @returns {Promise<import('googleapis').drive_v3.Drive|null>} The authorized Google Drive API client or null.
  */
 async function authorizeAndGetDrive() {
     if (!CREDENTIALS_PATH) await initializePaths();
@@ -82,19 +87,19 @@ async function authorizeAndGetDrive() {
     if (client) {
         return google.drive({ version: 'v3', auth: client });
     }
-    // If no saved credentials, trigger interactive auth and poll for the token.
-    // This function will now primarily be for getting an existing client.
-    // The interactive part is handled by triggerUserAuthorization.
+    // If no saved credentials, the interactive part is handled by triggerUserAuthorization.
     return null;
 }
 
 /**
  * Triggers the user authorization flow which opens a browser window.
- * It does not wait for the flow to complete.
+ * This function runs in the background and does not wait for completion.
+ * Upon success, it saves the credentials.
+ * @returns {void}
  */
 function triggerUserAuthorization() {
     // This runs in the background. When the user completes the flow,
-    // @google-cloud/local-auth will save the token to TOKEN_PATH.
+    // @google-cloud/local-auth will save the token.
     authenticate({
         scopes: SCOPES,
         keyfilePath: CREDENTIALS_PATH,
@@ -116,10 +121,11 @@ function triggerUserAuthorization() {
 
 /**
  * Renames a file in Google Drive.
- * @param {string} fileId - The ID of the file to rename.
- * @param {string} newTitle - The new name for the file.
- * @param {string} oldTitle - The original name of the file, for the toast message.
- * @returns {Promise<object>} - A promise that resolves with the updated file data or rejects with an error.
+ * @param {import('googleapis').drive_v3.Drive} gdrive The authorized Google Drive API client.
+ * @param {string} fileId The ID of the file to rename.
+ * @param {string} newTitle The new name for the file.
+ * @param {string} oldTitle The original name of the file, for the toast message.
+ * @returns {Promise<object>} A promise that resolves with the updated file data or rejects with an error.
  */
 function renameFile(gdrive, fileId, newTitle, oldTitle) {
     return new Promise((resolve, reject) => {
@@ -143,15 +149,16 @@ function renameFile(gdrive, fileId, newTitle, oldTitle) {
 }
 
 /**
- * Helper function to fetch file lists from Google Drive.
- * @param {string} parentId - The ID of the parent folder.
- * @param {string} orderBy - How to order the results.
- * @param {string} pageToken - The page token for pagination.
- * @returns {Promise<object>} - An object containing files and nextPageToken.
+ * Helper function to fetch file and folder lists from Google Drive with rate limiting.
+ * @param {import('googleapis').drive_v3.Drive} gdrive The authorized Google Drive API client.
+ * @param {string} parentId The ID of the parent folder (use 'root' for the root folder).
+ * @param {string} orderBy A comma-separated list of sort keys.
+ * @param {string|null} [pageToken=null] The page token for pagination.
+ * @returns {Promise<{files: Array<object>, nextPageToken: string|null}>} An object containing files and the next page token.
  */
 async function fetchDriveFiles(gdrive, parentId, orderBy, pageToken = null) {
     const response = await limiter.schedule(() => gdrive.files.list({
-        pageSize: 30, // Number of items per page
+        pageSize: 30, // Number of items per page.
         q: `'${parentId}' in parents`,
         spaces: 'drive',
         fields: 'nextPageToken, files(id, name, mimeType)',

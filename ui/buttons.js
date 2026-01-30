@@ -1,23 +1,30 @@
 // ui/buttons.js
 const { getState } = require('../state');
 
+/**
+ * Updates the state and appearance of the main authorization button.
+ * It handles loading, success, and initial/failure states.
+ * @param {boolean} isAuthSuccessful - True if authorization was successful.
+ * @param {boolean} isLoading - True if an authorization process is currently in progress.
+ */
 function updateAuthorizeButton(isAuthSuccessful, isLoading) {
     const authorizeButton = document.getElementById('authorize');
     const refreshButton = document.getElementById('refresh-button');
 
     if (authorizeButton) {
         if (isLoading) {
-            // When authorizing, show spinner on the big button
+            // When authorizing, show a spinner on the large button and disable it.
             authorizeButton.innerHTML = `<div class="flex flex-col items-center justify-center pt-5 pb-6"><i class="fas fa-spinner fa-spin fa-3x text-gray-500 dark:text-gray-400"></i></div>`;
             authorizeButton.disabled = true;
         } else {
             if (isAuthSuccessful) {
+                // If authorization is successful, hide the main auth button and show the refresh button.
                 authorizeButton.classList.add('hidden');
                 if (refreshButton) {
                     refreshButton.classList.remove('hidden');
                 }
             } else {
-                // Reset to original state if auth fails or is needed
+                // Reset to the original state if authorization fails or is required.
                 authorizeButton.innerHTML = `<div class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
                         <i class="fab fa-google-drive fa-3x text-gray-500 dark:text-gray-400 mb-4"></i>
@@ -35,6 +42,10 @@ function updateAuthorizeButton(isAuthSuccessful, isLoading) {
     }
 }
 
+/**
+ * Toggles the loading state of the refresh button.
+ * @param {boolean} isLoading - True to show the loading spinner, false to show the sync icon.
+ */
 function setRefreshButtonLoading(isLoading) {
     const refreshButton = document.getElementById('refresh-button');
     if (refreshButton) {
@@ -48,6 +59,10 @@ function setRefreshButtonLoading(isLoading) {
     }
 }
 
+/**
+ * Updates the visibility and state of selection-related buttons
+ * ("Select All", "Select None", "Next Step") based on the current file selection.
+ */
 function updateSelectionButtons() {
     const { arrListAllFiles } = getState();
     const nextStepBtn = document.getElementById('next-step-btn');
@@ -60,14 +75,15 @@ function updateSelectionButtons() {
     const hasSelected = arrListAllFiles.some(file => file.checked);
     const allSelected = arrListAllFiles.length > 0 && arrListAllFiles.every(file => file.checked);
 
-    // Update Select All button icon
+    // Update the "Select All" button icon to reflect whether all items are selected.
     if (allSelected) {
         selectAllBtn.innerHTML = `<i class="fa-solid fa-square-check mr-2"></i> Select All`;
     } else {
         selectAllBtn.innerHTML = `<i class="fa-regular fa-square-check mr-2"></i> Select All`;
     }
 
-    // Update visibility for Next Step and Select None buttons
+    // Show or hide the "Next Step" and "Select None" buttons based on whether any files are selected.
+    // Also enables or disables the main "Execute" navigation tab.
     if (hasSelected) {
         nextStepBtn.classList.remove('hidden');
         selectNoneBtn.classList.remove('hidden');
