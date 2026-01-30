@@ -13,7 +13,7 @@ const {
     renderLoadingIndicator, 
     updateFileListBorderVisibility, 
     updatePaginationVisibility, 
-    updatePreviewCard 
+    renderSidebarForm 
 } = require('./ui');
 const { setupEventHandlers } = require('./eventHandlers');
 
@@ -102,9 +102,9 @@ function handleFileFolderClick(file, checkboxElement) {
     updateSelectionButtons();
 
     // Also update the preview card if an operation is selected.
-    const operationType = document.getElementById('sidebar-operation-select').value;
+    const operationType = document.getElementById('operation-select').value;
     if (['replace', 'pad', 'slice'].includes(operationType)) {
-        updatePreviewCard(operationType);
+        renderSidebarForm(operationType);
     }
 }
 

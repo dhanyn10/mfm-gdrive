@@ -10,7 +10,6 @@ const {
     toggleExecuteSidebar, 
     renderSidebarForm, 
     setPanelVisibility, 
-    updatePreviewCard,
     addNotification,
     setupNotificationBell
 } = require('./ui');
@@ -172,7 +171,7 @@ function setupEventHandlers(listFiles) {
     const updatePreview = () => {
         const operationType = operationSelect.value;
         if (['replace', 'pad', 'slice'].includes(operationType)) {
-            updatePreviewCard(operationType);
+            renderSidebarForm(operationType);
         }
     };
 

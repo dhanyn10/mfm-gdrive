@@ -1,57 +1,7 @@
 const { padFilename } = require('./utils');
 const { renameFile } = require('./driveApi');
 const { getCheckedFiles } = require('./state');
-const { showReplaceTextModal, showSliceTextModal, showPadFilenameModal } = require('./flowbite-helpers');
 const { addNotification } = require('./ui');
-
-/**
- * Opens a modal to get user input for "Replace Text" and then executes the operation.
- * @param {import('googleapis').drive_v3.Drive} driveClient - The authorized Google Drive API client.
- * @param {function} refreshFileList - A callback function to refresh the file list in the UI.
- */
-function handleReplaceText(driveClient, refreshFileList) {
-    showReplaceTextModal(async (from, to) => {
-        await executeReplace(driveClient, from, to, refreshFileList);
-    });
-}
-
-/**
- * Opens a modal to get user input for "Slice Text" and then executes the operation.
- * @param {import('googleapis').drive_v3.Drive} driveClient - The authorized Google Drive API client.
- * @param {function} refreshFileList - A callback function to refresh the file list in the UI.
- */
-function handleSliceText(driveClient, refreshFileList) {
-    showSliceTextModal(async (start, end) => {
-        const startNum = parseInt(start);
-        const endNum = parseInt(end);
-
-        if (isNaN(startNum) || startNum < 0) {
-            addNotification('Please enter a valid start position (0 or greater).', 'error');
-            return;
-        }
-        if (isNaN(endNum) || endNum < 0) {
-            addNotification('Please enter a valid end position (0 or greater).', 'error');
-            return;
-        }
-        if (startNum > endNum) {
-            addNotification('Start position cannot be greater than end position.', 'error');
-            return;
-        }
-        
-        await executeSlice(driveClient, startNum, endNum, refreshFileList);
-    });
-}
-
-/**
- * Opens a modal to get user input for "Pad Filename" and then executes the operation.
- * @param {import('googleapis').drive_v3.Drive} driveClient - The authorized Google Drive API client.
- * @param {function} refreshFileList - A callback function to refresh the file list in the UI.
- */
-function handlePadFilename(driveClient, refreshFileList) {
-    showPadFilenameModal(async (numPrefix) => {
-        await executePad(driveClient, parseInt(numPrefix), refreshFileList);
-    });
-}
 
 /**
  * Executes the "Replace Text" operation for all checked files.
@@ -145,9 +95,6 @@ async function executePad(driveClient, numPrefix, refreshFileList) {
 }
 
 module.exports = {
-    handleReplaceText,
-    handleSliceText,
-    handlePadFilename,
     executeReplace,
     executeSlice,
     executePad
