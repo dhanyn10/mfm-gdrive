@@ -20,16 +20,18 @@ function renderNotifications() {
         noNotificationsMessage.classList.add('hidden');
         markAllReadButton.classList.remove('hidden');
         notifications.forEach(notif => {
+            // Card style with soft shadow instead of border
             const item = elemFactory('div', {
-                class: `p-4 text-sm ${notif.read ? 'text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'} border-b border-gray-200 dark:border-gray-600`
+                class: `flex items-center p-3 mb-2 mx-2 rounded-lg shadow-sm text-sm ${notif.read ? 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-blue-50 dark:bg-gray-600 text-gray-800 dark:text-gray-200'}`
             });
+            
             const iconClass = {
                 success: 'fas fa-check-circle text-green-500',
                 error: 'fas fa-times-circle text-red-500',
                 info: 'fas fa-info-circle text-blue-500'
             }[notif.type];
 
-            item.innerHTML = `<i class="${iconClass} mr-2"></i> ${notif.text}`;
+            item.innerHTML = `<i class="${iconClass} mr-3 text-lg"></i> <span>${notif.text}</span>`;
             notificationList.appendChild(item);
         });
     }
@@ -64,12 +66,6 @@ function markAllAsRead() {
 function setupNotificationBell() {
     notificationBell.addEventListener('click', () => {
         notificationDropdown.classList.toggle('hidden');
-        if (!notificationDropdown.classList.contains('hidden')) {
-            // When opening the dropdown, mark items as read after a short delay
-            setTimeout(() => {
-                markAllAsRead();
-            }, 1500);
-        }
     });
 
     markAllReadButton.addEventListener('click', () => {
