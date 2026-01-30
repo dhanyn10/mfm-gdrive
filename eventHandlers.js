@@ -1,6 +1,6 @@
 // eventHandlers.js
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
-const { showToast, elemFactory } = require('./utils');
+const { elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
 const { 
     showMainUI, 
@@ -10,7 +10,9 @@ const {
     toggleExecuteSidebar, 
     renderSidebarForm, 
     setPanelVisibility, 
-    updatePreviewCard 
+    updatePreviewCard,
+    addNotification,
+    setupNotificationBell
 } = require('./ui');
 const { executeReplace, executeSlice, executePad } = require('./fileOperations');
 
@@ -47,6 +49,8 @@ function setupEventHandlers(listFiles) {
     const foldersPanel = document.getElementById('folders');
     const executeSidebar = document.getElementById('execute-sidebar');
 
+    setupNotificationBell();
+
     /**
      * Handles the click event for both the authorization and refresh buttons.
      * It attempts to authorize with Google Drive or refresh the existing token.
@@ -68,10 +72,10 @@ function setupEventHandlers(listFiles) {
                 const { arrParentFolder } = getState();
                 await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1]);
                 if (isInitialAuth) {
-                    showToast('Authorization successful. Ready to go!', 'success');
+                    addNotification('Authorization successful. Ready to go!', 'success');
                     updateState({ isInitialAuthSuccessful: true });
                 } else {
-                    showToast('File list refreshed.', 'success');
+                    addNotification('File list refreshed.', 'success');
                 }
                 updateAuthorizeButton(true, false); // Hide authorize button, show refresh.
             } else {
@@ -82,7 +86,7 @@ function setupEventHandlers(listFiles) {
                 let pollingHandle;
                 const timeoutHandle = setTimeout(() => {
                     clearInterval(pollingHandle);
-                    showToast('Authorization timed out. Please try again.', 'error');
+                    addNotification('Authorization timed out. Please try again.', 'error');
                     updateAuthorizeButton(false, false); // Reset button state.
                 }, pollingTimeout);
         
@@ -104,14 +108,14 @@ function setupEventHandlers(listFiles) {
                             const { arrParentFolder, currentPageToken } = getState();
                             await listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], currentPageToken);                        
                             updateState({ isInitialAuthSuccessful: true });
-                            showToast('Authorization successful. Ready to go!', 'success');
+                            addNotification('Authorization successful. Ready to go!', 'success');
                             updateAuthorizeButton(true, false); // Hide authorize button, show refresh.
                         }
                     } catch (error) {
                         // Handle errors during polling.
                         clearInterval(pollingHandle);
                         clearTimeout(timeoutHandle);
-                        showToast('An error occurred during authorization. Please try again.', 'error');
+                        addNotification('An error occurred during authorization. Please try again.', 'error');
                         console.error('Error during polling or listFiles:', error);
                         updateAuthorizeButton(false, false); // Reset button state.
                     }
@@ -119,7 +123,7 @@ function setupEventHandlers(listFiles) {
             }
         } catch (error) {
             // Handle errors during initial auth/refresh attempt.
-            showToast('An error occurred. Please try again.', 'error');
+            addNotification('An error occurred. Please try again.', 'error');
             console.error('Error during auth/refresh:', error);
             updateAuthorizeButton(false, false); // Reset button state.
         } finally {
@@ -141,7 +145,7 @@ function setupEventHandlers(listFiles) {
             updateState({ prevPageTokensStack });
             listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], prevToken);
         } else {
-            showToast('No previous pages.', 'info');
+            addNotification('No previous pages.', 'info');
             prevPageButton.disabled = true;
         }
     });
@@ -157,7 +161,7 @@ function setupEventHandlers(listFiles) {
             const { arrParentFolder } = getState();
             listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], nextPageTokenFromAPI);
         } else {
-            showToast('No more pages.', 'info');
+            addNotification('No more pages.', 'info');
             nextPageButton.disabled = true;
         }
     });

@@ -25,17 +25,40 @@
 
     <div id="main-view" class="hidden">
       <nav class="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 mb-4">
-        <div class="flex justify-center p-4">
-            <div class="inline-flex rounded-md" role="group">
-                <button id="nav-folders" type="button" class="px-4 py-2 text-sm font-medium text-blue-700 bg-gray-100 border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    Folders
-                </button>
-                <button id="nav-files" type="button" class="px-4 py-2 text-sm font-medium text-blue-700 bg-gray-100 border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-default">
-                    Files
-                </button>
-                <button id="nav-execute" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    Execute
-                </button>
+        <div class="container mx-auto flex items-center p-4 relative">
+            <div class="flex-grow flex justify-center">
+                <div class="inline-flex rounded-md" role="group">
+                    <button id="nav-folders" type="button" class="px-4 py-2 text-sm font-medium text-blue-700 bg-gray-100 border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        Folders
+                    </button>
+                    <button id="nav-files" type="button" class="px-4 py-2 text-sm font-medium text-blue-700 bg-gray-100 border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-default">
+                        Files
+                    </button>
+                    <button id="nav-execute" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Execute
+                    </button>
+                </div>
+            </div>
+            <div class="absolute right-4">
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button id="notification-bell" type="button" class="relative px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span id="notification-count" class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full hidden">0</span>
+                    </button>
+                    <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 hidden dark:bg-gray-700">
+                        <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="notification-bell">
+                            <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 border-b dark:border-gray-600">
+                                <span>Notifications</span>
+                                <button id="mark-all-read" class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 hidden">Mark all as read</button>
+                            </div>
+                            <div id="notification-list" class="max-h-60 overflow-y-auto">
+                                <!-- Notification items will be inserted here -->
+                                <p class="text-gray-500 dark:text-gray-400 text-sm p-4" id="no-notifications-message">No new notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
       </nav>

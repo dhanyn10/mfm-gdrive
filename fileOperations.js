@@ -1,7 +1,8 @@
-const { showToast, padFilename } = require('./utils');
+const { padFilename } = require('./utils');
 const { renameFile } = require('./driveApi');
 const { getCheckedFiles } = require('./state');
 const { showReplaceTextModal, showSliceTextModal, showPadFilenameModal } = require('./flowbite-helpers');
+const { addNotification } = require('./ui');
 
 /**
  * Opens a modal to get user input for "Replace Text" and then executes the operation.
@@ -25,15 +26,15 @@ function handleSliceText(driveClient, refreshFileList) {
         const endNum = parseInt(end);
 
         if (isNaN(startNum) || startNum < 0) {
-            showToast('Please enter a valid start position (0 or greater).', 'error');
+            addNotification('Please enter a valid start position (0 or greater).', 'error');
             return;
         }
         if (isNaN(endNum) || endNum < 0) {
-            showToast('Please enter a valid end position (0 or greater).', 'error');
+            addNotification('Please enter a valid end position (0 or greater).', 'error');
             return;
         }
         if (startNum > endNum) {
-            showToast('Start position cannot be greater than end position.', 'error');
+            addNotification('Start position cannot be greater than end position.', 'error');
             return;
         }
         
@@ -62,7 +63,7 @@ function handlePadFilename(driveClient, refreshFileList) {
 async function executeReplace(driveClient, from, to, refreshFileList) {
     const checkedFiles = getCheckedFiles();
     if (checkedFiles.length === 0) {
-        showToast('No files selected for operation.', 'info');
+        addNotification('No files selected for operation.', 'info');
         return;
     }
 
@@ -75,9 +76,9 @@ async function executeReplace(driveClient, from, to, refreshFileList) {
     try {
         await Promise.all(renamePromises);
         refreshFileList();
-        showToast('Rename completed.', 'success');
+        addNotification('Rename completed.', 'success');
     } catch (error) {
-        showToast('An error occurred during rename.', 'error');
+        addNotification('An error occurred during rename.', 'error');
         console.error('Error during rename:', error);
     }
 }
@@ -92,7 +93,7 @@ async function executeReplace(driveClient, from, to, refreshFileList) {
 async function executeSlice(driveClient, startNum, endNum, refreshFileList) {
     const checkedFiles = getCheckedFiles();
     if (checkedFiles.length === 0) {
-        showToast('No files selected for operation.', 'info');
+        addNotification('No files selected for operation.', 'info');
         return;
     }
 
@@ -105,10 +106,10 @@ async function executeSlice(driveClient, startNum, endNum, refreshFileList) {
 
     try {
         await Promise.all(renamePromises);
-        showToast(`Operation 'slice' completed.`, 'success');
+        addNotification(`Operation 'slice' completed.`, 'success');
         refreshFileList();
     } catch (error) {
-        showToast(`An error occurred during slice operation.`, 'error');
+        addNotification(`An error occurred during slice operation.`, 'error');
         console.error(`Error during slice operation:`, error);
     }
 }
@@ -123,7 +124,7 @@ async function executeSlice(driveClient, startNum, endNum, refreshFileList) {
 async function executePad(driveClient, numPrefix, refreshFileList) {
     const checkedFiles = getCheckedFiles();
     if (checkedFiles.length === 0) {
-        showToast('No files selected for operation.', 'info');
+        addNotification('No files selected for operation.', 'info');
         return;
     }
 
@@ -135,10 +136,10 @@ async function executePad(driveClient, numPrefix, refreshFileList) {
 
     try {
         await Promise.all(renamePromises);
-        showToast('Padding completed.', 'success');
+        addNotification('Padding completed.', 'success');
         refreshFileList();
     } catch (error) {
-        showToast('An error occurred while padding filenames.', 'error');
+        addNotification('An error occurred while padding filenames.', 'error');
         console.error('Error during pad filename:', error);
     }
 }

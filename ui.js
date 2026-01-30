@@ -11,6 +11,7 @@ const components = require('./ui/components');
 const panels = require('./ui/panels');
 const buttons = require('./ui/buttons');
 const helpers = require('./ui/helpers');
+const notifications = require('./ui/notifications');
 
 // Export all functions from the imported UI modules.
 // The spread syntax (...) is used to merge the exports from each module
@@ -20,6 +21,7 @@ module.exports = {
     ...panels,
     ...buttons,
     ...helpers,
+    ...notifications,
     // Explicitly exporting updatePreviewCard to ensure it's available,
     // though it should already be included via the spread of `components`.
     // This might be redundant but doesn't cause harm.

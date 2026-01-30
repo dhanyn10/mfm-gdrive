@@ -6,7 +6,7 @@ const { authenticate } = require('@google-cloud/local-auth');
 const { google } = require('googleapis');
 const Bottleneck = require('bottleneck');
 const { ipcRenderer } = require('electron');
-const { showToast } = require('./utils');
+const { addNotification } = require('./ui');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
@@ -136,11 +136,11 @@ function renameFile(gdrive, fileId, newTitle, oldTitle) {
                 'resource': body
             }, (err, res) => {
                 if (err) {
-                    showToast(`Error renaming file: ${err.message}`, 'error');
+                    addNotification(`Error renaming file: ${err.message}`, 'error');
                     console.error(`Error: ${err}`);
                     reject(err);
                 } else {
-                    showToast(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success');
+                    addNotification(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success');
                     resolve(res.data);
                 }
             });
