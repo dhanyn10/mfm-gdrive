@@ -1,6 +1,6 @@
 // ui/panels.js
 const { updateSlicePreview } = require('./helpers');
-const { resetFileListItemStyles } = require('./components');
+const { resetFileListItemStyles, resetSidebarForm } = require('./components');
 
 /**
  * Switches the view from the initial authorization screen to the main application UI.
@@ -70,8 +70,10 @@ function setPanelVisibility(panel, isVisible) {
             foldersPanel.classList.remove('hidden');
             sidebarPanel.classList.add('hidden');
             if (resizer) resizer.classList.add('hidden');
-            updateSlicePreview(-1, -1); // Clear any slice previews.
-            resetFileListItemStyles(); // Reset item styles when showing folders.
+            // Cleanup when switching away from the sidebar to the folders view.
+            updateSlicePreview(-1, -1);
+            resetFileListItemStyles();
+            resetSidebarForm(); // Reset the sidebar form.
         } else {
             foldersPanel.classList.add('hidden');
         }
@@ -83,8 +85,10 @@ function setPanelVisibility(panel, isVisible) {
         } else {
             sidebarPanel.classList.add('hidden');
             if (resizer) resizer.classList.add('hidden');
-            updateSlicePreview(-1, -1); // Clear any slice previews.
-            resetFileListItemStyles(); // Reset item styles when closing the sidebar.
+            // Cleanup when the sidebar is explicitly closed.
+            updateSlicePreview(-1, -1);
+            resetFileListItemStyles();
+            resetSidebarForm(); // Reset the sidebar form.
         }
     }
     updatePanelLayout(); // Update tab styles to match panel visibility.

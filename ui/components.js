@@ -146,8 +146,10 @@ function resetFileListItemStyles() {
     listItems.forEach(li => {
         const fileFolderSpan = li.querySelector('span:first-of-type');
         if (fileFolderSpan) {
-            // Remove special styling to revert to the default peer-checked behavior.
-            fileFolderSpan.classList.remove('bg-transparent', 'text-red-600');
+            // Remove preview-specific styles
+            fileFolderSpan.classList.remove('peer-checked:bg-transparent', 'peer-checked:text-gray-900');
+            // Ensure default selection styles are present
+            fileFolderSpan.classList.add('peer-checked:bg-blue-500', 'peer-checked:text-white');
         }
         
         // Hide and clear all preview elements.
@@ -163,6 +165,29 @@ function resetFileListItemStyles() {
             previewButton.innerHTML = 'Preview';
         }
     });
+}
+
+/**
+ * Resets the sidebar form to its default state.
+ * Clears input fields and resets the operation dropdown.
+ */
+function resetSidebarForm() {
+    const container = document.getElementById('sidebar-form-container');
+    if (container) {
+        container.innerHTML = '';
+    }
+
+    const runButton = document.getElementById('run-sidebar-execute');
+    if (runButton) {
+        runButton.classList.add('hidden');
+    }
+
+    const operationSelect = document.getElementById('operation-select');
+    const dropdownButton = document.getElementById('dropdown-button');
+    if (operationSelect && dropdownButton) {
+        operationSelect.value = '';
+        dropdownButton.innerHTML = `Select Operation <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/></svg>`;
+    }
 }
 
 /**
@@ -206,16 +231,20 @@ function renderSidebarForm(operationType) {
 
             if (!fileFolderSpan) return;
 
-            // Always reset special styling first.
-            fileFolderSpan.classList.remove('bg-transparent', 'text-red-600');
+            // First, ensure the item is in the default state.
+            fileFolderSpan.classList.remove('peer-checked:bg-transparent', 'peer-checked:text-gray-900');
+            fileFolderSpan.classList.add('peer-checked:bg-blue-500', 'peer-checked:text-white');
 
             if (checkbox && checkbox.checked && previewDiv && nameWrapper && previewButton) {
                 const originalName = nameWrapper.textContent;
                 const newName = transformer(originalName);
                 
-                // If the name changes, apply special styling and show the preview.
+                // If the name changes, apply the preview styling.
                 if (newName !== originalName) {
-                    fileFolderSpan.classList.add('bg-transparent', 'text-red-600'); // Indicates a pending change.
+                    // Remove default styles and add preview styles.
+                    fileFolderSpan.classList.remove('peer-checked:bg-blue-500', 'peer-checked:text-white');
+                    fileFolderSpan.classList.add('peer-checked:bg-transparent', 'peer-checked:text-gray-900');
+                    
                     previewButton.classList.remove('hidden');
                     previewDiv.classList.remove('hidden');
 
@@ -231,7 +260,7 @@ function renderSidebarForm(operationType) {
                         previewDiv.innerHTML = `<i class="fas fa-arrow-right mr-1"></i> <span class="text-green-600">${newName}</span>`;
                     }
                 } else {
-                    // If no change, revert to default state.
+                    // If no change, hide the preview elements. The default style is already applied.
                     previewDiv.classList.add('hidden');
                     previewButton.classList.add('hidden');
                     previewDiv.classList.remove('expanded');
@@ -372,5 +401,6 @@ module.exports = {
     renderEmptyFileList,
     renderLoadingIndicator,
     renderSidebarForm,
-    resetFileListItemStyles
+    resetFileListItemStyles,
+    resetSidebarForm
 };
