@@ -45,7 +45,6 @@ function setupEventHandlers(listFiles) {
     const dropdownItems = document.querySelectorAll('.dropdown-item');
     const sidebarResizer = document.getElementById('sidebar-resizer');
     const foldersPanel = document.getElementById('folders');
-    const filesPanel = document.getElementById('files'); // This variable is declared but not used.
     const executeSidebar = document.getElementById('execute-sidebar');
 
     /**

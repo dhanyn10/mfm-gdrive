@@ -31,9 +31,6 @@ const state = {
 
     /** @type {number|null} The index of the last clicked file, used for shift-click range selection. */
     fromIndex: null,
-
-    /** @type {number|null} The index of the file that a shift-click range selection goes to. (Note: This seems unused and could be a candidate for removal). */
-    toIndex: null,
 };
 
 /**
