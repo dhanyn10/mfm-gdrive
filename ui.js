@@ -8,5 +8,6 @@ module.exports = {
     ...components,
     ...panels,
     ...buttons,
-    ...helpers
+    ...helpers,
+    updatePreviewCard: components.updatePreviewCard
 };

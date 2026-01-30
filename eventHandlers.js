@@ -2,7 +2,7 @@
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
 const { showToast, elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
-const { showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateSelectionButtons, toggleExecuteSidebar, renderSidebarForm, setPanelVisibility } = require('./ui');
+const { showMainUI, updateAuthorizeButton, setRefreshButtonLoading, updateSelectionButtons, toggleExecuteSidebar, renderSidebarForm, setPanelVisibility, updatePreviewCard } = require('./ui');
 const { executeReplace, executeSlice, executePad } = require('./fileOperations');
 
 let driveClient;
@@ -129,6 +129,13 @@ function setupEventHandlers(listFiles) {
         }
     });
 
+    const updatePreview = () => {
+        const operationType = operationSelect.value;
+        if (['replace', 'pad', 'slice'].includes(operationType)) {
+            updatePreviewCard(operationType);
+        }
+    };
+
     selectAllBtn.addEventListener('click', () => {
         const { arrListAllFiles } = getState();
         const allSelected = arrListAllFiles.length > 0 && arrListAllFiles.every(file => file.checked);
@@ -137,14 +144,15 @@ function setupEventHandlers(listFiles) {
         const listContainer = document.getElementById('file-folder-list');
         const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
 
-        arrListAllFiles.forEach((file, index) => {
-            file.checked = shouldSelectAll;
+        const newArrListAllFiles = arrListAllFiles.map((file, index) => {
             if (checkboxes[index]) {
                 checkboxes[index].checked = shouldSelectAll;
             }
+            return { ...file, checked: shouldSelectAll };
         });
-        updateState({ arrListAllFiles });
+        updateState({ arrListAllFiles: newArrListAllFiles });
         updateSelectionButtons();
+        updatePreview();
     });
 
     selectNoneBtn.addEventListener('click', () => {
@@ -152,14 +160,15 @@ function setupEventHandlers(listFiles) {
         const listContainer = document.getElementById('file-folder-list');
         const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
 
-        arrListAllFiles.forEach((file, index) => {
-            file.checked = false;
+        const newArrListAllFiles = arrListAllFiles.map((file, index) => {
             if (checkboxes[index]) {
                 checkboxes[index].checked = false;
             }
+            return { ...file, checked: false };
         });
-        updateState({ arrListAllFiles });
+        updateState({ arrListAllFiles: newArrListAllFiles });
         updateSelectionButtons();
+        updatePreview();
     });
 
     nextStepBtn.addEventListener('click', () => {
@@ -226,20 +235,27 @@ function setupEventHandlers(listFiles) {
         const targetCheckbox = evt.target.closest('li')?.querySelector('.cbox-file-folder');
         if (!targetCheckbox) return;
 
-        const checkboxes = fileFolderList.querySelectorAll('.cbox-file-folder');
-        const clickedIndex = Array.from(checkboxes).indexOf(targetCheckbox);
+        const checkboxes = Array.from(fileFolderList.querySelectorAll('.cbox-file-folder'));
+        const clickedIndex = checkboxes.indexOf(targetCheckbox);
         let { fromIndex, arrListAllFiles } = getState();
 
         if (evt.shiftKey && fromIndex !== null) {
             const toIndex = clickedIndex;
             const [low, high] = fromIndex < toIndex ? [fromIndex, toIndex] : [toIndex, fromIndex];
-            for (let idx = low; idx <= high; idx++) {
-                checkboxes[idx].checked = true;
-                arrListAllFiles[idx].checked = true;
-            }
+            
+            const newArrListAllFiles = arrListAllFiles.map((file, idx) => {
+                if (idx >= low && idx <= high) {
+                    checkboxes[idx].checked = true;
+                    return { ...file, checked: true };
+                }
+                return file;
+            });
+            updateState({ arrListAllFiles: newArrListAllFiles });
         }
+        
         updateState({ fromIndex: clickedIndex });
         updateSelectionButtons();
+        updatePreview();
     });
 
     let isResizing = false;
