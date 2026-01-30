@@ -321,22 +321,24 @@ function setupEventHandlers(listFiles) {
 
     document.addEventListener('mousemove', (e) => {
         if (!isResizing) return;
-
-        const containerWidth = document.querySelector('.container').offsetWidth;
+    
+        const container = document.querySelector('.container');
+        const containerWidth = container.offsetWidth;
         const x = e.clientX;
-        const containerLeft = document.querySelector('.container').getBoundingClientRect().left;
-        
+        const containerLeft = container.getBoundingClientRect().left;
+    
         let foldersWidth = 0;
         if (!foldersPanel.classList.contains('hidden')) {
             foldersWidth = foldersPanel.offsetWidth;
         }
-        
+    
         const newSidebarWidth = containerWidth - (x - containerLeft);
-        
+        const maxSidebarWidth = containerWidth * 0.5; // 50% of container width
+    
         // Constrain sidebar width within reasonable limits.
-        if (newSidebarWidth > 200 && newSidebarWidth < containerWidth - foldersWidth - 200) {
-             executeSidebar.style.width = `${newSidebarWidth}px`;
-             executeSidebar.style.flex = 'none'; // Prevent flexbox from overriding width.
+        if (newSidebarWidth > 200 && newSidebarWidth < maxSidebarWidth) {
+            executeSidebar.style.width = `${newSidebarWidth}px`;
+            executeSidebar.style.flex = 'none'; // Prevent flexbox from overriding width.
         }
     });
 
