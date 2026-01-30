@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "npm run css-gen && electron .",
     "css": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify --watch",
     "css-gen": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify",
     "app:build": "electron-builder",
@@ -79,7 +79,6 @@
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@google-cloud/local-auth": "^3.0.1",
     "bottleneck": "^2.19.5",
-    "flowbite": "^4.0.1",
     "google-auth-library": "^10.1.0",
     "googleapis": "^170.1.0",
     "node-abi": "^4.14.0",
