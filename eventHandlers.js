@@ -137,9 +137,12 @@ function setupEventHandlers(listFiles) {
     prevPageButton.addEventListener('click', async () => {
         const { prevPageTokensStack, arrParentFolder } = getState();
         if (prevPageTokensStack.length > 0) {
-            const prevToken = prevPageTokensStack.pop(); // Get the previous page token.
-            updateState({ prevPageTokensStack }); // Update state.
-            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], prevToken); // Load previous page.
+            const prevToken = prevPageTokensStack.pop();
+            updateState({ prevPageTokensStack });
+            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], prevToken);
+        } else {
+            showToast('No previous pages.', 'info');
+            prevPageButton.disabled = true;
         }
     });
 
@@ -147,16 +150,15 @@ function setupEventHandlers(listFiles) {
     nextPageButton.addEventListener('click', async () => {
         const { nextPageTokenFromAPI, currentPageToken, prevPageTokensStack } = getState();
         if (nextPageTokenFromAPI) {
-            // Save current page token to stack if not already there or if it's the first page.
-            if (currentPageToken !== null || prevPageTokensStack.length === 0) {
-                prevPageTokensStack.push(currentPageToken);
-            }
-            updateState({ prevPageTokensStack }); // Update state.
+            // Always push the current token to the previous stack before navigating.
+            prevPageTokensStack.push(currentPageToken);
+            updateState({ prevPageTokensStack });
+
             const { arrParentFolder } = getState();
-            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], nextPageTokenFromAPI); // Load next page.
+            listFiles(driveClient, arrParentFolder[arrParentFolder.length - 1], nextPageTokenFromAPI);
         } else {
             showToast('No more pages.', 'info');
-            nextPageButton.disabled = true; // Disable if no next page.
+            nextPageButton.disabled = true;
         }
     });
 
