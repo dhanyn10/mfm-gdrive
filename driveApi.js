@@ -136,11 +136,11 @@ function renameFile(gdrive, fileId, newTitle, oldTitle) {
                 'resource': body
             }, (err, res) => {
                 if (err) {
-                    addNotification(`Error renaming file: ${err.message}`, 'error');
+                    addNotification(`Error renaming file: ${err.message}`, 'error', fileId);
                     console.error(`Error: ${err}`);
                     reject(err);
                 } else {
-                    addNotification(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success');
+                    addNotification(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success', fileId);
                     resolve(res.data);
                 }
             });

@@ -20,9 +20,8 @@ function renderNotifications() {
         noNotificationsMessage.classList.add('hidden');
         markAllReadButton.classList.remove('hidden');
         notifications.forEach(notif => {
-            // Card style with soft shadow instead of border
             const item = elemFactory('div', {
-                class: `flex items-center p-3 mb-2 mx-2 rounded-lg shadow-sm text-sm ${notif.read ? 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-blue-50 dark:bg-gray-600 text-gray-800 dark:text-gray-200'}`
+                class: `flex items-center p-3 text-sm border-b border-gray-200 dark:border-gray-600 ${notif.read ? 'text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'}`
             });
             
             const iconClass = {
@@ -32,6 +31,30 @@ function renderNotifications() {
             }[notif.type];
 
             item.innerHTML = `<i class="${iconClass} mr-3 text-lg"></i> <span>${notif.text}</span>`;
+            
+            if (notif.relatedFileId) {
+                item.style.cursor = 'pointer';
+                item.addEventListener('mouseenter', () => {
+                    const checkbox = document.querySelector(`input.cbox-file-folder[value="${notif.relatedFileId}"]`);
+                    if (checkbox) {
+                        const span = checkbox.nextElementSibling;
+                        if (span) {
+                            span.classList.add('bg-gray-100');
+                            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                });
+                item.addEventListener('mouseleave', () => {
+                    const checkbox = document.querySelector(`input.cbox-file-folder[value="${notif.relatedFileId}"]`);
+                    if (checkbox) {
+                        const span = checkbox.nextElementSibling;
+                        if (span) {
+                            span.classList.remove('bg-gray-100');
+                        }
+                    }
+                });
+            }
+
             notificationList.appendChild(item);
         });
     }
@@ -43,10 +66,11 @@ function renderNotifications() {
     }
 }
 
-function addNotification(text, type = 'info') {
+function addNotification(text, type = 'info', relatedFileId = null) {
     const newNotification = {
         text,
         type,
+        relatedFileId,
         read: false,
         timestamp: new Date()
     };
