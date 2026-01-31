@@ -21,7 +21,7 @@ function renderNotifications() {
         markAllReadButton.classList.remove('hidden');
         notifications.forEach((notif) => {
             const item = elemFactory('div', {
-                class: `flex items-center justify-between p-3 text-sm border-b border-gray-200 dark:border-gray-600 cursor-pointer transition-colors duration-200 ${notif.read ? 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'}`
+                class: `flex items-center justify-between p-3 text-sm border-b border-gray-200 dark:border-gray-600 cursor-pointer transition-all duration-300 ${notif.read ? 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'}`
             });
             
             const iconBase = {
@@ -50,16 +50,23 @@ function renderNotifications() {
                     try {
                         await notif.undoFunction();
                         
-                        // Find the current index of this notification object
-                        const currentIndex = notifications.indexOf(notif);
-                        if (currentIndex > -1) {
-                            notifications.splice(currentIndex, 1);
-                            // Only decrement unreadCount if the item was unread (which it should be, given the condition above)
-                            if (!notif.read) {
-                                unreadCount--;
+                        // Animate swipe out
+                        item.style.transform = 'translateX(100%)';
+                        item.style.opacity = '0';
+                        
+                        // Wait for animation to finish before removing from data and re-rendering
+                        setTimeout(() => {
+                            // Find the current index of this notification object
+                            const currentIndex = notifications.indexOf(notif);
+                            if (currentIndex > -1) {
+                                notifications.splice(currentIndex, 1);
+                                // Only decrement unreadCount if the item was unread (which it should be, given the condition above)
+                                if (!notif.read) {
+                                    unreadCount--;
+                                }
+                                renderNotifications();
                             }
-                            renderNotifications();
-                        }
+                        }, 300); // Match the duration-300 class
                     } catch (error) {
                         console.error("Undo failed", error);
                     }

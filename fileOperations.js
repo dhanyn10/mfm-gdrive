@@ -55,7 +55,6 @@ async function executeSlice(driveClient, startNum, endNum, refreshFileList) {
 
     try {
         await Promise.all(renamePromises);
-        addNotification(`Operation 'slice' completed.`, 'success');
         refreshFileList();
     } catch (error) {
         addNotification(`An error occurred during slice operation.`, 'error');
