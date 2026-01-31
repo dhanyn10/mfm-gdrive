@@ -84,7 +84,6 @@ async function executePad(driveClient, numPrefix, refreshFileList) {
 
     try {
         await Promise.all(renamePromises);
-        addNotification('Padding completed.', 'success');
         refreshFileList();
     } catch (error) {
         addNotification('An error occurred while padding filenames.', 'error');
