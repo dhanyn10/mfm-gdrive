@@ -20,7 +20,7 @@ async function executeReplace(driveClient, from, to, refreshFileList) {
     const renamePromises = checkedFiles.map(file => {
         const newFilename = file.name.replace(new RegExp(from, 'g'), to);
         if (newFilename === file.name) return Promise.resolve(); // Skip if no change
-        return renameFile(driveClient, file.id, newFilename, file.name);
+        return renameFile(driveClient, file.id, newFilename, file.name, refreshFileList);
     });
 
     try {
@@ -50,7 +50,7 @@ async function executeSlice(driveClient, startNum, endNum, refreshFileList) {
         const originalName = file.name;
         const newName = originalName.slice(0, startNum) + originalName.slice(endNum);
         if (newName === originalName) return Promise.resolve(); // Skip if no change
-        return renameFile(driveClient, file.id, newName, originalName);
+        return renameFile(driveClient, file.id, newName, originalName, refreshFileList);
     });
 
     try {
@@ -80,7 +80,7 @@ async function executePad(driveClient, numPrefix, refreshFileList) {
     const renamePromises = checkedFiles.map(file => {
         const paddedFilename = padFilename(file.name, numPrefix);
         if (paddedFilename === file.name) return Promise.resolve(); // Skip if no change
-        return renameFile(driveClient, file.id, paddedFilename, file.name);
+        return renameFile(driveClient, file.id, paddedFilename, file.name, refreshFileList);
     });
 
     try {
