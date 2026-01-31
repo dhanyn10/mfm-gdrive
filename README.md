@@ -7,70 +7,78 @@ Easy rename your files in Google Drive
     ```bash
     git clone https://github.com/dhanyn10/mfm-gdrive.git
     ```
-2. move to /app
+2. Move to the project directory
+    ```bash
+    cd mfm-gdrive
     ```
-    cd app
-    ```
-2. Install dependencies
+3. Install dependencies
     ```bash
     npm install
     ```
+
 ## Usage
-- generate css (optional)
+- Generate CSS (optional)
     ```bash
     npm run css-gen
     ```
-- run the application
+- Run the application
     ```bash
     npm start
     ```
+
 ## How to Use
-1. click button **authorize** to let the apps gain authorization to your Google Drive metadata
-2. **Left sidebar** shows you folder view; **right sidebar** shows you files and folder. If you need to return back to previous(parent) folder, you can click to folder **"..."**
-3. choose any files you needed to change the names. Also you can choose multiple files by using `shift + click`
-6. And finally, click **(play)** button to execute the rename function.
+1. Click the **Authorize** button to grant the app access to your Google Drive metadata.
+2. The **Left Sidebar** displays your folder structure. The **Main Area** shows files within the selected folder. To navigate back to the parent folder, click the **"..."** item in the folder list.
+3. Select the files you wish to rename. You can select multiple files using `Shift + Click` or by using the **Select All** button.
+4. Click the **Next** button or the **Execute** tab to switch the sidebar to the **Execute Menu**.
+5. Select an operation (**Replace Text**, **Slice Text**, or **Pad Filename**) from the dropdown menu.
+6. Adjust the operation parameters in the sidebar. You can toggle **Preview** on individual files to see the expected result.
+7. Click the **RUN** button to execute the rename operation.
+8. If needed, you can **Undo** the operation from the notification popup that appears after execution.
 
-## Features Example
+## Features
 
-### change filename by name
-you can change name for every file by typing file name you need to change. if you have file list like below:
+### Replace Text
+Replace specific text within filenames.
+
+**Example:**
+If you have files:
 ```
 my-file-1.pdf
 my-file-2.pdf
-my-file-3.pdf
-my-file-4.pdf
 ```
-choose rename option **change filename by name**, then fill the input form **`from`** with `my` and **`to`** with `our`. Your filename list will change like below:
+Select **Replace Text**, set **From** to `my` and **To** to `our`.
+Result:
 ```
 our-file-1.pdf
 our-file-2.pdf
-our-file-3.pdf
-our-file-4.pdf
 ```
 
-### change filename by Position
-#### Overview
-The "Change File Name by Position" operation enables precise manipulation of filenames by specifying a start and an end position. Characters within the specified range will be removed from the filename. This operation is particularly useful for cleaning up filenames that have unwanted prefixes, suffixes, or segments in the middle.
+### Slice Text
+Remove a specific range of characters from filenames.
 
-#### How It Works
-When you select "Change File Name by Position" and click "RUN", a dialog will appear prompting you to enter two values:
-- Start: The 1-based numerical position where you want to begin removing characters.
-- End: The 1-based numerical position where you want to end removing characters. The character at this 'end' position will also be removed.
+**Overview:**
+Use the sliders or input fields to specify the **Start** and **End** positions. Characters starting from the **Start** position up to (but not including) the **End** position will be removed. The preview highlights the characters to be removed.
 
-### Insert PadStart
-padStart is pads the current string with given string until meet the required length, you can read more details [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart). You can use padStart to solve problem like below:
+**Example:**
+If you have `report-2023-final.pdf` and you want to remove `-final` (assuming it is at indices 11 to 17).
+Set **Start** to `11` and **End** to `17`.
 
+### Pad Filename
+Add leading zeros to numbers in filenames to ensure consistent length.
+
+**Overview:**
+Specify the **Expected Length** for the number part of the filename. This is useful for sorting files correctly.
+
+**Example:**
+If you have:
 ```
-file-997.pdf
-file-998.pdf
-file-999.pdf
-file-1000.pdf
+file-1.pdf
+file-10.pdf
 ```
-From the list above, set expected value with `4`. The result will become:
-
+Set **Expected Length** to `3`.
+Result:
 ```
-file-0997.pdf
-file-0998.pdf
-file-0999.pdf
-file-1000.pdf
+file-001.pdf
+file-010.pdf
 ```

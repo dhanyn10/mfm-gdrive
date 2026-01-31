@@ -40,7 +40,8 @@
       "!karma.conf.js",
       "!tsconfig.json",
       "!tslint.json",
-      "!token.json"
+      "!token.json",
+      "!README.md"
     ],
     "win": {
       "target": "nsis",
