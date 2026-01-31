@@ -1,13 +1,11 @@
 // eventHandlers.js
 const { authorizeAndGetDrive, triggerUserAuthorization } = require('./driveApi');
-const { elemFactory } = require('./utils');
 const { updateState, getState } = require('./state');
 const { 
     showMainUI, 
     updateAuthorizeButton, 
     setRefreshButtonLoading, 
     updateSelectionButtons, 
-    toggleExecuteSidebar, 
     renderSidebarForm, 
     setPanelVisibility, 
     addNotification,

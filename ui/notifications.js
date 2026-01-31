@@ -19,17 +19,93 @@ function renderNotifications() {
     } else {
         noNotificationsMessage.classList.add('hidden');
         markAllReadButton.classList.remove('hidden');
-        notifications.forEach(notif => {
+        notifications.forEach((notif) => {
             const item = elemFactory('div', {
-                class: `p-4 text-sm ${notif.read ? 'text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'} border-b border-gray-200 dark:border-gray-600`
+                class: `flex items-center justify-between p-3 text-sm border-b border-gray-200 dark:border-gray-600 cursor-pointer transition-all duration-300 ${notif.read ? 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'}`
             });
-            const iconClass = {
-                success: 'fas fa-check-circle text-green-500',
-                error: 'fas fa-times-circle text-red-500',
-                info: 'fas fa-info-circle text-blue-500'
+            
+            const iconBase = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-times-circle',
+                info: 'fas fa-info-circle'
             }[notif.type];
 
-            item.innerHTML = `<i class="${iconClass} mr-2"></i> ${notif.text}`;
+            const iconColor = notif.read ? 'text-gray-300 dark:text-gray-600' : {
+                success: 'text-green-500',
+                error: 'text-red-500',
+                info: 'text-blue-500'
+            }[notif.type];
+
+            const contentWrapper = elemFactory('div', { class: 'flex items-center flex-grow' });
+            contentWrapper.innerHTML = `<i class="${iconBase} ${iconColor} mr-3 text-lg"></i> <span>${notif.text}</span>`;
+            item.appendChild(contentWrapper);
+
+            if (notif.undoFunction && !notif.read) {
+                const undoButton = elemFactory('button', {
+                    class: 'ml-2 px-2 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-full transition-colors duration-150 shadow-sm',
+                    innerHTML: 'Undo'
+                });
+                undoButton.addEventListener('click', async (e) => {
+                    e.stopPropagation(); // Prevent marking as read immediately or closing dropdown
+                    try {
+                        await notif.undoFunction();
+                        
+                        // Animate swipe out
+                        item.style.transform = 'translateX(100%)';
+                        item.style.opacity = '0';
+                        
+                        // Wait for animation to finish before removing from data and re-rendering
+                        setTimeout(() => {
+                            // Find the current index of this notification object
+                            const currentIndex = notifications.indexOf(notif);
+                            if (currentIndex > -1) {
+                                notifications.splice(currentIndex, 1);
+                                // Only decrement unreadCount if the item was unread (which it should be, given the condition above)
+                                if (!notif.read) {
+                                    unreadCount--;
+                                }
+                                renderNotifications();
+                            }
+                        }, 300); // Match the duration-300 class
+                    } catch (error) {
+                        console.error("Undo failed", error);
+                    }
+                });
+                item.appendChild(undoButton);
+            }
+            
+            // Click to mark as read
+            item.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                if (!notif.read) {
+                    notif.read = true;
+                    unreadCount--;
+                    renderNotifications();
+                }
+            });
+
+            if (notif.relatedFileId) {
+                item.addEventListener('mouseenter', () => {
+                    const checkbox = document.querySelector(`input.cbox-file-folder[value="${notif.relatedFileId}"]`);
+                    if (checkbox) {
+                        const span = checkbox.nextElementSibling;
+                        if (span) {
+                            span.classList.add('bg-gray-100');
+                            span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                });
+                item.addEventListener('mouseleave', () => {
+                    const checkbox = document.querySelector(`input.cbox-file-folder[value="${notif.relatedFileId}"]`);
+                    if (checkbox) {
+                        const span = checkbox.nextElementSibling;
+                        if (span) {
+                            span.classList.remove('bg-gray-100');
+                        }
+                    }
+                });
+            }
+
             notificationList.appendChild(item);
         });
     }
@@ -41,12 +117,13 @@ function renderNotifications() {
     }
 }
 
-function addNotification(text, type = 'info') {
+function addNotification(text, type = 'info', relatedFileId = null, undoFunction = null) {
     const newNotification = {
         text,
         type,
-        read: false,
-        timestamp: new Date()
+        relatedFileId,
+        undoFunction,
+        read: false
     };
     notifications.unshift(newNotification);
     unreadCount++;
@@ -62,17 +139,13 @@ function markAllAsRead() {
 }
 
 function setupNotificationBell() {
-    notificationBell.addEventListener('click', () => {
+    notificationBell.addEventListener('click', (e) => {
+        e.stopPropagation();
         notificationDropdown.classList.toggle('hidden');
-        if (!notificationDropdown.classList.contains('hidden')) {
-            // When opening the dropdown, mark items as read after a short delay
-            setTimeout(() => {
-                markAllAsRead();
-            }, 1500);
-        }
     });
 
-    markAllReadButton.addEventListener('click', () => {
+    markAllReadButton.addEventListener('click', (e) => {
+        e.stopPropagation();
         markAllAsRead();
     });
 

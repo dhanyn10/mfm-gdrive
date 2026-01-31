@@ -1,7 +1,6 @@
 // driveApi.js
 const fs = require('fs').promises;
 const path = require('path');
-const process = require('process');
 const { authenticate } = require('@google-cloud/local-auth');
 const { google } = require('googleapis');
 const Bottleneck = require('bottleneck');
@@ -125,9 +124,11 @@ function triggerUserAuthorization() {
  * @param {string} fileId The ID of the file to rename.
  * @param {string} newTitle The new name for the file.
  * @param {string} oldTitle The original name of the file, for the toast message.
+ * @param {function} [refreshCallback] Optional callback to refresh the file list.
+ * @param {boolean} [suppressNotification=false] If true, success notification will not be shown.
  * @returns {Promise<object>} A promise that resolves with the updated file data or rejects with an error.
  */
-function renameFile(gdrive, fileId, newTitle, oldTitle) {
+function renameFile(gdrive, fileId, newTitle, oldTitle, refreshCallback, suppressNotification = false) {
     return new Promise((resolve, reject) => {
         const body = { 'name': newTitle };
         limiter.schedule(() => {
@@ -136,11 +137,19 @@ function renameFile(gdrive, fileId, newTitle, oldTitle) {
                 'resource': body
             }, (err, res) => {
                 if (err) {
-                    addNotification(`Error renaming file: ${err.message}`, 'error');
+                    addNotification(`Error renaming file: ${err.message}`, 'error', fileId);
                     console.error(`Error: ${err}`);
                     reject(err);
                 } else {
-                    addNotification(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success');
+                    if (!suppressNotification) {
+                        // Create an undo function that renames the file back to the old title
+                        // We pass true for suppressNotification to avoid creating a new notification for the undo action
+                        const undoFunction = async () => {
+                            await renameFile(gdrive, fileId, oldTitle, newTitle, refreshCallback, true);
+                            if (refreshCallback) refreshCallback();
+                        };
+                        addNotification(`Renamed '${oldTitle}' to '${res.data.name}'`, 'success', fileId, undoFunction);
+                    }
                     resolve(res.data);
                 }
             });
