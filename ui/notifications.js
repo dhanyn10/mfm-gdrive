@@ -19,21 +19,37 @@ function renderNotifications() {
     } else {
         noNotificationsMessage.classList.add('hidden');
         markAllReadButton.classList.remove('hidden');
-        notifications.forEach(notif => {
+        notifications.forEach((notif) => {
             const item = elemFactory('div', {
-                class: `flex items-center p-3 text-sm border-b border-gray-200 dark:border-gray-600 ${notif.read ? 'text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'}`
+                class: `flex items-center p-3 text-sm border-b border-gray-200 dark:border-gray-600 cursor-pointer transition-colors duration-200 ${notif.read ? 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800' : 'text-gray-800 dark:text-gray-200 bg-blue-50 dark:bg-gray-600'}`
             });
             
-            const iconClass = {
-                success: 'fas fa-check-circle text-green-500',
-                error: 'fas fa-times-circle text-red-500',
-                info: 'fas fa-info-circle text-blue-500'
+            const iconBase = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-times-circle',
+                info: 'fas fa-info-circle'
             }[notif.type];
 
-            item.innerHTML = `<i class="${iconClass} mr-3 text-lg"></i> <span>${notif.text}</span>`;
+            // If read, make icon gray/invisible-ish. If unread, use color.
+            const iconColor = notif.read ? 'text-gray-300 dark:text-gray-600' : {
+                success: 'text-green-500',
+                error: 'text-red-500',
+                info: 'text-blue-500'
+            }[notif.type];
+
+            item.innerHTML = `<i class="${iconBase} ${iconColor} mr-3 text-lg"></i> <span>${notif.text}</span>`;
             
+            // Click to mark as read
+            item.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent click from bubbling to document and closing dropdown
+                if (!notif.read) {
+                    notif.read = true;
+                    unreadCount--;
+                    renderNotifications();
+                }
+            });
+
             if (notif.relatedFileId) {
-                item.style.cursor = 'pointer';
                 item.addEventListener('mouseenter', () => {
                     const checkbox = document.querySelector(`input.cbox-file-folder[value="${notif.relatedFileId}"]`);
                     if (checkbox) {
@@ -71,8 +87,7 @@ function addNotification(text, type = 'info', relatedFileId = null) {
         text,
         type,
         relatedFileId,
-        read: false,
-        timestamp: new Date()
+        read: false
     };
     notifications.unshift(newNotification);
     unreadCount++;
@@ -88,11 +103,13 @@ function markAllAsRead() {
 }
 
 function setupNotificationBell() {
-    notificationBell.addEventListener('click', () => {
+    notificationBell.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent immediate closing
         notificationDropdown.classList.toggle('hidden');
     });
 
-    markAllReadButton.addEventListener('click', () => {
+    markAllReadButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent closing when clicking mark all read
         markAllAsRead();
     });
 

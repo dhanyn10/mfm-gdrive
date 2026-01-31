@@ -26,7 +26,6 @@ async function executeReplace(driveClient, from, to, refreshFileList) {
     try {
         await Promise.all(renamePromises);
         refreshFileList();
-        addNotification('Rename completed.', 'success');
     } catch (error) {
         addNotification('An error occurred during rename.', 'error');
         console.error('Error during rename:', error);
