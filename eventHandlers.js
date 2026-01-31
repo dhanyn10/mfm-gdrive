@@ -176,18 +176,16 @@ function setupEventHandlers(listFiles) {
     // Event listener for the "Select All" button.
     selectAllBtn.addEventListener('click', () => {
         const { arrListAllFiles } = getState();
-        const allSelected = arrListAllFiles.length > 0 && arrListAllFiles.every(file => file.checked);
-        const shouldSelectAll = !allSelected; // Toggle selection.
-
+        
         const listContainer = document.getElementById('file-folder-list');
         const checkboxes = listContainer.querySelectorAll('.cbox-file-folder');
 
-        // Update checked status for all files in state and DOM.
+        // Always select all files
         const newArrListAllFiles = arrListAllFiles.map((file, index) => {
             if (checkboxes[index]) {
-                checkboxes[index].checked = shouldSelectAll;
+                checkboxes[index].checked = true;
             }
-            return { ...file, checked: shouldSelectAll };
+            return { ...file, checked: true };
         });
         updateState({ arrListAllFiles: newArrListAllFiles });
         updateSelectionButtons(); // Update UI for selection buttons.
