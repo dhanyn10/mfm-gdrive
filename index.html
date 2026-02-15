@@ -87,7 +87,7 @@
       <div class="container mx-auto px-4 flex-1 min-h-0 pb-4">
             <div class="flex h-full">
               <div id="folders" class="w-1/4 min-w-[250px] mr-2 h-full">
-                <div class="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y h-full flex flex-col">
+                <div class="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y flex flex-col">
                     <div class="flex justify-between items-center px-6 py-2 bg-gray-50 dark:bg-gray-700">
                         <p class="text-gray-900 dark:text-white">folders</p>
                         <div class="flex items-center">
@@ -97,7 +97,7 @@
                           </button>
                         </div>
                     </div>
-                    <ul class="overflow-y-scroll flex-1 select-none" id="folder-list"></ul>
+                    <ul class="overflow-y-auto select-none max-h-[calc(100vh-200px)]" id="folder-list"></ul>
                 </div>
               </div>
               <div id="files" class="flex-1 min-w-0 h-full flex flex-col">

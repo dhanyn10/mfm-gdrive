@@ -71,8 +71,6 @@ function setupEventHandlers(listFiles) {
                 if (isInitialAuth) {
                     addNotification('Authorization successful. Ready to go!', 'success');
                     updateState({ isInitialAuthSuccessful: true });
-                } else {
-                    addNotification('File list refreshed.', 'success');
                 }
                 updateAuthorizeButton(true, false); // Hide authorize button, show refresh.
             } else {
