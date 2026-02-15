@@ -8,8 +8,30 @@
     <link rel="stylesheet" href="./node_modules/@fortawesome/fontawesome-free/css/all.min.css">
     <title>MFM Gdrive</title>
   </head>
-  <body>
-    <div id="app-container" class="flex justify-center items-center h-screen">
+  <body class="overflow-hidden">
+    <div id="title-bar" class="flex justify-between items-center bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 h-8 select-none" style="-webkit-app-region: drag;">
+        <div class="flex items-center px-2">
+            <!-- <img src="./assets/icon.png" class="w-4 h-4 mr-2" alt="Icon"> -->
+            <div class="flex text-xs text-gray-700 dark:text-gray-300" style="-webkit-app-region: no-drag;">
+                <div class="px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer rounded">File</div>
+                <div class="px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer rounded">View</div>
+                <div class="px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer rounded">Help</div>
+            </div>
+        </div>
+        <div class="flex items-center h-full" style="-webkit-app-region: no-drag;">
+             <div id="min-btn" class="px-4 h-full flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+                <i class="fas fa-minus text-xs"></i>
+            </div>
+            <div id="max-btn" class="px-4 h-full flex items-center hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+                <i class="far fa-square text-xs"></i>
+            </div>
+            <div id="close-btn" class="px-4 h-full flex items-center hover:bg-red-500 hover:text-white cursor-pointer">
+                <i class="fas fa-times text-xs"></i>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="flex justify-center items-center h-[calc(100vh-2rem)]">
       <!-- The authorize button is initially centered. Its parent will be changed on auth. -->
       <div id="authorize" data-testid="auth-button" class="flex justify-center items-center w-full max-w-sm mx-auto cursor-pointer">
         <div class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
@@ -22,8 +44,8 @@
       </div>
     </div>
 
-    <div id="main-view" class="hidden">
-      <nav class="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 mb-4">
+    <div id="main-view" class="hidden h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
+      <nav class="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 mb-4 flex-none">
         <div class="container mx-auto flex items-center p-4 relative">
             <div class="flex-grow flex justify-center">
                 <div class="inline-flex rounded-md" role="group">
@@ -62,10 +84,10 @@
         </div>
       </nav>
 
-      <div class="container mx-auto px-4">
-            <div class="flex">
-              <div id="folders" class="w-1/4 min-w-[250px] mr-2">
-                <div class="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y">
+      <div class="container mx-auto px-4 flex-1 min-h-0 pb-4">
+            <div class="flex h-full">
+              <div id="folders" class="w-1/4 min-w-[250px] mr-2 h-full">
+                <div class="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y h-full flex flex-col">
                     <div class="flex justify-between items-center px-6 py-2 bg-gray-50 dark:bg-gray-700">
                         <p class="text-gray-900 dark:text-white">folders</p>
                         <div class="flex items-center">
@@ -75,10 +97,10 @@
                           </button>
                         </div>
                     </div>
-                    <ul class="overflow-y-scroll max-h-[calc(100vh-200px)] select-none" id="folder-list"></ul>
+                    <ul class="overflow-y-scroll flex-1 select-none" id="folder-list"></ul>
                 </div>
               </div>
-              <div id="files" class="flex-1 min-w-0">
+              <div id="files" class="flex-1 min-w-0 h-full flex flex-col">
                 <div id="selection-control-block" class="hidden mb-2 p-4 bg-white rounded-lg shadow-sm dark:bg-gray-800 flex items-center justify-between">
                     <div class="flex items-center">
                         <button id="select-all" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:text-white">
@@ -92,8 +114,8 @@
                         Next
                     </button>
                 </div>
-                <div id="file-list-container" class="w-full">
-                  <ul class="overflow-y-auto h-[calc(100vh-200px)]" id="file-folder-list"></ul>
+                <div id="file-list-container" class="w-full flex-1 overflow-hidden">
+                  <ul class="overflow-y-auto h-full" id="file-folder-list"></ul>
                 </div>
                 <div id="pagination-controls" class="hidden mt-2 mb-4 flex items-center justify-between">
                     <button id="prev-page" type="button" class="

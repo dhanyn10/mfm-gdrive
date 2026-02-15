@@ -1,8 +1,40 @@
 // main.js
 
 // Modules to control application life and create native browser window.
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('path');
+
+// Define menu templates
+const menuTemplates = {
+    'File': [
+        { role: 'quit' }
+    ],
+    'View': [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+    ],
+    'Window': [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { role: 'close' }
+    ],
+    'Help': [
+        {
+            label: 'Learn More',
+            click: async () => {
+                const { shell } = require('electron');
+                await shell.openExternal('https://electronjs.org');
+            }
+        }
+    ]
+};
 
 /**
  * Creates and configures the main browser window of the application.
@@ -13,6 +45,9 @@ function createWindow() {
         width: 800,
         height: 600,
         icon: path.join(__dirname, 'assets/icon.png'),
+        frame: false,
+        titleBarStyle: 'hidden',
+        backgroundColor: '#FFF',
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: false, // Must be false for nodeIntegration to work.
@@ -42,6 +77,35 @@ app.whenReady().then(() => {
     // In a packaged app, it's the directory containing the executable.
     ipcMain.handle('get-local-token-base-path', () => {
         return app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
+    });
+
+    // IPC handlers for window controls
+    ipcMain.on('minimize-window', (event) => {
+        const window = BrowserWindow.fromWebContents(event.sender);
+        window.minimize();
+    });
+
+    ipcMain.on('maximize-window', (event) => {
+        const window = BrowserWindow.fromWebContents(event.sender);
+        if (window.isMaximized()) {
+            window.unmaximize();
+        } else {
+            window.maximize();
+        }
+    });
+
+    ipcMain.on('close-window', (event) => {
+        const window = BrowserWindow.fromWebContents(event.sender);
+        window.close();
+    });
+
+    // Handler for specific submenu popup
+    ipcMain.on('show-submenu', (event, menuLabel, x, y) => {
+        const template = menuTemplates[menuLabel];
+        if (template) {
+            const menu = Menu.buildFromTemplate(template);
+            menu.popup({ window: BrowserWindow.fromWebContents(event.sender), x, y });
+        }
     });
 
     createWindow();
