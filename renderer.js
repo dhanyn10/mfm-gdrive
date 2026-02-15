@@ -1,4 +1,5 @@
 // renderer.js
+const { ipcRenderer } = require('electron');
 const { fetchDriveFiles, initializePaths, authorizeAndGetDrive } = require('./driveApi');
 const { updateState, getState } = require('./state');
 const { 
@@ -27,7 +28,34 @@ async function main() {
     await startup(eventHandlers.getDriveClient);
 }
 
-window.addEventListener('DOMContentLoaded', main);
+window.addEventListener('DOMContentLoaded', () => {
+    main();
+
+    // Custom Title Bar Events
+    document.getElementById('min-btn').addEventListener('click', () => {
+        ipcRenderer.send('minimize-window');
+    });
+
+    document.getElementById('max-btn').addEventListener('click', () => {
+        ipcRenderer.send('maximize-window');
+    });
+
+    document.getElementById('close-btn').addEventListener('click', () => {
+        ipcRenderer.send('close-window');
+    });
+
+    // Custom Menu Events
+    const menuItems = document.querySelectorAll('#title-bar .flex.text-xs > div');
+    menuItems.forEach(item => {
+        item.addEventListener('click', (event) => {
+            const rect = item.getBoundingClientRect();
+            const x = Math.round(rect.left);
+            const y = Math.round(rect.bottom);
+            const menuLabel = item.textContent;
+            ipcRenderer.send('show-submenu', menuLabel, x, y);
+        });
+    });
+});
 
 const prevPageButton = document.getElementById('prev-page');
 const nextPageButton = document.getElementById('next-page');

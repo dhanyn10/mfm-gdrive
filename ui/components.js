@@ -58,7 +58,7 @@ function createFileFolderListItem(file, onClick) {
     let fileFolderSpan = elemFactory('span', {
         "class": "flex items-center px-4 py-2 border-b border-gray-200 overflow-x-auto select-none \
                     peer-checked:bg-blue-500 peer-checked:text-white \
-                    hover:bg-gray-100 hover:overflow-visible",
+                    hover:bg-gray-100 peer-checked:hover:bg-blue-500 peer-checked:hover:text-white hover:overflow-visible",
     });
 
     const fileIcon = createFileIcon(file.type);
