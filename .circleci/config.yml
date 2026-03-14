@@ -23,7 +23,7 @@ jobs:
           command: echo $TOKEN > ./dist/linux-unpacked/token.json
       - run:
           name: Run WebdriverIO tests
-          command: xvfb-run npm run wdio
+          command: xvfb-run -a npm run wdio
 
 workflows:
   version: 2
