@@ -6,6 +6,7 @@ import {
   appendFiles,
   toggleFileSelection,
   selectAllFilesOnPage,
+  selectFileRange,
   deselectAllFilesOnPage,
   clearAllSelections,
   setPage
@@ -13,6 +14,7 @@ import {
 
 function FileList() {
   const dispatch = useDispatch();
+  const [lastSelectedIndex, setLastSelectedIndex] = React.useState(null);
   const selectedFolderId = useSelector(state => state.drive.selectedFolderId);
 
   const files = useSelector(state => state.drive.files);
@@ -27,6 +29,11 @@ function FileList() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, files.length);
   const currentFiles = files.slice(startIndex, endIndex);
+
+  // Reset last selected index when changing pages or folders
+  useEffect(() => {
+    setLastSelectedIndex(null);
+  }, [currentPage, selectedFolderId]);
 
   // Determine if all items on the *current page* are selected
   const allCurrentPageSelected = currentFiles.length > 0 &&
@@ -69,6 +76,21 @@ function FileList() {
       dispatch(deselectAllFilesOnPage(pageIds));
     } else {
       dispatch(selectAllFilesOnPage(pageIds));
+    }
+  };
+
+  const handleFileClick = (e, index, fileId) => {
+    if (e.shiftKey && lastSelectedIndex !== null) {
+      // Shift+Click logic
+      const start = Math.min(lastSelectedIndex, index);
+      const end = Math.max(lastSelectedIndex, index);
+      const rangeFiles = currentFiles.slice(start, end + 1);
+      const rangeFileIds = rangeFiles.map(f => f.id);
+      dispatch(selectFileRange(rangeFileIds));
+    } else {
+      // Normal click logic
+      dispatch(toggleFileSelection(fileId));
+      setLastSelectedIndex(index);
     }
   };
 
@@ -120,7 +142,7 @@ function FileList() {
           <div className="p-8 text-center text-gray-500">No files found in this folder</div>
         ) : (
           <ul className="overflow-y-auto h-full divide-y divide-gray-100 dark:divide-gray-700">
-            {currentFiles.map(file => {
+            {currentFiles.map((file, index) => {
               const isSelected = selectedFileIds.includes(file.id);
               return (
                 <li
@@ -131,14 +153,13 @@ function FileList() {
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={() => dispatch(toggleFileSelection(file.id))}
+                      onChange={(e) => handleFileClick(e.nativeEvent, index, file.id)}
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
                   </div>
-                  <div className="ms-3 text-sm">
+                  <div className="ms-3 text-sm flex-1 cursor-pointer" onClick={(e) => handleFileClick(e, index, file.id)}>
                     <label
-                      className="font-medium text-gray-900 dark:text-gray-300 cursor-pointer"
-                      onClick={() => dispatch(toggleFileSelection(file.id))}
+                      className="font-medium text-gray-900 dark:text-gray-300 cursor-pointer pointer-events-none"
                     >
                       {file.name}
                     </label>
