@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  activeTab: 'files', // 'folders', 'files', 'execute'
+  isFoldersOpen: true, // Initially true based on previous code rendering Folders by default
   isExecuteSidebarOpen: false,
   notifications: [],
   unreadCount: 0,
@@ -11,16 +11,24 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setActiveTab: (state, action) => {
-      state.activeTab = action.payload;
-      // Handle mutual exclusivity for mobile/small views if needed
+    toggleFolders: (state) => {
+      state.isFoldersOpen = !state.isFoldersOpen;
+      // Mutual exclusivity: if Folders is opened, Execute must be closed
+      if (state.isFoldersOpen) {
+        state.isExecuteSidebarOpen = false;
+      }
     },
     setExecuteSidebarOpen: (state, action) => {
       state.isExecuteSidebarOpen = action.payload;
-      if (action.payload) {
-        state.activeTab = 'execute';
-      } else if (state.activeTab === 'execute') {
-        state.activeTab = 'files';
+      // Mutual exclusivity: if Execute is opened, Folders must be closed
+      if (state.isExecuteSidebarOpen) {
+        state.isFoldersOpen = false;
+      }
+    },
+    toggleExecute: (state) => {
+      state.isExecuteSidebarOpen = !state.isExecuteSidebarOpen;
+      if (state.isExecuteSidebarOpen) {
+        state.isFoldersOpen = false;
       }
     },
     addNotification: (state, action) => {
@@ -42,8 +50,9 @@ const uiSlice = createSlice({
 });
 
 export const {
-  setActiveTab,
+  toggleFolders,
   setExecuteSidebarOpen,
+  toggleExecute,
   addNotification,
   markAllNotificationsRead,
 } = uiSlice.actions;

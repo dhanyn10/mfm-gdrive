@@ -15,6 +15,7 @@ function App() {
   const dispatch = useDispatch();
   const isAuthorized = useSelector((state) => state.auth.isAuthorized);
   const isExecuteSidebarOpen = useSelector((state) => state.ui.isExecuteSidebarOpen);
+  const isFoldersOpen = useSelector((state) => state.ui.isFoldersOpen);
 
   useEffect(() => {
     // Check initial auth status
@@ -84,9 +85,11 @@ function App() {
 
           <div className="container mx-auto px-4 flex-1 min-h-0 pb-4 flex h-full">
             {/* Folders List - Fixed width */}
-            <div className="w-1/4 min-w-[250px] mr-2 h-full">
-               <FolderList />
-            </div>
+            {isFoldersOpen && (
+              <div className="w-1/4 min-w-[250px] mr-2 h-full">
+                 <FolderList />
+              </div>
+            )}
 
             {/* Main File Area - Flexible width */}
             <div className="flex-1 min-w-0 h-full flex flex-col">
