@@ -28,6 +28,8 @@ function ExecuteSidebar() {
     setIsDropdownOpen(false);
   };
 
+  const nextFilesPageToken = useSelector(state => state.drive.nextFilesPageToken);
+
   const handleExecute = async () => {
     if (!window.electronAPI) return;
 
@@ -58,7 +60,7 @@ function ExecuteSidebar() {
              const updated = updatedFiles.find(uf => uf.id === f.id);
              return updated ? { ...f, name: updated.newName } : f;
          });
-         dispatch(setFiles(newFiles));
+         dispatch(setFiles({ files: newFiles, nextPageToken: nextFilesPageToken }));
          dispatch(clearAllSelections());
       }
     } catch (error) {
