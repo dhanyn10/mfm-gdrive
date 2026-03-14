@@ -149,7 +149,7 @@ function FileList() {
                   key={file.id}
                   className={`flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${isSelected ? 'bg-blue-50 dark:bg-gray-700' : ''}`}
                 >
-                  <div className="flex items-center h-5">
+                  <div className="flex items-center h-5 hidden">
                     <input
                       type="checkbox"
                       checked={isSelected}
