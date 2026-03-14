@@ -8,26 +8,25 @@ jobs:
       - checkout
 
       - run:
+          name: Install xvfb
+          command: sudo apt-get update && sudo apt-get install -y xvfb
+      - run:
           name: Install dependencies
           command: npm install
       - run:
-          name: Generate Tailwind CSS
-          command: npm run css-gen
-      - run:
-          name: Build Electron apps
+          name: Build Electron apps (Vite + React)
           command: |
             # Build for Linux since we are in a Linux environment
             npm run app:dist -- --linux
       - run:
           name: Put token.json
+          # In the new setup, token.json is read from user data or app executable path.
+          # The tests mock out the interactive auth, so we don't strictly need a valid token to pass the UI tests.
+          # But we leave this here just in case the backend tests need it.
           command: echo $TOKEN > ./dist/linux-unpacked/token.json
       - run:
-          name: Running X virtual framebuffer
-          command: Xvfb :99 -ac & export DISPLAY=:99
-          background: true
-      - run:
           name: Run WebdriverIO tests
-          command: npm run wdio
+          command: xvfb-run npm run wdio
 
 workflows:
   version: 2

@@ -26,7 +26,19 @@ window.electronAPI = {
   showSubmenu: (label, x, y) => ipcRenderer.send('show-submenu', label, x, y),
 
   // Event Listeners from Main to Renderer
-  onUpdateStatus: (callback) => ipcRenderer.on('update-status', (_event, value) => callback(value)),
-  onAuthSuccess: (callback) => ipcRenderer.on('auth-success', () => callback()),
-  onOperationComplete: (callback) => ipcRenderer.on('operation-complete', (_event, msg) => callback(msg)),
+  onUpdateStatus: (callback) => {
+    const handler = (_event, value) => callback(value);
+    ipcRenderer.on('update-status', handler);
+    return () => ipcRenderer.removeListener('update-status', handler);
+  },
+  onAuthSuccess: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on('auth-success', handler);
+    return () => ipcRenderer.removeListener('auth-success', handler);
+  },
+  onOperationComplete: (callback) => {
+    const handler = (_event, msg) => callback(msg);
+    ipcRenderer.on('operation-complete', handler);
+    return () => ipcRenderer.removeListener('operation-complete', handler);
+  },
 };

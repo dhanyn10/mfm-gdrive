@@ -34,8 +34,10 @@ function App() {
     checkAuth();
 
     // Setup global listeners (auth status updates, notifications from main)
+    let removeUpdateStatus, removeAuthSuccess, removeOperationComplete;
+
     if (window.electronAPI) {
-      window.electronAPI.onUpdateStatus((status) => {
+      removeUpdateStatus = window.electronAPI.onUpdateStatus((status) => {
         dispatch(addNotification({ message: status, type: 'info' }));
         Toastify({
           text: status,
@@ -46,12 +48,12 @@ function App() {
         }).showToast();
       });
 
-      window.electronAPI.onAuthSuccess(() => {
+      removeAuthSuccess = window.electronAPI.onAuthSuccess(() => {
         dispatch(setAuthorized(true));
         dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
       });
 
-      window.electronAPI.onOperationComplete((msg) => {
+      removeOperationComplete = window.electronAPI.onOperationComplete((msg) => {
           dispatch(addNotification({ message: msg, type: "success" }));
           Toastify({
               text: msg,
@@ -63,7 +65,11 @@ function App() {
       });
     }
 
-    // Cleanup listeners if necessary (depends on preload implementation)
+    return () => {
+      if (removeUpdateStatus) removeUpdateStatus();
+      if (removeAuthSuccess) removeAuthSuccess();
+      if (removeOperationComplete) removeOperationComplete();
+    };
   }, [dispatch]);
 
   return (
