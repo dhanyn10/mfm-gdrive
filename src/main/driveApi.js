@@ -81,46 +81,40 @@ async function authorize(event) {
     throw new Error("Not authorized");
 }
 
-async function getFolders() {
+async function getFolders(parentId = 'root', pageToken = null) {
     if (!_driveClient) await authorize(null);
-    let allFolders = [];
-    let pageToken = null;
 
-    do {
-         const response = await limiter.schedule(() => _driveClient.files.list({
-             pageSize: 1000,
-             q: "mimeType='application/vnd.google-apps.folder'",
-             spaces: 'drive',
-             fields: 'nextPageToken, files(id, name)',
-             orderBy: 'name',
-             pageToken: pageToken
-         }));
-         allFolders = allFolders.concat(response.data.files || []);
-         pageToken = response.data.nextPageToken;
-    } while (pageToken);
+    const response = await limiter.schedule(() => _driveClient.files.list({
+        pageSize: 100, // Fetch in reasonable chunks
+        q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        spaces: 'drive',
+        fields: 'nextPageToken, files(id, name, parents)',
+        orderBy: 'name',
+        pageToken: pageToken
+    }));
 
-    return allFolders;
+    return {
+        folders: response.data.files || [],
+        nextPageToken: response.data.nextPageToken || null
+    };
 }
 
-async function getFiles(folderId) {
+async function getFiles(parentId = 'root', pageToken = null) {
     if (!_driveClient) await authorize(null);
-    let allFiles = [];
-    let pageToken = null;
 
-    do {
-         const response = await limiter.schedule(() => _driveClient.files.list({
-             pageSize: 1000,
-             q: `'${folderId}' in parents and mimeType!='application/vnd.google-apps.folder'`,
-             spaces: 'drive',
-             fields: 'nextPageToken, files(id, name)',
-             orderBy: 'name',
-             pageToken: pageToken
-         }));
-         allFiles = allFiles.concat(response.data.files || []);
-         pageToken = response.data.nextPageToken;
-    } while (pageToken);
+    const response = await limiter.schedule(() => _driveClient.files.list({
+        pageSize: 300, // Fetch in reasonable chunks
+        q: `'${parentId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`,
+        spaces: 'drive',
+        fields: 'nextPageToken, files(id, name)',
+        orderBy: 'name',
+        pageToken: pageToken
+    }));
 
-    return allFiles;
+    return {
+        files: response.data.files || [],
+        nextPageToken: response.data.nextPageToken || null
+    };
 }
 
 async function renameFile(fileId, newTitle) {

@@ -60,7 +60,7 @@ function createWindow() {
         mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
         // mainWindow.webContents.openDevTools();
     } else {
-        mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
+        mainWindow.loadFile(path.join(__dirname, '../../dist-vite/index.html'));
     }
 
     // Uncomment to open the DevTools automatically.
@@ -132,8 +132,8 @@ app.on('window-all-closed', function () {
 // In this file, you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-const { authorize, getFolders, getFiles } = require('./driveApi');
-const { renameFile, sliceText, padText } = require('./fileOperations');
+const { authorize, getFolders, getFiles, renameFile } = require('./driveApi');
+const { sliceText, padText } = require('./fileOperations');
 
 // Drive APIs
 ipcMain.invoke('check-auth', async () => {
@@ -154,23 +154,29 @@ ipcMain.on('authorize', async (event) => {
     }
 });
 
-ipcMain.invoke('get-folders', async (event) => {
+ipcMain.invoke('get-folders', async (event, parentId = 'root', pageToken = null) => {
     try {
-        const folders = await getFolders();
-        return folders.map(f => ({ id: f.id, name: f.name }));
+        const result = await getFolders(parentId, pageToken);
+        return {
+             folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
+             nextPageToken: result.nextPageToken
+        };
     } catch (error) {
         console.error("Error getting folders", error);
-        return [];
+        return { folders: [], nextPageToken: null };
     }
 });
 
-ipcMain.invoke('get-files', async (event, folderId) => {
+ipcMain.invoke('get-files', async (event, folderId = 'root', pageToken = null) => {
     try {
-        const files = await getFiles(folderId);
-        return files.map(f => ({ id: f.id, name: f.name }));
+        const result = await getFiles(folderId, pageToken);
+        return {
+            files: result.files.map(f => ({ id: f.id, name: f.name })),
+            nextPageToken: result.nextPageToken
+        };
     } catch (error) {
         console.error("Error getting files", error);
-        return [];
+        return { files: [], nextPageToken: null };
     }
 });
 

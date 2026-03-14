@@ -29,7 +29,7 @@
       "output": "dist"
     },
     "files": [
-      "dist/**/*",
+      "dist-vite/**/*",
       "src/main/**/*",
       "assets/**/*",
       "package.json",

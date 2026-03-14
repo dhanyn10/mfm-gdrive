@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setFolders, selectFolder, setLoadingFolders } from '../store/driveSlice';
+import { setFolders, selectFolder, setLoadingFolders, appendFolders, setCurrentParentId, pushParentHistory, popParentHistory } from '../store/driveSlice';
 
 function FolderList() {
   const dispatch = useDispatch();
@@ -9,14 +9,21 @@ function FolderList() {
   const selectedFolderId = useSelector(state => state.drive.selectedFolderId);
   const isAuthorized = useSelector(state => state.auth.isAuthorized);
 
-  const fetchFolders = async () => {
+  const currentParentId = useSelector(state => state.drive.currentParentId);
+  const parentHistory = useSelector(state => state.drive.parentHistory);
+  const nextFoldersPageToken = useSelector(state => state.drive.nextFoldersPageToken);
+
+  const fetchFolders = async (parentId, pageToken = null, append = false) => {
     if (!window.electronAPI) return;
 
     dispatch(setLoadingFolders(true));
     try {
-      const data = await window.electronAPI.getFolders();
-      // Assume getFolders returns an array of folder objects {id, name, ...}
-      dispatch(setFolders(data || []));
+      const data = await window.electronAPI.getFolders(parentId, pageToken);
+      if (append) {
+          dispatch(appendFolders(data));
+      } else {
+          dispatch(setFolders(data));
+      }
     } catch (error) {
       console.error("Failed to fetch folders:", error);
     } finally {
@@ -26,20 +33,41 @@ function FolderList() {
 
   useEffect(() => {
     if (isAuthorized) {
-      fetchFolders();
+      fetchFolders(currentParentId);
     }
-  }, [isAuthorized]);
+  }, [isAuthorized, currentParentId]);
 
   const handleFolderClick = (folder) => {
     dispatch(selectFolder(folder));
+  };
+
+  const handleDoubleClick = (folder) => {
+      // Navigate into the folder
+      dispatch(pushParentHistory(currentParentId));
+      dispatch(setCurrentParentId(folder.id));
+      dispatch(selectFolder({id: null})); // Clear selection when navigating
+  };
+
+  const handleUpDirectory = () => {
+      dispatch(popParentHistory());
+      dispatch(selectFolder({id: null}));
   };
 
   return (
     <div className="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y flex flex-col h-full">
       <div className="flex justify-between items-center px-6 py-2 bg-gray-50 dark:bg-gray-700">
         <p className="text-gray-900 dark:text-white">Folders</p>
+        {parentHistory.length > 0 && (
+           <button
+             onClick={handleUpDirectory}
+             className="ml-2 px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
+             title="Go Up"
+           >
+             <i className="fas fa-level-up-alt"></i>
+           </button>
+        )}
         <button
-          onClick={fetchFolders}
+          onClick={() => fetchFolders(currentParentId)}
           data-testid="refresh-button"
           className="ml-2 px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
           title="Refresh"
@@ -51,22 +79,33 @@ function FolderList() {
         {isLoading && folders.length === 0 ? (
            <li className="p-4 text-center text-gray-500">Loading folders...</li>
         ) : folders.length === 0 ? (
-           <li className="p-4 text-center text-gray-500">No folders found</li>
+           <li className="p-4 text-center text-gray-500">No folders found in this directory</li>
         ) : (
-          folders.map((folder) => (
-            <li
-              key={folder.id}
-              onClick={() => handleFolderClick(folder)}
-              className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 ${
-                selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
-              }`}
-            >
-              <div className="flex items-center">
-                <i className="fas fa-folder mr-3 text-gray-400 dark:text-gray-500"></i>
-                <span className="truncate" title={folder.name}>{folder.name}</span>
-              </div>
-            </li>
-          ))
+          <>
+            {folders.map((folder) => (
+              <li
+                key={folder.id}
+                onClick={() => handleFolderClick(folder)}
+                onDoubleClick={() => handleDoubleClick(folder)}
+                className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 ${
+                  selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                <div className="flex items-center">
+                  <i className="fas fa-folder mr-3 text-gray-400 dark:text-gray-500"></i>
+                  <span className="truncate" title={folder.name}>{folder.name}</span>
+                </div>
+              </li>
+            ))}
+            {nextFoldersPageToken && (
+               <li
+                 onClick={() => fetchFolders(currentParentId, nextFoldersPageToken, true)}
+                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm"
+               >
+                 {isLoading ? 'Loading more...' : 'Load more folders'}
+               </li>
+            )}
+          </>
         )}
       </ul>
     </div>

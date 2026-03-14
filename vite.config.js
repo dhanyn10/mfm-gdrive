@@ -11,7 +11,7 @@ export default defineConfig({
   ],
   base: './', // Use relative paths for Electron
   build: {
-    outDir: 'dist',
+    outDir: 'dist-vite',
     emptyOutDir: true,
     rollupOptions: {
       input: {

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   setLoadingFiles,
   setFiles,
+  appendFiles,
   toggleFileSelection,
   selectAllFilesOnPage,
   deselectAllFilesOnPage,
@@ -13,7 +14,10 @@ import {
 function FileList() {
   const dispatch = useDispatch();
   const selectedFolderId = useSelector(state => state.drive.selectedFolderId);
+
   const files = useSelector(state => state.drive.files);
+  const nextFilesPageToken = useSelector(state => state.drive.nextFilesPageToken);
+
   const isLoading = useSelector(state => state.drive.isLoadingFiles);
   const selectedFileIds = useSelector(state => state.drive.selectedFileIds);
   const currentPage = useSelector(state => state.drive.currentPage);
@@ -30,23 +34,34 @@ function FileList() {
 
   const hasSelections = selectedFileIds.length > 0;
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      if (!window.electronAPI || !selectedFolderId) return;
-
-      dispatch(setLoadingFiles(true));
-      try {
-        const data = await window.electronAPI.getFiles(selectedFolderId);
-        dispatch(setFiles(data || []));
-      } catch (error) {
-        console.error("Failed to fetch files:", error);
-      } finally {
-        dispatch(setLoadingFiles(false));
+  const fetchFiles = async (folderId, pageToken = null, append = false) => {
+    if (!window.electronAPI) return;
+    dispatch(setLoadingFiles(true));
+    try {
+      const data = await window.electronAPI.getFiles(folderId, pageToken);
+      if (append) {
+          dispatch(appendFiles(data));
+      } else {
+          dispatch(setFiles(data));
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch files:", error);
+    } finally {
+      dispatch(setLoadingFiles(false));
+    }
+  };
 
-    fetchFiles();
+  useEffect(() => {
+    if (selectedFolderId) {
+       fetchFiles(selectedFolderId);
+    }
   }, [selectedFolderId, dispatch]);
+
+  const handleLoadMore = () => {
+      if (nextFilesPageToken) {
+          fetchFiles(selectedFolderId, nextFilesPageToken, true);
+      }
+  };
 
   const handleToggleSelectAll = () => {
     const pageIds = currentFiles.map(f => f.id);
@@ -99,7 +114,7 @@ function FileList() {
 
       {/* File List Area */}
       <div className="w-full flex-1 overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex flex-col">
-        {isLoading ? (
+        {isLoading && files.length === 0 ? (
           <div className="p-8 text-center text-gray-500">Loading files...</div>
         ) : files.length === 0 ? (
           <div className="p-8 text-center text-gray-500">No files found in this folder</div>
@@ -131,6 +146,16 @@ function FileList() {
                 </li>
               );
             })}
+
+            {/* Server-side load more indicator */}
+            {nextFilesPageToken && (
+               <li
+                 onClick={handleLoadMore}
+                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm"
+               >
+                 {isLoading ? 'Loading more from Google Drive...' : 'Load more files'}
+               </li>
+            )}
           </ul>
         )}
       </div>

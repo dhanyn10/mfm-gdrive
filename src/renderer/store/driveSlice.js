@@ -3,10 +3,19 @@ import { createSlice } from '@reduxjs/toolkit';
 const ITEMS_PER_PAGE = 300;
 
 const initialState = {
+  // Navigation
+  currentParentId: 'root',
+  parentHistory: [], // To allow going "Up"
+
   folders: [],
+  nextFoldersPageToken: null,
+
   files: [],
+  nextFilesPageToken: null,
+
   selectedFolderId: null,
   selectedFolderObj: null,
+
   isLoadingFolders: false,
   isLoadingFiles: false,
 
@@ -22,12 +31,32 @@ const driveSlice = createSlice({
   name: 'drive',
   initialState,
   reducers: {
+    // Navigation
+    setCurrentParentId: (state, action) => {
+      state.currentParentId = action.payload;
+    },
+    pushParentHistory: (state, action) => {
+      state.parentHistory.push(action.payload);
+    },
+    popParentHistory: (state) => {
+      if (state.parentHistory.length > 0) {
+          state.currentParentId = state.parentHistory.pop();
+      } else {
+          state.currentParentId = 'root';
+      }
+    },
+
     // Folders
     setLoadingFolders: (state, action) => {
       state.isLoadingFolders = action.payload;
     },
     setFolders: (state, action) => {
-      state.folders = action.payload;
+      state.folders = action.payload.folders;
+      state.nextFoldersPageToken = action.payload.nextPageToken;
+    },
+    appendFolders: (state, action) => {
+      state.folders = [...state.folders, ...action.payload.folders];
+      state.nextFoldersPageToken = action.payload.nextPageToken;
     },
     selectFolder: (state, action) => {
       state.selectedFolderId = action.payload.id;
@@ -41,7 +70,12 @@ const driveSlice = createSlice({
       state.isLoadingFiles = action.payload;
     },
     setFiles: (state, action) => {
-      state.files = action.payload;
+      state.files = action.payload.files;
+      state.nextFilesPageToken = action.payload.nextPageToken;
+    },
+    appendFiles: (state, action) => {
+      state.files = [...state.files, ...action.payload.files];
+      state.nextFilesPageToken = action.payload.nextPageToken;
     },
 
     // File Selection
@@ -74,11 +108,16 @@ const driveSlice = createSlice({
 });
 
 export const {
+  setCurrentParentId,
+  pushParentHistory,
+  popParentHistory,
   setLoadingFolders,
   setFolders,
+  appendFolders,
   selectFolder,
   setLoadingFiles,
   setFiles,
+  appendFiles,
   toggleFileSelection,
   selectAllFilesOnPage,
   deselectAllFilesOnPage,
