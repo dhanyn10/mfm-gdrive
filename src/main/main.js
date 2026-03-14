@@ -136,7 +136,7 @@ const { authorize, getFolders, getFiles, renameFile } = require('./driveApi');
 const { sliceText, padText } = require('./fileOperations');
 
 // Drive APIs
-ipcMain.invoke('check-auth', async () => {
+ipcMain.handle('check-auth', async () => {
     try {
         await authorize(null);
         return true;
@@ -154,7 +154,7 @@ ipcMain.on('authorize', async (event) => {
     }
 });
 
-ipcMain.invoke('get-folders', async (event, parentId = 'root', pageToken = null) => {
+ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null) => {
     try {
         const result = await getFolders(parentId, pageToken);
         return {
@@ -167,7 +167,7 @@ ipcMain.invoke('get-folders', async (event, parentId = 'root', pageToken = null)
     }
 });
 
-ipcMain.invoke('get-files', async (event, folderId = 'root', pageToken = null) => {
+ipcMain.handle('get-files', async (event, folderId = 'root', pageToken = null) => {
     try {
         const result = await getFiles(folderId, pageToken);
         return {
@@ -180,7 +180,7 @@ ipcMain.invoke('get-files', async (event, folderId = 'root', pageToken = null) =
     }
 });
 
-ipcMain.invoke('execute-operation', async (event, operation, params, files) => {
+ipcMain.handle('execute-operation', async (event, operation, params, files) => {
     if (!files || files.length === 0) return [];
 
     let updatedFiles = [];
