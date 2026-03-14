@@ -92,6 +92,11 @@ const driveSlice = createSlice({
       const newSelections = new Set([...state.selectedFileIds, ...pageFileIds]);
       state.selectedFileIds = Array.from(newSelections);
     },
+    selectFileRange: (state, action) => {
+      const rangeFileIds = action.payload;
+      const newSelections = new Set([...state.selectedFileIds, ...rangeFileIds]);
+      state.selectedFileIds = Array.from(newSelections);
+    },
     deselectAllFilesOnPage: (state, action) => {
       const pageFileIds = action.payload;
       state.selectedFileIds = state.selectedFileIds.filter(id => !pageFileIds.includes(id));
@@ -120,6 +125,7 @@ export const {
   appendFiles,
   toggleFileSelection,
   selectAllFilesOnPage,
+  selectFileRange,
   deselectAllFilesOnPage,
   clearAllSelections,
   setPage,
