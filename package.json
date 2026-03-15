@@ -89,7 +89,7 @@
     "wdio-electron-service": "^9.1.0"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.1.0",
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "@google-cloud/local-auth": "^3.0.1",
     "@reduxjs/toolkit": "^2.11.2",
     "bottleneck": "^2.19.5",
