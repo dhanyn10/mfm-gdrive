@@ -114,7 +114,7 @@ function FileList() {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Selection Control Block */}
       {files.length > 0 && (
-        <div className="mb-2 p-4 bg-white rounded-lg shadow-sm dark:bg-gray-800 flex items-center justify-between">
+        <div className="mb-2 p-4 bg-white rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.1)] dark:bg-gray-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <button
               onClick={handleSelectAll}
@@ -128,9 +128,9 @@ function FileList() {
               <button
                 onClick={handleSelectNone}
                 type="button"
-                className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-red-600 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 dark:hover:text-red-400"
+                className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
               >
-                <i className="far fa-square mr-2"></i>
+                <i className="far fa-minus-square mr-2"></i>
                 Select None
               </button>
             )}
