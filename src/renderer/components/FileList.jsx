@@ -7,7 +7,6 @@ import {
   toggleFileSelection,
   selectAllFilesOnPage,
   selectFileRange,
-  deselectAllFilesOnPage,
   clearAllSelections,
   setPage
 } from '../store/driveSlice';
@@ -70,13 +69,13 @@ function FileList() {
       }
   };
 
-  const handleToggleSelectAll = () => {
+  const handleSelectAll = () => {
     const pageIds = currentFiles.map(f => f.id);
-    if (allCurrentPageSelected) {
-      dispatch(deselectAllFilesOnPage(pageIds));
-    } else {
-      dispatch(selectAllFilesOnPage(pageIds));
-    }
+    dispatch(selectAllFilesOnPage(pageIds));
+  };
+
+  const handleSelectNone = () => {
+    dispatch(clearAllSelections());
   };
 
   const handleFileClick = (e, index, fileId) => {
@@ -116,19 +115,24 @@ function FileList() {
       {/* Selection Control Block */}
       {files.length > 0 && (
         <div className="mb-2 p-4 bg-white rounded-lg shadow-sm dark:bg-gray-800 flex items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <button
-              onClick={handleToggleSelectAll}
+              onClick={handleSelectAll}
               type="button"
-              className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+              className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
             >
-              <i className={allCurrentPageSelected ? "far fa-minus-square mr-2" : "far fa-square mr-2"}></i>
-              {allCurrentPageSelected ? "Select None (Page)" : "Select All (Page)"}
+              <i className="far fa-check-square mr-2"></i>
+              Select All
             </button>
             {hasSelections && (
-              <span className="ml-4 text-sm text-gray-600 dark:text-gray-400">
-                {selectedFileIds.length} item(s) selected globally
-              </span>
+              <button
+                onClick={handleSelectNone}
+                type="button"
+                className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-red-600 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 dark:hover:text-red-400"
+              >
+                <i className="far fa-square mr-2"></i>
+                Select None
+              </button>
             )}
           </div>
         </div>
