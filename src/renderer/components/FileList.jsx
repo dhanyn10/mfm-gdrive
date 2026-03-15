@@ -24,6 +24,7 @@ function FileList() {
   const selectedFileIds = useSelector(state => state.drive.selectedFileIds);
   const currentPage = useSelector(state => state.drive.currentPage);
   const itemsPerPage = useSelector(state => state.drive.itemsPerPage);
+  const slicePreview = useSelector(state => state.ui.slicePreview);
 
   const totalPages = Math.ceil(files.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -172,10 +173,39 @@ function FileList() {
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
                   </div>
-                  <div className="ms-3 text-sm flex-1">
-                    <span className="font-medium text-gray-900 dark:text-gray-300 block">
-                      {file.name}
-                    </span>
+                  <div className="ms-3 text-sm flex-1 min-w-0">
+                    {slicePreview.active && slicePreview.start !== undefined && isSelected ? (
+                      <span
+                        className="font-medium text-gray-900 dark:text-gray-300 flex flex-row items-stretch flex-nowrap overflow-hidden min-w-0"
+                        style={{ height: '1.25em', lineHeight: 1.25 }}
+                      >
+                        {[...file.name].map((char, i) => {
+                          const inRange = i >= slicePreview.start && i < slicePreview.end;
+                          return (
+                            <React.Fragment key={i}>
+                              {i === slicePreview.start && (
+                                <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
+                              )}
+                              {i === slicePreview.end && slicePreview.end !== slicePreview.start && (
+                                <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                              )}
+                              {inRange ? (
+                                <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0">{char}</span>
+                              ) : (
+                                <span className="flex items-center justify-center shrink-0">{char}</span>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                        {file.name.length === slicePreview.end && slicePreview.end !== slicePreview.start && (
+                          <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                        )}
+                      </span>
+                    ) : (
+                      <span className="font-medium text-gray-900 dark:text-gray-300 block truncate">
+                        {file.name}
+                      </span>
+                    )}
                   </div>
                 </li>
               );

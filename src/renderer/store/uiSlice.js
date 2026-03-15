@@ -5,6 +5,8 @@ const initialState = {
   isExecuteSidebarOpen: false,
   notifications: [],
   unreadCount: 0,
+  /** When Slice Text is active: show position cursors on file list. { active, start, end } */
+  slicePreview: { active: false, start: 0, end: 0 },
 };
 
 const uiSlice = createSlice({
@@ -20,6 +22,7 @@ const uiSlice = createSlice({
     },
     setExecuteSidebarOpen: (state, action) => {
       state.isExecuteSidebarOpen = action.payload;
+      if (!action.payload) state.slicePreview = { active: false, start: 0, end: 0 };
       // Mutual exclusivity: if Execute is opened, Folders must be closed
       if (state.isExecuteSidebarOpen) {
         state.isFoldersOpen = false;
@@ -27,9 +30,13 @@ const uiSlice = createSlice({
     },
     toggleExecute: (state) => {
       state.isExecuteSidebarOpen = !state.isExecuteSidebarOpen;
+      if (!state.isExecuteSidebarOpen) state.slicePreview = { active: false, start: 0, end: 0 };
       if (state.isExecuteSidebarOpen) {
         state.isFoldersOpen = false;
       }
+    },
+    setSlicePreview: (state, action) => {
+      state.slicePreview = { ...state.slicePreview, ...action.payload };
     },
     addNotification: (state, action) => {
       // action.payload should be { message, type: 'success' | 'error' | 'info' }
@@ -53,6 +60,7 @@ export const {
   toggleFolders,
   setExecuteSidebarOpen,
   toggleExecute,
+  setSlicePreview,
   addNotification,
   markAllNotificationsRead,
 } = uiSlice.actions;

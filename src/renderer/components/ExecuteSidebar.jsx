@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearAllSelections, setFiles } from '../store/driveSlice';
-import { addNotification } from '../store/uiSlice';
+import { addNotification, setSlicePreview } from '../store/uiSlice';
 
 function ExecuteSidebar() {
   const dispatch = useDispatch();
@@ -13,8 +13,8 @@ function ExecuteSidebar() {
   // Form states
   const [replaceTarget, setReplaceTarget] = useState('');
   const [replaceWith, setReplaceWith] = useState('');
-  const [sliceStart, setSliceStart] = useState('');
-  const [sliceEnd, setSliceEnd] = useState('');
+  const [sliceStart, setSliceStart] = useState(0);
+  const [sliceEnd, setSliceEnd] = useState(0);
   const [padPosition, setPadPosition] = useState('start');
   const [padCount, setPadCount] = useState('');
   const [padChar, setPadChar] = useState('');
@@ -26,7 +26,15 @@ function ExecuteSidebar() {
   const selectOperation = (op) => {
     setOperation(op);
     setIsDropdownOpen(false);
+    if (op !== 'slice') dispatch(setSlicePreview({ active: false }));
   };
+
+  // Sync slice indices to Redux so FileList can show position cursors
+  useEffect(() => {
+    if (operation === 'slice') {
+      dispatch(setSlicePreview({ active: true, start: sliceStart, end: sliceEnd }));
+    }
+  }, [operation, sliceStart, sliceEnd, dispatch]);
 
   const nextFilesPageToken = useSelector(state => state.drive.nextFilesPageToken);
 
@@ -41,8 +49,7 @@ function ExecuteSidebar() {
       if (!replaceTarget) return;
       params = { search: replaceTarget, replace: replaceWith };
     } else if (operation === 'slice') {
-      if (!sliceStart) return;
-      params = { start: parseInt(sliceStart, 10), end: sliceEnd ? parseInt(sliceEnd, 10) : undefined };
+      params = { start: sliceStart, end: sliceEnd || undefined };
     } else if (operation === 'pad') {
       if (!padCount || !padChar) return;
       params = { position: padPosition, count: parseInt(padCount, 10), char: padChar };
@@ -128,18 +135,54 @@ function ExecuteSidebar() {
           </>
         )}
 
-        {operation === 'slice' && (
-          <>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start index</label>
-              <input type="number" value={sliceStart} onChange={e => setSliceStart(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End index (optional)</label>
-              <input type="number" value={sliceEnd} onChange={e => setSliceEnd(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
-            </div>
-          </>
-        )}
+        {operation === 'slice' && (() => {
+          const targetFiles = files.filter(f => selectedFileIds.includes(f.id));
+          const maxSliceLength = targetFiles.length > 0
+            ? Math.max(...targetFiles.map(f => f.name.length), 1)
+            : 100;
+          const handleSliceStart = (e) => {
+            const v = parseInt(e.target.value, 10);
+            setSliceStart(v);
+            if (v > sliceEnd) setSliceEnd(v);
+          };
+          const handleSliceEnd = (e) => {
+            const v = parseInt(e.target.value, 10);
+            setSliceEnd(v);
+            if (v < sliceStart) setSliceStart(v);
+          };
+          return (
+            <>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start index</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={0}
+                    max={maxSliceLength}
+                    value={sliceStart}
+                    onChange={handleSliceStart}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                  />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white w-8 tabular-nums">{sliceStart}</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End index (optional)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={0}
+                    max={maxSliceLength}
+                    value={sliceEnd}
+                    onChange={handleSliceEnd}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                  />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white w-8 tabular-nums">{sliceEnd}</span>
+                </div>
+              </div>
+            </>
+          );
+        })()}
 
         {operation === 'pad' && (
           <>
