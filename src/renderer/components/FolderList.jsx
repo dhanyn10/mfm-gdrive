@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFolders, selectFolder, setLoadingFolders, appendFolders, setCurrentParentId, pushParentHistory, popParentHistory } from '../store/driveSlice';
+import { Spinner } from './common/Spinner';
 
 function FolderList() {
   const dispatch = useDispatch();
@@ -69,15 +70,21 @@ function FolderList() {
         <button
           onClick={() => fetchFolders(currentParentId)}
           data-testid="refresh-button"
-          className="ml-2 px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
+          className="ml-2 px-2 py-1 flex items-center justify-center min-w-[32px] min-h-[28px] text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
           title="Refresh"
         >
-          <i className={`fas fa-sync-alt ${isLoading ? 'animate-spin' : ''}`}></i>
+          {isLoading ? (
+            <Spinner className="h-4 w-4 text-blue-500" />
+          ) : (
+            <i className="fas fa-sync-alt"></i>
+          )}
         </button>
       </div>
       <ul id="folder-list" className="overflow-y-auto select-none max-h-[calc(100vh-240px)] flex-1">
         {isLoading && folders.length === 0 ? (
-           <li className="p-4 text-center text-gray-500">Loading folders...</li>
+           <li className="p-4 flex justify-center items-center">
+             <Spinner className="h-8 w-8 text-blue-500" />
+           </li>
         ) : folders.length === 0 ? (
            <li className="p-4 text-center text-gray-500">No folders found in this directory</li>
         ) : (

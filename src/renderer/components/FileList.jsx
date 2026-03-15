@@ -11,6 +11,7 @@ import {
   setPage
 } from '../store/driveSlice';
 import { toggleExecute } from '../store/uiSlice';
+import { Spinner } from './common/Spinner';
 
 function FileList() {
   const dispatch = useDispatch();
@@ -154,8 +155,10 @@ function FileList() {
 
       {/* File List Area */}
       <div className="w-full flex-1 overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex flex-col">
-        {isLoading && files.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">Loading files...</div>
+        {isLoading ? (
+          <div className="flex-1 flex justify-center items-center">
+            <Spinner className="h-8 w-8 text-blue-500" />
+          </div>
         ) : files.length === 0 ? (
           <div className="p-8 text-center text-gray-500">No files found in this folder</div>
         ) : (

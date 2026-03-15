@@ -65,6 +65,10 @@ const driveSlice = createSlice({
       state.selectedFolderObj = action.payload;
       state.currentPage = 1; // Reset page on folder change
       state.selectedFileIds = []; // Reset selection on folder change
+      if (action.payload.id) {
+          state.files = []; // Clear files immediately when selecting a new folder
+          state.nextFilesPageToken = null;
+      }
     },
 
     // Files
