@@ -161,7 +161,8 @@ function FileList() {
               return (
                 <li
                   key={file.id}
-                  className={`flex items-center p-3 select-none ${isSelected ? 'bg-blue-300 hover:bg-blue-400 dark:bg-gray-700 dark:hover:bg-gray-600' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  onClick={(e) => handleFileClick(e, index, file.id)}
+                  className={`flex items-center p-3 select-none cursor-pointer w-full ${isSelected ? 'bg-blue-300 hover:bg-blue-400 dark:bg-gray-700 dark:hover:bg-gray-600' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                 >
                   <div className="flex items-center h-5 hidden">
                     <input
@@ -171,12 +172,10 @@ function FileList() {
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
                   </div>
-                  <div className="ms-3 text-sm flex-1 cursor-pointer" onClick={(e) => handleFileClick(e, index, file.id)}>
-                    <label
-                      className="font-medium text-gray-900 dark:text-gray-300 cursor-pointer pointer-events-none"
-                    >
+                  <div className="ms-3 text-sm flex-1">
+                    <span className="font-medium text-gray-900 dark:text-gray-300 block">
                       {file.name}
-                    </label>
+                    </span>
                   </div>
                 </li>
               );
