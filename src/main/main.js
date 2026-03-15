@@ -218,7 +218,6 @@ ipcMain.handle('undo-rename', async (event, fileId, oldName) => {
     try {
         const renamed = await renameFile(fileId, oldName);
         if (renamed) {
-            event.sender.send('operation-complete', { newName: oldName, oldName: "Restored", fileId: fileId });
             return true;
         }
         return false;

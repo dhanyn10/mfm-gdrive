@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { markAllNotificationsRead } from '../store/uiSlice';
+import { markAllNotificationsRead, removeNotification } from '../store/uiSlice';
 
 function NotificationDropdown({ count }) {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState({});
+  const [swipingOutId, setSwipingOutId] = useState(null);
   const notifications = useSelector(state => state.ui.notifications);
   const dispatch = useDispatch();
 
@@ -19,10 +20,17 @@ function NotificationDropdown({ count }) {
     setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleUndo = async (e, fileId, oldName) => {
+  const handleUndo = async (e, notifId, fileId, oldName) => {
     e.stopPropagation();
     if (window.electronAPI && window.electronAPI.undoRename) {
-       await window.electronAPI.undoRename(fileId, oldName);
+       const success = await window.electronAPI.undoRename(fileId, oldName);
+       if (success) {
+           setSwipingOutId(notifId);
+           setTimeout(() => {
+               dispatch(removeNotification(notifId));
+               setSwipingOutId(null);
+           }, 300);
+       }
     }
   };
 
@@ -54,7 +62,7 @@ function NotificationDropdown({ count }) {
                 notifications.map((notif) => (
                   <div
                     key={notif.id}
-                    className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'} ${notif.details ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600' : ''}`}
+                    className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'} ${notif.details ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600' : ''} transition-all duration-300 transform ${swipingOutId === notif.id ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}
                     onClick={() => notif.details && toggleExpand(notif.id)}
                   >
                     <div className="flex items-center">
@@ -67,7 +75,7 @@ function NotificationDropdown({ count }) {
                             <i
                               className="fas fa-rotate-left text-gray-400 ml-3 hover:text-blue-500 cursor-pointer"
                               title="Undo Rename"
-                              onClick={(e) => handleUndo(e, notif.fileId, notif.details)}
+                              onClick={(e) => handleUndo(e, notif.id, notif.fileId, notif.details)}
                             ></i>
                           )}
                         </>
