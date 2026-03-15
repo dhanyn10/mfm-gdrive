@@ -50,8 +50,8 @@ function App() {
               dispatch(addNotification({ message: data, type: "success" }));
           } else if (data && data.newName && data.oldName) {
               dispatch(addNotification({
-                  message: data.newName,
-                  details: data.oldName,
+                  message: `Renamed ${data.oldName} to ${data.newName}`,
+                  oldName: data.oldName,
                   fileId: data.fileId,
                   type: "success"
               }));
