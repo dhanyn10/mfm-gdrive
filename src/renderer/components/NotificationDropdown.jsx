@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { markAllNotificationsRead, removeNotification } from '../store/uiSlice';
+import { triggerRefresh } from '../store/driveSlice';
 
 function NotificationDropdown({ count }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +26,7 @@ function NotificationDropdown({ count }) {
     if (window.electronAPI && window.electronAPI.undoRename) {
        const success = await window.electronAPI.undoRename(fileId, oldName);
        if (success) {
+           dispatch(triggerRefresh());
            setSwipingOutId(notifId);
            setTimeout(() => {
                dispatch(removeNotification(notifId));
