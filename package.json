@@ -93,7 +93,7 @@
     "@google-cloud/local-auth": "^3.0.1",
     "@reduxjs/toolkit": "^2.11.2",
     "bottleneck": "^2.19.5",
-    "google-auth-library": "^10.1.0",
+    "google-auth-library": "^10.6.1",
     "googleapis": "^171.4.0",
     "node-abi": "^4.14.0",
     "react": "^19.2.4",
