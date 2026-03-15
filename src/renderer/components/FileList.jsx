@@ -114,7 +114,7 @@ function FileList() {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Selection Control Block */}
       {files.length > 0 && (
-        <div className="mb-2 p-4 bg-white rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.1)] dark:bg-gray-800 flex items-center justify-between">
+        <div className="mb-2 p-3 bg-white rounded-md border border-gray-200 dark:bg-gray-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <button
               onClick={handleSelectAll}
