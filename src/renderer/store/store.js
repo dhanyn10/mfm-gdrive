@@ -10,3 +10,8 @@ export const store = configureStore({
     ui: uiReducer,
   },
 });
+
+// Expose store for e2e tests
+if (typeof window !== 'undefined') {
+  window.__REDUX_STORE__ = store;
+}
