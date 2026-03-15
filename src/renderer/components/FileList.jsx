@@ -190,9 +190,9 @@ function FileList() {
                                 <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
                               )}
                               {inRange ? (
-                                <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0">{char}</span>
+                                <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0 whitespace-pre">{char}</span>
                               ) : (
-                                <span className="flex items-center justify-center shrink-0">{char}</span>
+                                <span className="flex items-center justify-center shrink-0 whitespace-pre">{char}</span>
                               )}
                             </React.Fragment>
                           );
