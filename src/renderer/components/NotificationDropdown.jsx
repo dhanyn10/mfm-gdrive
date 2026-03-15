@@ -19,6 +19,13 @@ function NotificationDropdown({ count }) {
     setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleUndo = async (e, fileId, oldName) => {
+    e.stopPropagation();
+    if (window.electronAPI && window.electronAPI.undoRename) {
+       await window.electronAPI.undoRename(fileId, oldName);
+    }
+  };
+
   return (
     <div className="relative">
       <button
@@ -54,7 +61,16 @@ function NotificationDropdown({ count }) {
                       <span className={`w-2 h-2 rounded-full mr-2 ${notif.type === 'success' ? 'bg-green-500' : notif.type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`}></span>
                       <span className="text-gray-800 dark:text-gray-200 flex-1">{notif.message}</span>
                       {notif.details && (
-                        <i className={`fas fa-chevron-${expandedIds[notif.id] ? 'up' : 'down'} text-gray-400 ml-2`}></i>
+                        <>
+                          <i className={`fas fa-chevron-${expandedIds[notif.id] ? 'up' : 'down'} text-gray-400 ml-2 hover:text-gray-600`}></i>
+                          {notif.fileId && (
+                            <i
+                              className="fas fa-rotate-left text-gray-400 ml-3 hover:text-blue-500 cursor-pointer"
+                              title="Undo Rename"
+                              onClick={(e) => handleUndo(e, notif.fileId, notif.details)}
+                            ></i>
+                          )}
+                        </>
                       )}
                     </div>
                     {expandedIds[notif.id] && notif.details && (

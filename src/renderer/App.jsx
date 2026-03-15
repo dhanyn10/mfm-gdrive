@@ -52,6 +52,7 @@ function App() {
               dispatch(addNotification({
                   message: data.newName,
                   details: data.oldName,
+                  fileId: data.fileId,
                   type: "success"
               }));
           }

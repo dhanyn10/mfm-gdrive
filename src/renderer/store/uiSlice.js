@@ -39,7 +39,7 @@ const uiSlice = createSlice({
       state.slicePreview = { ...state.slicePreview, ...action.payload };
     },
     addNotification: (state, action) => {
-      // action.payload should be { message, details, type: 'success' | 'error' | 'info' }
+      // action.payload should be { message, details, fileId, type: 'success' | 'error' | 'info' }
       const newNotif = {
         id: Date.now(),
         time: new Date().toLocaleTimeString(),
