@@ -81,7 +81,7 @@ function NotificationDropdown({ count }) {
                       {notif.fileId && notif.oldName && (
                         <button
                           type="button"
-                          className="ml-3 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none"
+                          className="ml-3 px-3 py-1 text-xs font-medium text-white bg-blue-800 hover:bg-blue-900 rounded-full dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           onClick={(e) => handleUndo(e, notif.id, notif.fileId, notif.oldName)}
                         >
                           Undo
