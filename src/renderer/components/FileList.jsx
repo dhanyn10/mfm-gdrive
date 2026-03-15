@@ -26,6 +26,8 @@ function FileList() {
   const itemsPerPage = useSelector(state => state.drive.itemsPerPage);
   const refreshTrigger = useSelector(state => state.drive.refreshTrigger);
   const slicePreview = useSelector(state => state.ui.slicePreview);
+  const isNotificationDropdownOpen = useSelector(state => state.ui.isNotificationDropdownOpen);
+  const hoveredFileId = useSelector(state => state.ui.hoveredFileId);
 
   const totalPages = Math.ceil(files.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -159,17 +161,30 @@ function FileList() {
         ) : (
           <ul className="overflow-y-auto h-full divide-y divide-gray-100 dark:divide-gray-700">
             {currentFiles.map((file, index) => {
-              const isSelected = selectedFileIds.includes(file.id);
+              const actuallySelected = selectedFileIds.includes(file.id);
+              const isSelected = !isNotificationDropdownOpen && actuallySelected;
+              const isHoveredNotif = isNotificationDropdownOpen && file.id === hoveredFileId;
+
+              // Base background styling logic
+              let liClass = "flex items-center p-3 select-none cursor-pointer w-full ";
+              if (isSelected) {
+                liClass += "bg-blue-300 hover:bg-blue-400 dark:bg-gray-700 dark:hover:bg-gray-600";
+              } else if (isHoveredNotif) {
+                liClass += "bg-gray-50 dark:bg-gray-700";
+              } else {
+                liClass += "hover:bg-gray-50 dark:hover:bg-gray-700";
+              }
+
               return (
                 <li
                   key={file.id}
                   onClick={(e) => handleFileClick(e, index, file.id)}
-                  className={`flex items-center p-3 select-none cursor-pointer w-full ${isSelected ? 'bg-blue-300 hover:bg-blue-400 dark:bg-gray-700 dark:hover:bg-gray-600' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  className={liClass}
                 >
                   <div className="flex items-center h-5 hidden">
                     <input
                       type="checkbox"
-                      checked={isSelected}
+                      checked={actuallySelected}
                       onChange={(e) => handleFileClick(e.nativeEvent, index, file.id)}
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />

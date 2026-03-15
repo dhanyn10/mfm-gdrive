@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { markAllNotificationsRead, removeNotification } from '../store/uiSlice';
+import { markAllNotificationsRead, removeNotification, setHoveredFileId, setNotificationDropdownOpen } from '../store/uiSlice';
 import { triggerRefresh } from '../store/driveSlice';
 
 function NotificationDropdown({ count }) {
@@ -8,6 +8,10 @@ function NotificationDropdown({ count }) {
   const [swipingOutId, setSwipingOutId] = useState(null);
   const notifications = useSelector(state => state.ui.notifications);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setNotificationDropdownOpen(isOpen));
+  }, [isOpen, dispatch]);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -59,6 +63,16 @@ function NotificationDropdown({ count }) {
                 notifications.map((notif) => (
                   <div
                     key={notif.id}
+                    onMouseEnter={() => {
+                        if (notif.fileId) {
+                            dispatch(setHoveredFileId(notif.fileId));
+                        }
+                    }}
+                    onMouseLeave={() => {
+                        if (notif.fileId) {
+                            dispatch(setHoveredFileId(null));
+                        }
+                    }}
                     className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'} transition-all duration-300 transform ${swipingOutId === notif.id ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}
                   >
                     <div className="flex items-center">
@@ -67,7 +81,7 @@ function NotificationDropdown({ count }) {
                       {notif.fileId && notif.oldName && (
                         <button
                           type="button"
-                          className="ml-3 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none"
+                          className="ml-3 px-3 py-1 text-xs font-medium text-white bg-blue-800 hover:bg-blue-900 rounded-full dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           onClick={(e) => handleUndo(e, notif.id, notif.fileId, notif.oldName)}
                         >
                           Undo

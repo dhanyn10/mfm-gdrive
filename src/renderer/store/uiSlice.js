@@ -7,6 +7,8 @@ const initialState = {
   unreadCount: 0,
   /** When Slice Text is active: show position cursors on file list. { active, start, end } */
   slicePreview: { active: false, start: 0, end: 0 },
+  isNotificationDropdownOpen: false,
+  hoveredFileId: null,
 };
 
 const uiSlice = createSlice({
@@ -56,6 +58,15 @@ const uiSlice = createSlice({
     removeNotification: (state, action) => {
       state.notifications = state.notifications.filter(n => n.id !== action.payload);
     },
+    setNotificationDropdownOpen: (state, action) => {
+      state.isNotificationDropdownOpen = action.payload;
+      if (!action.payload) {
+        state.hoveredFileId = null;
+      }
+    },
+    setHoveredFileId: (state, action) => {
+      state.hoveredFileId = action.payload;
+    },
   },
 });
 
@@ -67,6 +78,8 @@ export const {
   addNotification,
   markAllNotificationsRead,
   removeNotification,
+  setNotificationDropdownOpen,
+  setHoveredFileId,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
