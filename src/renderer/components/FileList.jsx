@@ -136,15 +136,15 @@ function FileList() {
               </button>
             )}
           </div>
-          <button
-            onClick={() => dispatch(toggleExecute())}
-            type="button"
-            disabled={!hasSelections}
-            className="px-3 py-1.5 text-sm font-medium text-white bg-blue-700 border border-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          >
-            Next
-            <i className="fas fa-chevron-right ml-2"></i>
-          </button>
+          {hasSelections && (
+            <button
+              onClick={() => dispatch(toggleExecute())}
+              type="button"
+              className="px-3 py-1.5 text-sm font-medium text-white bg-blue-700 border border-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >
+              Next
+            </button>
+          )}
         </div>
       )}
 
