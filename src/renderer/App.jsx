@@ -8,8 +8,6 @@ import FileList from './components/FileList';
 import ExecuteSidebar from './components/ExecuteSidebar';
 import { setAuthorized, setAuthorizing } from './store/authSlice';
 import { addNotification } from './store/uiSlice';
-import Toastify from 'toastify-js';
-import 'toastify-js/src/toastify.css';
 
 function App() {
   const dispatch = useDispatch();
@@ -40,13 +38,6 @@ function App() {
     if (window.electronAPI) {
       removeUpdateStatus = window.electronAPI.onUpdateStatus((status) => {
         dispatch(addNotification({ message: status, type: 'info' }));
-        Toastify({
-          text: status,
-          duration: 3000,
-          gravity: "bottom",
-          position: "right",
-          style: { background: "#3b82f6" },
-        }).showToast();
       });
 
       removeAuthSuccess = window.electronAPI.onAuthSuccess(() => {
@@ -54,15 +45,17 @@ function App() {
         dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
       });
 
-      removeOperationComplete = window.electronAPI.onOperationComplete((msg) => {
-          dispatch(addNotification({ message: msg, type: "success" }));
-          Toastify({
-              text: msg,
-              duration: 3000,
-              gravity: "bottom",
-              position: "right",
-              style: { background: "#10b981" },
-          }).showToast();
+      removeOperationComplete = window.electronAPI.onOperationComplete((data) => {
+          if (typeof data === 'string') {
+              dispatch(addNotification({ message: data, type: "success" }));
+          } else if (data && data.newName && data.oldName) {
+              dispatch(addNotification({
+                  message: `Renamed ${data.oldName} to ${data.newName}`,
+                  oldName: data.oldName,
+                  fileId: data.fileId,
+                  type: "success"
+              }));
+          }
       });
     }
 

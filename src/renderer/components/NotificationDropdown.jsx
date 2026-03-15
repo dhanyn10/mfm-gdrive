@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { markAllNotificationsRead } from '../store/uiSlice';
+import { markAllNotificationsRead, removeNotification } from '../store/uiSlice';
+import { triggerRefresh } from '../store/driveSlice';
 
 function NotificationDropdown({ count }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [swipingOutId, setSwipingOutId] = useState(null);
   const notifications = useSelector(state => state.ui.notifications);
   const dispatch = useDispatch();
 
@@ -11,6 +13,21 @@ function NotificationDropdown({ count }) {
     setIsOpen(!isOpen);
     if (!isOpen && count > 0) {
         dispatch(markAllNotificationsRead());
+    }
+  };
+
+  const handleUndo = async (e, notifId, fileId, oldName) => {
+    e.stopPropagation();
+    if (window.electronAPI && window.electronAPI.undoRename) {
+       const success = await window.electronAPI.undoRename(fileId, oldName);
+       if (success) {
+           dispatch(triggerRefresh());
+           setSwipingOutId(notifId);
+           setTimeout(() => {
+               dispatch(removeNotification(notifId));
+               setSwipingOutId(null);
+           }, 300);
+       }
     }
   };
 
@@ -39,13 +56,24 @@ function NotificationDropdown({ count }) {
               {notifications.length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 text-sm p-4">No new notifications.</p>
               ) : (
-                notifications.map((notif, idx) => (
-                  <div key={idx} className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'}`}>
+                notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'} transition-all duration-300 transform ${swipingOutId === notif.id ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}
+                  >
                     <div className="flex items-center">
                       <span className={`w-2 h-2 rounded-full mr-2 ${notif.type === 'success' ? 'bg-green-500' : notif.type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`}></span>
                       <span className="text-gray-800 dark:text-gray-200 flex-1">{notif.message}</span>
+                      {notif.fileId && notif.oldName && (
+                        <button
+                          type="button"
+                          className="ml-3 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none"
+                          onClick={(e) => handleUndo(e, notif.id, notif.fileId, notif.oldName)}
+                        >
+                          Undo
+                        </button>
+                      )}
                     </div>
-                    <span className="text-xs text-gray-500 mt-1 block ml-4">{notif.time}</span>
                   </div>
                 ))
               )}

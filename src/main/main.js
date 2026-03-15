@@ -199,18 +199,31 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
                 const renamed = await renameFile(file.id, newName);
                 if (renamed) {
                     updatedFiles.push({ id: file.id, newName: newName });
+                    event.sender.send('operation-complete', { newName, oldName: file.name, fileId: file.id });
                 }
             }
         }
 
-        if (updatedFiles.length > 0) {
-           event.sender.send('operation-complete', `Successfully updated ${updatedFiles.length} file(s).`);
-        } else {
+        if (updatedFiles.length === 0) {
            event.sender.send('update-status', `No files needed changes.`);
         }
         return updatedFiles;
     } catch (error) {
         console.error("Error executing operation:", error);
         throw error;
+    }
+});
+
+ipcMain.handle('undo-rename', async (event, fileId, oldName) => {
+    try {
+        const renamed = await renameFile(fileId, oldName);
+        if (renamed) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error undoing rename:", error);
+        event.sender.send('update-status', `Failed to undo rename: ${error.message}`);
+        return false;
     }
 });

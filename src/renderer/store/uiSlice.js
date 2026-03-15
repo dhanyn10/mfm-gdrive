@@ -39,7 +39,7 @@ const uiSlice = createSlice({
       state.slicePreview = { ...state.slicePreview, ...action.payload };
     },
     addNotification: (state, action) => {
-      // action.payload should be { message, type: 'success' | 'error' | 'info' }
+      // action.payload should be { message, details, fileId, type: 'success' | 'error' | 'info' }
       const newNotif = {
         id: Date.now(),
         time: new Date().toLocaleTimeString(),
@@ -53,6 +53,9 @@ const uiSlice = createSlice({
       state.notifications.forEach(n => { n.read = true; });
       state.unreadCount = 0;
     },
+    removeNotification: (state, action) => {
+      state.notifications = state.notifications.filter(n => n.id !== action.payload);
+    },
   },
 });
 
@@ -63,6 +66,7 @@ export const {
   setSlicePreview,
   addNotification,
   markAllNotificationsRead,
+  removeNotification,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

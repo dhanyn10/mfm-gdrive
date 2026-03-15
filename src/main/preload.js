@@ -20,6 +20,7 @@ window.electronAPI = {
   getFolders: (parentId, pageToken) => ipcRenderer.invoke('get-folders', parentId, pageToken),
   getFiles: (folderId, pageToken) => ipcRenderer.invoke('get-files', folderId, pageToken),
   executeOperation: (operation, params, files) => ipcRenderer.invoke('execute-operation', operation, params, files),
+  undoRename: (fileId, oldName) => ipcRenderer.invoke('undo-rename', fileId, oldName),
   minimizeWindow: () => ipcRenderer.send('minimize-window'),
   maximizeWindow: () => ipcRenderer.send('maximize-window'),
   closeWindow: () => ipcRenderer.send('close-window'),

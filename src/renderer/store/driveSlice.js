@@ -25,6 +25,8 @@ const initialState = {
   // Pagination
   currentPage: 1,
   itemsPerPage: ITEMS_PER_PAGE,
+
+  refreshTrigger: 0,
 };
 
 const driveSlice = createSlice({
@@ -78,6 +80,10 @@ const driveSlice = createSlice({
       state.nextFilesPageToken = action.payload.nextPageToken;
     },
 
+    triggerRefresh: (state) => {
+      state.refreshTrigger += 1;
+    },
+
     // File Selection
     toggleFileSelection: (state, action) => {
       const fileId = action.payload;
@@ -129,6 +135,7 @@ export const {
   deselectAllFilesOnPage,
   clearAllSelections,
   setPage,
+  triggerRefresh,
 } = driveSlice.actions;
 
 export default driveSlice.reducer;

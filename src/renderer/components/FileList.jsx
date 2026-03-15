@@ -24,6 +24,7 @@ function FileList() {
   const selectedFileIds = useSelector(state => state.drive.selectedFileIds);
   const currentPage = useSelector(state => state.drive.currentPage);
   const itemsPerPage = useSelector(state => state.drive.itemsPerPage);
+  const refreshTrigger = useSelector(state => state.drive.refreshTrigger);
   const slicePreview = useSelector(state => state.ui.slicePreview);
 
   const totalPages = Math.ceil(files.length / itemsPerPage);
@@ -63,7 +64,7 @@ function FileList() {
     if (selectedFolderId) {
        fetchFiles(selectedFolderId);
     }
-  }, [selectedFolderId, dispatch]);
+  }, [selectedFolderId, refreshTrigger, dispatch]);
 
   const handleLoadMore = () => {
       if (nextFilesPageToken) {
