@@ -151,7 +151,7 @@ function FileList() {
               return (
                 <li
                   key={file.id}
-                  className={`flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 select-none ${isSelected ? 'bg-blue-300 dark:bg-gray-700' : ''}`}
+                  className={`flex items-center p-3 select-none ${isSelected ? 'bg-blue-300 hover:bg-blue-400 dark:bg-gray-700 dark:hover:bg-gray-600' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                 >
                   <div className="flex items-center h-5 hidden">
                     <input
