@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearAllSelections, setFiles } from '../store/driveSlice';
-import { addNotification, setSlicePreview } from '../store/uiSlice';
+import { addNotification, setSlicePreview, setOperationPreview } from '../store/uiSlice';
 
 function ExecuteSidebar() {
   const dispatch = useDispatch();
@@ -28,6 +28,23 @@ function ExecuteSidebar() {
     setIsDropdownOpen(false);
     if (op !== 'slice') dispatch(setSlicePreview({ active: false }));
   };
+
+  // Sync operation state to Redux so FileList can preview changes
+  useEffect(() => {
+    if (operation) {
+      let params = {};
+      if (operation === 'replace') {
+        params = { search: replaceTarget, replace: replaceWith };
+      } else if (operation === 'slice') {
+        params = { start: sliceStart, end: sliceEnd || undefined };
+      } else if (operation === 'pad') {
+        params = { position: padPosition, count: parseInt(padCount, 10), char: padChar };
+      }
+      dispatch(setOperationPreview({ active: true, type: operation, params }));
+    } else {
+      dispatch(setOperationPreview({ active: false, type: '', params: {} }));
+    }
+  }, [operation, replaceTarget, replaceWith, sliceStart, sliceEnd, padPosition, padCount, padChar, dispatch]);
 
   // Sync slice indices to Redux so FileList can show position cursors
   useEffect(() => {

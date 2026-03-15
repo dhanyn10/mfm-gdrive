@@ -7,6 +7,8 @@ const initialState = {
   unreadCount: 0,
   /** When Slice Text is active: show position cursors on file list. { active, start, end } */
   slicePreview: { active: false, start: 0, end: 0 },
+  /** Holds the active operation parameters to preview changes in the file list */
+  operationPreview: { active: false, type: '', params: {} },
   isNotificationDropdownOpen: false,
   hoveredFileId: null,
 };
@@ -24,7 +26,10 @@ const uiSlice = createSlice({
     },
     setExecuteSidebarOpen: (state, action) => {
       state.isExecuteSidebarOpen = action.payload;
-      if (!action.payload) state.slicePreview = { active: false, start: 0, end: 0 };
+      if (!action.payload) {
+        state.slicePreview = { active: false, start: 0, end: 0 };
+        state.operationPreview = { active: false, type: '', params: {} };
+      }
       // Mutual exclusivity: if Execute is opened, Folders must be closed
       if (state.isExecuteSidebarOpen) {
         state.isFoldersOpen = false;
@@ -32,13 +37,19 @@ const uiSlice = createSlice({
     },
     toggleExecute: (state) => {
       state.isExecuteSidebarOpen = !state.isExecuteSidebarOpen;
-      if (!state.isExecuteSidebarOpen) state.slicePreview = { active: false, start: 0, end: 0 };
+      if (!state.isExecuteSidebarOpen) {
+        state.slicePreview = { active: false, start: 0, end: 0 };
+        state.operationPreview = { active: false, type: '', params: {} };
+      }
       if (state.isExecuteSidebarOpen) {
         state.isFoldersOpen = false;
       }
     },
     setSlicePreview: (state, action) => {
       state.slicePreview = { ...state.slicePreview, ...action.payload };
+    },
+    setOperationPreview: (state, action) => {
+      state.operationPreview = { ...state.operationPreview, ...action.payload };
     },
     addNotification: (state, action) => {
       // action.payload should be { message, details, fileId, type: 'success' | 'error' | 'info' }
@@ -75,6 +86,7 @@ export const {
   setExecuteSidebarOpen,
   toggleExecute,
   setSlicePreview,
+  setOperationPreview,
   addNotification,
   markAllNotificationsRead,
   removeNotification,
