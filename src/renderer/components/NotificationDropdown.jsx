@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { markAllNotificationsRead, removeNotification } from '../store/uiSlice';
+import { markAllNotificationsRead, removeNotification, setHoveredFileId, setNotificationDropdownOpen } from '../store/uiSlice';
 import { triggerRefresh } from '../store/driveSlice';
 
 function NotificationDropdown({ count }) {
@@ -8,6 +8,10 @@ function NotificationDropdown({ count }) {
   const [swipingOutId, setSwipingOutId] = useState(null);
   const notifications = useSelector(state => state.ui.notifications);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setNotificationDropdownOpen(isOpen));
+  }, [isOpen, dispatch]);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -59,6 +63,16 @@ function NotificationDropdown({ count }) {
                 notifications.map((notif) => (
                   <div
                     key={notif.id}
+                    onMouseEnter={() => {
+                        if (notif.fileId) {
+                            dispatch(setHoveredFileId(notif.fileId));
+                        }
+                    }}
+                    onMouseLeave={() => {
+                        if (notif.fileId) {
+                            dispatch(setHoveredFileId(null));
+                        }
+                    }}
                     className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'} transition-all duration-300 transform ${swipingOutId === notif.id ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}
                   >
                     <div className="flex items-center">
