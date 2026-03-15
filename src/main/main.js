@@ -199,7 +199,7 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
                 const renamed = await renameFile(file.id, newName);
                 if (renamed) {
                     updatedFiles.push({ id: file.id, newName: newName });
-                    event.sender.send('operation-complete', `${file.name} ⟶ ${newName}`);
+                    event.sender.send('operation-complete', { newName, oldName: file.name });
                 }
             }
         }

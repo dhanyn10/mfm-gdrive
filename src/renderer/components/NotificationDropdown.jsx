@@ -4,6 +4,7 @@ import { markAllNotificationsRead } from '../store/uiSlice';
 
 function NotificationDropdown({ count }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [expandedIds, setExpandedIds] = useState({});
   const notifications = useSelector(state => state.ui.notifications);
   const dispatch = useDispatch();
 
@@ -12,6 +13,10 @@ function NotificationDropdown({ count }) {
     if (!isOpen && count > 0) {
         dispatch(markAllNotificationsRead());
     }
+  };
+
+  const toggleExpand = (id) => {
+    setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -39,13 +44,24 @@ function NotificationDropdown({ count }) {
               {notifications.length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 text-sm p-4">No new notifications.</p>
               ) : (
-                notifications.map((notif, idx) => (
-                  <div key={idx} className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'}`}>
+                notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className={`p-3 text-sm border-b border-gray-100 dark:border-gray-600 ${notif.read ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-700'} ${notif.details ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600' : ''}`}
+                    onClick={() => notif.details && toggleExpand(notif.id)}
+                  >
                     <div className="flex items-center">
                       <span className={`w-2 h-2 rounded-full mr-2 ${notif.type === 'success' ? 'bg-green-500' : notif.type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`}></span>
                       <span className="text-gray-800 dark:text-gray-200 flex-1">{notif.message}</span>
+                      {notif.details && (
+                        <i className={`fas fa-chevron-${expandedIds[notif.id] ? 'up' : 'down'} text-gray-400 ml-2`}></i>
+                      )}
                     </div>
-                    <span className="text-xs text-gray-500 mt-1 block ml-4">{notif.time}</span>
+                    {expandedIds[notif.id] && notif.details && (
+                       <div className="mt-2 ml-4 p-2 bg-gray-200 dark:bg-gray-900 rounded text-gray-700 dark:text-gray-300 font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap" title={notif.details}>
+                         {notif.details}
+                       </div>
+                    )}
                   </div>
                 ))
               )}

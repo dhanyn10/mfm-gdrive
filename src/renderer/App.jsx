@@ -45,8 +45,16 @@ function App() {
         dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
       });
 
-      removeOperationComplete = window.electronAPI.onOperationComplete((msg) => {
-          dispatch(addNotification({ message: msg, type: "success" }));
+      removeOperationComplete = window.electronAPI.onOperationComplete((data) => {
+          if (typeof data === 'string') {
+              dispatch(addNotification({ message: data, type: "success" }));
+          } else if (data && data.newName && data.oldName) {
+              dispatch(addNotification({
+                  message: data.newName,
+                  details: data.oldName,
+                  type: "success"
+              }));
+          }
       });
     }
 
