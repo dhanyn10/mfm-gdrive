@@ -1,14 +1,16 @@
 {
   "name": "mfm-gdrive",
   "version": "2.0.0",
-  "main": "main.js",
+  "main": "src/main/main.js",
   "scripts": {
-    "start": "npm run css-gen && electron .",
-    "css": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify --watch",
-    "css-gen": "npx @tailwindcss/cli -i ./css/input.css -o ./css/output.css --minify",
-    "app:build": "electron-builder",
+    "dev": "npm-run-all --parallel dev:vite dev:electron",
+    "dev:vite": "vite",
+    "dev:electron": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
+    "build": "vite build",
+    "start": "npm run build && electron .",
+    "app:build": "npm run build && electron-builder",
     "postinstall": "electron-builder install-app-deps",
-    "app:dist": "electron-builder --publish=never",
+    "app:dist": "npm run build && electron-builder --publish=never",
     "wdio": "wdio run ./wdio.conf.ts"
   },
   "build": {
@@ -27,12 +29,15 @@
       "output": "dist"
     },
     "files": [
-      "**/*",
+      "dist-vite/**/*",
+      "src/main/**/*",
+      "assets/**/*",
+      "package.json",
+      "credentials.json",
       "!**/*.ts",
       "!*.code-workspace",
       "!LICENSE.md",
       "!package-lock.json",
-      "!src/",
       "!e2e/",
       "!hooks/",
       "!angular.json",
@@ -65,24 +70,35 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/cli": "^4.1.16",
+    "@tailwindcss/vite": "^4.2.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "@wdio/cli": "^9.16.2",
     "@wdio/local-runner": "^9.16.2",
     "@wdio/mocha-framework": "^9.16.2",
     "@wdio/spec-reporter": "^9.16.2",
+    "cross-env": "^10.1.0",
     "electron": "^40.4.1",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
+    "npm-run-all": "^4.1.5",
+    "playwright": "^1.58.2",
     "postcss-cli": "^11.0.0",
     "tailwindcss": "^4.1.18",
+    "vite": "^6.4.1",
+    "wait-on": "^9.0.4",
     "wdio-electron-service": "^9.1.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@google-cloud/local-auth": "^3.0.1",
+    "@reduxjs/toolkit": "^2.11.2",
     "bottleneck": "^2.19.5",
     "google-auth-library": "^10.1.0",
     "googleapis": "^171.4.0",
     "node-abi": "^4.14.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-redux": "^9.2.0",
     "toastify-js": "^1.12.0"
   }
 }
