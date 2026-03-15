@@ -27,6 +27,7 @@ function FileList() {
   const itemsPerPage = useSelector(state => state.drive.itemsPerPage);
   const refreshTrigger = useSelector(state => state.drive.refreshTrigger);
   const slicePreview = useSelector(state => state.ui.slicePreview);
+  const operationPreview = useSelector(state => state.ui.operationPreview);
   const isNotificationDropdownOpen = useSelector(state => state.ui.isNotificationDropdownOpen);
   const hoveredFileId = useSelector(state => state.ui.hoveredFileId);
 
@@ -45,6 +46,44 @@ function FileList() {
     currentFiles.every(file => selectedFileIds.includes(file.id));
 
   const hasSelections = selectedFileIds.length > 0;
+
+  // Replicate logic from src/main/fileOperations.js for previewing
+  const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const getPreviewName = (originalName) => {
+    if (!operationPreview.active) return originalName;
+    const { type, params } = operationPreview;
+
+    if (type === 'replace') {
+      if (!params.search) return originalName;
+      try {
+        const regex = new RegExp(escapeRegExp(params.search), 'g');
+        return originalName.replace(regex, params.replace || '');
+      } catch (e) {
+        return originalName;
+      }
+    } else if (type === 'slice') {
+      const { start, end } = params;
+      if (start === undefined || start === null) return originalName;
+      if (end === undefined || end === null) {
+        return originalName.slice(0, start);
+      }
+      return originalName.slice(0, start) + originalName.slice(end);
+    } else if (type === 'pad') {
+      const { count, char, position } = params;
+      if (!count || !char) return originalName;
+      return originalName.replace(/\d+/, (match) => {
+        if (match.length >= count) return match;
+        if (position === 'start') {
+          return match.padStart(count, char);
+        } else {
+          return match.padEnd(count, char);
+        }
+      });
+    }
+
+    return originalName;
+  };
 
   const fetchFiles = async (folderId, pageToken = null, append = false) => {
     if (!window.electronAPI) return;
@@ -169,7 +208,7 @@ function FileList() {
               const isHoveredNotif = isNotificationDropdownOpen && file.id === hoveredFileId;
 
               // Base background styling logic
-              let liClass = "flex items-center p-3 select-none cursor-pointer w-full ";
+              let liClass = "flex flex-col p-3 select-none cursor-pointer w-full ";
               if (isSelected) {
                 liClass += "bg-blue-300 hover:bg-blue-400 dark:bg-gray-700 dark:hover:bg-gray-600";
               } else if (isHoveredNotif) {
@@ -178,54 +217,65 @@ function FileList() {
                 liClass += "hover:bg-gray-50 dark:hover:bg-gray-700";
               }
 
+              const previewName = actuallySelected && operationPreview.active ? getPreviewName(file.name) : null;
+
               return (
                 <li
                   key={file.id}
                   onClick={(e) => handleFileClick(e, index, file.id)}
                   className={liClass}
                 >
-                  <div className="flex items-center h-5 hidden">
-                    <input
-                      type="checkbox"
-                      checked={actuallySelected}
-                      onChange={(e) => handleFileClick(e.nativeEvent, index, file.id)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
+                  <div className="flex items-center w-full">
+                    <div className="flex items-center h-5 hidden">
+                      <input
+                        type="checkbox"
+                        checked={actuallySelected}
+                        onChange={(e) => handleFileClick(e.nativeEvent, index, file.id)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      />
+                    </div>
+                    <div className="ms-3 text-sm flex-1 min-w-0">
+                      {slicePreview.active && slicePreview.start !== undefined && isSelected ? (
+                        <span
+                          className="font-medium text-gray-900 dark:text-gray-300 flex flex-row items-stretch flex-nowrap overflow-hidden min-w-0"
+                          style={{ height: '1.25em', lineHeight: 1.25 }}
+                        >
+                          {[...file.name].map((char, i) => {
+                            const inRange = i >= slicePreview.start && i < slicePreview.end;
+                            return (
+                              <React.Fragment key={i}>
+                                {i === slicePreview.start && (
+                                  <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
+                                )}
+                                {i === slicePreview.end && slicePreview.end !== slicePreview.start && (
+                                  <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                                )}
+                                {inRange ? (
+                                  <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
+                                ) : (
+                                  <span className="flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                          {file.name.length === slicePreview.end && slicePreview.end !== slicePreview.start && (
+                            <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                          )}
+                        </span>
+                      ) : (
+                        <span className="font-medium text-gray-900 dark:text-gray-300 block truncate">
+                          {file.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="ms-3 text-sm flex-1 min-w-0">
-                    {slicePreview.active && slicePreview.start !== undefined && isSelected ? (
-                      <span
-                        className="font-medium text-gray-900 dark:text-gray-300 flex flex-row items-stretch flex-nowrap overflow-hidden min-w-0"
-                        style={{ height: '1.25em', lineHeight: 1.25 }}
-                      >
-                        {[...file.name].map((char, i) => {
-                          const inRange = i >= slicePreview.start && i < slicePreview.end;
-                          return (
-                            <React.Fragment key={i}>
-                              {i === slicePreview.start && (
-                                <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
-                              )}
-                              {i === slicePreview.end && slicePreview.end !== slicePreview.start && (
-                                <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
-                              )}
-                              {inRange ? (
-                                <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
-                              ) : (
-                                <span className="flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
-                        {file.name.length === slicePreview.end && slicePreview.end !== slicePreview.start && (
-                          <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
-                        )}
+                  {previewName !== null && previewName !== file.name && (
+                    <div className="ms-3 mt-1 text-sm flex-1 min-w-0">
+                      <span className="font-medium text-green-600 dark:text-green-500 block truncate">
+                        {previewName}
                       </span>
-                    ) : (
-                      <span className="font-medium text-gray-900 dark:text-gray-300 block truncate">
-                        {file.name}
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </li>
               );
             })}
