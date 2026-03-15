@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:vite dev:electron",
     "dev:vite": "vite",
-    "dev:electron": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
+    "dev:electron": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron . --remote-debugging-port=9222",
     "build": "vite build",
     "start": "npm run build && electron .",
     "app:build": "npm run build && electron-builder",
@@ -98,7 +98,6 @@
     "node-abi": "^4.14.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-redux": "^9.2.0",
-    "toastify-js": "^1.12.0"
+    "react-redux": "^9.2.0"
   }
 }

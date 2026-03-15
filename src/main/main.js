@@ -199,13 +199,12 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
                 const renamed = await renameFile(file.id, newName);
                 if (renamed) {
                     updatedFiles.push({ id: file.id, newName: newName });
+                    event.sender.send('operation-complete', `Updated file: ${newName}`);
                 }
             }
         }
 
-        if (updatedFiles.length > 0) {
-           event.sender.send('operation-complete', `Successfully updated ${updatedFiles.length} file(s).`);
-        } else {
+        if (updatedFiles.length === 0) {
            event.sender.send('update-status', `No files needed changes.`);
         }
         return updatedFiles;
