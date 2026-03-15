@@ -208,10 +208,8 @@ function FileList() {
               const isHoveredNotif = isNotificationDropdownOpen && file.id === hoveredFileId;
 
               // Base background styling logic
-              let liClass = "flex flex-col p-3 select-none cursor-pointer w-full ";
-              if (isSelected) {
-                liClass += "bg-blue-300 hover:bg-blue-400 dark:bg-gray-700 dark:hover:bg-gray-600";
-              } else if (isHoveredNotif) {
+              let liClass = "flex items-center justify-between p-3 select-none cursor-pointer w-full ";
+              if (isHoveredNotif) {
                 liClass += "bg-gray-50 dark:bg-gray-700";
               } else {
                 liClass += "hover:bg-gray-50 dark:hover:bg-gray-700";
@@ -225,7 +223,7 @@ function FileList() {
                   onClick={(e) => handleFileClick(e, index, file.id)}
                   className={liClass}
                 >
-                  <div className="flex items-center w-full">
+                  <div className="flex items-center flex-1 min-w-0">
                     <div className="flex items-center h-5 hidden">
                       <input
                         type="checkbox"
@@ -270,8 +268,8 @@ function FileList() {
                     </div>
                   </div>
                   {previewName !== null && previewName !== file.name && (
-                    <div className="ms-3 mt-1 text-sm flex-1 min-w-0">
-                      <span className="font-medium text-green-600 dark:text-green-500 block truncate">
+                    <div className="ms-4 text-sm text-right shrink-0">
+                      <span className="font-medium text-green-600 dark:text-green-500 truncate block max-w-[200px]">
                         {previewName}
                       </span>
                     </div>
