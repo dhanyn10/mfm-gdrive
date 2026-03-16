@@ -5,6 +5,9 @@ const { google } = require('googleapis');
 const Bottleneck = require('bottleneck');
 const { app } = require('electron');
 
+// Set global timeout for Google APIs to 30 seconds
+google.options({ timeout: 30000 });
+
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 
 let TOKEN_PATH;
