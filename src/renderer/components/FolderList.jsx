@@ -28,13 +28,18 @@ function FolderList() {
                   text: data.error,
                   duration: 5000,
                   close: true,
-                  gravity: "top",
+                  gravity: "bottom",
                   position: "right",
                   style: {
                       background: "#EF4444",
                       color: "#FFFFFF",
                       borderRadius: "8px",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                      maxWidth: "300px",
+                      fontSize: "14px",
+                      padding: "10px 15px",
+                      overflowX: "auto",
+                      whiteSpace: "nowrap"
                   }
               }).showToast();
           } else {
