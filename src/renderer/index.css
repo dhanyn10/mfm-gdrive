@@ -1,1 +1,20 @@
 @import 'tailwindcss';
+
+/* Custom Toastify Styles */
+.toastify {
+    padding-right: 32px !important; /* Make room for absolute close button */
+}
+
+.toastify .toast-close {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    font-size: 16px !important;
+    opacity: 0.8 !important;
+}
+
+.toastify .toast-close:hover {
+    opacity: 1 !important;
+}

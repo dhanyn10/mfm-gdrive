@@ -5,6 +5,9 @@ const { google } = require('googleapis');
 const Bottleneck = require('bottleneck');
 const { app } = require('electron');
 
+// Set global timeout for Google APIs to 30 seconds
+google.options({ timeout: 30000 });
+
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 
 let TOKEN_PATH;
@@ -51,12 +54,37 @@ async function saveCredentials(client) {
     await fs.writeFile(TOKEN_PATH, payload);
 }
 
+// Helper to detect network errors
+function isNetworkError(error) {
+    if (!error) return false;
+    const msg = error.message || '';
+    const code = error.code || '';
+    return msg.includes('ETIMEDOUT') || code === 'ETIMEDOUT' ||
+           msg.includes('ENOTFOUND') || code === 'ENOTFOUND' ||
+           msg.includes('ECONNREFUSED') || code === 'ECONNREFUSED' ||
+           msg.includes('ECONNRESET') || code === 'ECONNRESET';
+}
+
+function throwNetworkError(contextMsg) {
+    const err = new Error(`${contextMsg} Please check your internet connection.`);
+    err.code = 'NETWORK_ERROR';
+    throw err;
+}
+
 // Keep an active client instance so we don't have to re-auth on every request
 let _driveClient = null;
 
 async function authorize(event) {
     await initializePaths();
-    let client = await loadSavedCredentialsIfExist();
+    let client;
+    try {
+        client = await loadSavedCredentialsIfExist();
+    } catch (error) {
+        if (isNetworkError(error)) {
+             throwNetworkError("Connection failed while loading saved credentials.");
+        }
+        throw error;
+    }
 
     if (client) {
         _driveClient = google.drive({ version: 'v3', auth: client });
@@ -64,12 +92,19 @@ async function authorize(event) {
     }
 
     if (event) {
-         client = await authenticate({
-            scopes: SCOPES,
-            keyfilePath: CREDENTIALS_PATH,
-            auth: { redirect_uri_placeholder: 1 },
-            client: { force_new_consent: true }
-        });
+        try {
+            client = await authenticate({
+                scopes: SCOPES,
+                keyfilePath: CREDENTIALS_PATH,
+                auth: { redirect_uri_placeholder: 1 },
+                client: { force_new_consent: true }
+            });
+        } catch (error) {
+            if (isNetworkError(error)) {
+                throwNetworkError("Connection failed while authenticating.");
+            }
+            throw error;
+        }
 
         if (client.credentials) {
             await saveCredentials(client);
@@ -84,49 +119,70 @@ async function authorize(event) {
 async function getFolders(parentId = 'root', pageToken = null) {
     if (!_driveClient) await authorize(null);
 
-    const response = await limiter.schedule(() => _driveClient.files.list({
-        pageSize: 100, // Fetch in reasonable chunks
-        q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-        spaces: 'drive',
-        fields: 'nextPageToken, files(id, name, parents)',
-        orderBy: 'name',
-        pageToken: pageToken
-    }));
+    try {
+        const response = await limiter.schedule(() => _driveClient.files.list({
+            pageSize: 100, // Fetch in reasonable chunks
+            q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+            spaces: 'drive',
+            fields: 'nextPageToken, files(id, name, parents)',
+            orderBy: 'name',
+            pageToken: pageToken
+        }));
 
-    return {
-        folders: response.data.files || [],
-        nextPageToken: response.data.nextPageToken || null
-    };
+        return {
+            folders: response.data.files || [],
+            nextPageToken: response.data.nextPageToken || null
+        };
+    } catch (error) {
+        if (isNetworkError(error)) {
+            throwNetworkError("Connection failed while fetching folders.");
+        }
+        throw error;
+    }
 }
 
 async function getFiles(parentId = 'root', pageToken = null) {
     if (!_driveClient) await authorize(null);
 
-    const response = await limiter.schedule(() => _driveClient.files.list({
-        pageSize: 300, // Fetch in reasonable chunks
-        q: `'${parentId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`,
-        spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)',
-        orderBy: 'name',
-        pageToken: pageToken
-    }));
+    try {
+        const response = await limiter.schedule(() => _driveClient.files.list({
+            pageSize: 300, // Fetch in reasonable chunks
+            q: `'${parentId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`,
+            spaces: 'drive',
+            fields: 'nextPageToken, files(id, name)',
+            orderBy: 'name',
+            pageToken: pageToken
+        }));
 
-    return {
-        files: response.data.files || [],
-        nextPageToken: response.data.nextPageToken || null
-    };
+        return {
+            files: response.data.files || [],
+            nextPageToken: response.data.nextPageToken || null
+        };
+    } catch (error) {
+        if (isNetworkError(error)) {
+            throwNetworkError("Connection failed while fetching files.");
+        }
+        throw error;
+    }
 }
 
 async function renameFile(fileId, newTitle) {
     if (!_driveClient) await authorize(null);
 
     const body = { 'name': newTitle };
-    const response = await limiter.schedule(() => _driveClient.files.update({
-        fileId: fileId,
-        resource: body
-    }));
+    try {
+        const response = await limiter.schedule(() => _driveClient.files.update({
+            fileId: fileId,
+            resource: body
+        }));
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        if (isNetworkError(error)) {
+            throwNetworkError("Connection failed while renaming file.");
+        }
+        throw error;
+    }
 }
 
 module.exports = {

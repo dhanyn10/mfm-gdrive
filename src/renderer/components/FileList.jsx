@@ -10,7 +10,8 @@ import {
   clearAllSelections,
   setPage
 } from '../store/driveSlice';
-import { toggleExecute } from '../store/uiSlice';
+import { toggleExecute, addNotification } from '../store/uiSlice';
+import Toastify from 'toastify-js';
 import { Spinner } from './common/Spinner';
 
 function FileList() {
@@ -87,9 +88,33 @@ function FileList() {
 
   const fetchFiles = async (folderId, pageToken = null, append = false) => {
     if (!window.electronAPI) return;
+    if (!append) dispatch(setFiles({ files: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFiles(true));
     try {
       const data = await window.electronAPI.getFiles(folderId, pageToken);
+      if (data.error) {
+          if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
+              Toastify({
+                  text: `<details style="max-width: 250px;"><summary style="cursor: pointer; font-weight: bold;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px;">${data.error}</div></details>`,
+                  escapeMarkup: false,
+                  duration: 10000, // Increase duration so user has time to read accordion
+                  close: true,
+                  gravity: "bottom",
+                  position: "right",
+                  style: {
+                      background: "#EF4444",
+                      color: "#FFFFFF",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                      fontSize: "14px",
+                      padding: "10px 15px"
+                  }
+              }).showToast();
+          } else {
+              dispatch(addNotification({ message: data.error, type: 'error' }));
+          }
+          return;
+      }
       if (append) {
           dispatch(appendFiles(data));
       } else {
@@ -97,6 +122,7 @@ function FileList() {
       }
     } catch (error) {
       console.error("Failed to fetch files:", error);
+      dispatch(addNotification({ message: "An unexpected error occurred while fetching files.", type: 'error' }));
     } finally {
       dispatch(setLoadingFiles(false));
     }
