@@ -83,7 +83,7 @@ function ExecuteSidebar() {
           const errorMsg = `Execution failed: ${updatedFiles.error}`;
           if (updatedFiles.errorCode === 'ETIMEDOUT' || updatedFiles.errorCode === 'NETWORK_ERROR') {
               Toastify({
-                  text: `<details style="max-width: 250px;"><summary style="cursor: pointer; font-weight: bold;">Network Error</summary><div style="margin-top: 8px; white-space: normal; word-break: break-word; overflow-y: auto; max-height: 100px;">${errorMsg}</div></details>`,
+                  text: `<details style="max-width: 250px;"><summary style="cursor: pointer; font-weight: bold;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px;">${errorMsg}</div></details>`,
                   escapeMarkup: false,
                   duration: 10000, // Increase duration so user has time to read accordion
                   close: true,

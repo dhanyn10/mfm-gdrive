@@ -19,13 +19,14 @@ function FolderList() {
   const fetchFolders = async (parentId, pageToken = null, append = false) => {
     if (!window.electronAPI) return;
 
+    if (!append) dispatch(setFolders({ folders: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFolders(true));
     try {
       const data = await window.electronAPI.getFolders(parentId, pageToken);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               Toastify({
-                  text: `<details style="max-width: 250px;"><summary style="cursor: pointer; font-weight: bold;">Network Error</summary><div style="margin-top: 8px; white-space: normal; word-break: break-word; overflow-y: auto; max-height: 100px;">${data.error}</div></details>`,
+                  text: `<details style="max-width: 250px;"><summary style="cursor: pointer; font-weight: bold;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px;">${data.error}</div></details>`,
                   escapeMarkup: false,
                   duration: 10000, // Increase duration so user has time to read accordion
                   close: true,
