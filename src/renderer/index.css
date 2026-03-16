@@ -3,6 +3,13 @@
 /* Custom Toastify Styles */
 .toastify {
     padding-right: 32px !important; /* Make room for absolute close button */
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    border: 1px solid #D1D5DB !important; /* Thin gray-300 border */
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    font-size: 14px !important;
+    padding: 10px 15px !important;
 }
 
 .toastify .toast-close {
@@ -11,7 +18,8 @@
     right: 8px !important;
     padding: 0 !important;
     line-height: 1 !important;
-    font-size: 16px !important;
+    font-size: 12px !important;
+    color: #000000 !important;
     opacity: 0.8 !important;
 }
 
