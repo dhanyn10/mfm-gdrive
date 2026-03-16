@@ -10,7 +10,8 @@ import {
   clearAllSelections,
   setPage
 } from '../store/driveSlice';
-import { toggleExecute } from '../store/uiSlice';
+import { toggleExecute, addNotification } from '../store/uiSlice';
+import Toastify from 'toastify-js';
 import { Spinner } from './common/Spinner';
 
 function FileList() {
@@ -90,6 +91,25 @@ function FileList() {
     dispatch(setLoadingFiles(true));
     try {
       const data = await window.electronAPI.getFiles(folderId, pageToken);
+      if (data.error) {
+          if (data.errorCode === 'ETIMEDOUT') {
+              Toastify({
+                  text: data.error,
+                  duration: 5000,
+                  close: true,
+                  gravity: "top",
+                  position: "right",
+                  style: {
+                      background: "#EF4444",
+                      color: "#FFFFFF",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                  }
+              }).showToast();
+          } else {
+              dispatch(addNotification({ message: data.error, type: 'error' }));
+          }
+      }
       if (append) {
           dispatch(appendFiles(data));
       } else {
@@ -97,6 +117,7 @@ function FileList() {
       }
     } catch (error) {
       console.error("Failed to fetch files:", error);
+      dispatch(addNotification({ message: "An unexpected error occurred while fetching files.", type: 'error' }));
     } finally {
       dispatch(setLoadingFiles(false));
     }

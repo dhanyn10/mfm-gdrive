@@ -56,7 +56,17 @@ let _driveClient = null;
 
 async function authorize(event) {
     await initializePaths();
-    let client = await loadSavedCredentialsIfExist();
+    let client;
+    try {
+        client = await loadSavedCredentialsIfExist();
+    } catch (error) {
+        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
+             const err = new Error("Connection timed out while loading saved credentials. Please check your network connection.");
+             err.code = 'ETIMEDOUT';
+             throw err;
+        }
+        throw error;
+    }
 
     if (client) {
         _driveClient = google.drive({ version: 'v3', auth: client });
@@ -64,12 +74,21 @@ async function authorize(event) {
     }
 
     if (event) {
-         client = await authenticate({
-            scopes: SCOPES,
-            keyfilePath: CREDENTIALS_PATH,
-            auth: { redirect_uri_placeholder: 1 },
-            client: { force_new_consent: true }
-        });
+        try {
+            client = await authenticate({
+                scopes: SCOPES,
+                keyfilePath: CREDENTIALS_PATH,
+                auth: { redirect_uri_placeholder: 1 },
+                client: { force_new_consent: true }
+            });
+        } catch (error) {
+            if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
+                const err = new Error("Connection timed out while authenticating. Please check your network connection.");
+                err.code = 'ETIMEDOUT';
+                throw err;
+            }
+            throw error;
+        }
 
         if (client.credentials) {
             await saveCredentials(client);
@@ -84,49 +103,76 @@ async function authorize(event) {
 async function getFolders(parentId = 'root', pageToken = null) {
     if (!_driveClient) await authorize(null);
 
-    const response = await limiter.schedule(() => _driveClient.files.list({
-        pageSize: 100, // Fetch in reasonable chunks
-        q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-        spaces: 'drive',
-        fields: 'nextPageToken, files(id, name, parents)',
-        orderBy: 'name',
-        pageToken: pageToken
-    }));
+    try {
+        const response = await limiter.schedule(() => _driveClient.files.list({
+            pageSize: 100, // Fetch in reasonable chunks
+            q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+            spaces: 'drive',
+            fields: 'nextPageToken, files(id, name, parents)',
+            orderBy: 'name',
+            pageToken: pageToken
+        }));
 
-    return {
-        folders: response.data.files || [],
-        nextPageToken: response.data.nextPageToken || null
-    };
+        return {
+            folders: response.data.files || [],
+            nextPageToken: response.data.nextPageToken || null
+        };
+    } catch (error) {
+        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
+            const err = new Error("Connection timed out while fetching folders. Please check your network connection.");
+            err.code = 'ETIMEDOUT';
+            throw err;
+        }
+        throw error;
+    }
 }
 
 async function getFiles(parentId = 'root', pageToken = null) {
     if (!_driveClient) await authorize(null);
 
-    const response = await limiter.schedule(() => _driveClient.files.list({
-        pageSize: 300, // Fetch in reasonable chunks
-        q: `'${parentId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`,
-        spaces: 'drive',
-        fields: 'nextPageToken, files(id, name)',
-        orderBy: 'name',
-        pageToken: pageToken
-    }));
+    try {
+        const response = await limiter.schedule(() => _driveClient.files.list({
+            pageSize: 300, // Fetch in reasonable chunks
+            q: `'${parentId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`,
+            spaces: 'drive',
+            fields: 'nextPageToken, files(id, name)',
+            orderBy: 'name',
+            pageToken: pageToken
+        }));
 
-    return {
-        files: response.data.files || [],
-        nextPageToken: response.data.nextPageToken || null
-    };
+        return {
+            files: response.data.files || [],
+            nextPageToken: response.data.nextPageToken || null
+        };
+    } catch (error) {
+        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
+            const err = new Error("Connection timed out while fetching files. Please check your network connection.");
+            err.code = 'ETIMEDOUT';
+            throw err;
+        }
+        throw error;
+    }
 }
 
 async function renameFile(fileId, newTitle) {
     if (!_driveClient) await authorize(null);
 
     const body = { 'name': newTitle };
-    const response = await limiter.schedule(() => _driveClient.files.update({
-        fileId: fileId,
-        resource: body
-    }));
+    try {
+        const response = await limiter.schedule(() => _driveClient.files.update({
+            fileId: fileId,
+            resource: body
+        }));
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
+            const err = new Error(`Connection timed out while renaming file. Please check your network connection.`);
+            err.code = 'ETIMEDOUT';
+            throw err;
+        }
+        throw error;
+    }
 }
 
 module.exports = {

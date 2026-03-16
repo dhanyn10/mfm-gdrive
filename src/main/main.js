@@ -150,7 +150,7 @@ ipcMain.on('authorize', async (event) => {
         await authorize(event);
         event.sender.send('auth-success');
     } catch (error) {
-        event.sender.send('update-status', `Auth Error: ${error.message}`);
+        event.sender.send('update-status', `Auth Error: ${error.message}`, error.code);
     }
 });
 
@@ -163,7 +163,7 @@ ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null)
         };
     } catch (error) {
         console.error("Error getting folders", error);
-        return { folders: [], nextPageToken: null };
+        return { folders: [], nextPageToken: null, error: error.message, errorCode: error.code };
     }
 });
 
@@ -176,7 +176,7 @@ ipcMain.handle('get-files', async (event, folderId = 'root', pageToken = null) =
         };
     } catch (error) {
         console.error("Error getting files", error);
-        return { files: [], nextPageToken: null };
+        return { files: [], nextPageToken: null, error: error.message, errorCode: error.code };
     }
 });
 
@@ -210,7 +210,7 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
         return updatedFiles;
     } catch (error) {
         console.error("Error executing operation:", error);
-        throw error;
+        return { error: error.message, errorCode: error.code };
     }
 });
 

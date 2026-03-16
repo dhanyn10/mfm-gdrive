@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFolders, selectFolder, setLoadingFolders, appendFolders, setCurrentParentId, pushParentHistory, popParentHistory } from '../store/driveSlice';
+import { addNotification } from '../store/uiSlice';
+import Toastify from 'toastify-js';
 import { Spinner } from './common/Spinner';
 
 function FolderList() {
@@ -20,6 +22,25 @@ function FolderList() {
     dispatch(setLoadingFolders(true));
     try {
       const data = await window.electronAPI.getFolders(parentId, pageToken);
+      if (data.error) {
+          if (data.errorCode === 'ETIMEDOUT') {
+              Toastify({
+                  text: data.error,
+                  duration: 5000,
+                  close: true,
+                  gravity: "top",
+                  position: "right",
+                  style: {
+                      background: "#EF4444",
+                      color: "#FFFFFF",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                  }
+              }).showToast();
+          } else {
+              dispatch(addNotification({ message: data.error, type: 'error' }));
+          }
+      }
       if (append) {
           dispatch(appendFolders(data));
       } else {
@@ -27,6 +48,7 @@ function FolderList() {
       }
     } catch (error) {
       console.error("Failed to fetch folders:", error);
+      dispatch(addNotification({ message: "An unexpected error occurred while fetching folders.", type: 'error' }));
     } finally {
       dispatch(setLoadingFolders(false));
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearAllSelections, setFiles } from '../store/driveSlice';
 import { addNotification, setSlicePreview, setOperationPreview } from '../store/uiSlice';
+import Toastify from 'toastify-js';
 
 function ExecuteSidebar() {
   const dispatch = useDispatch();
@@ -78,6 +79,28 @@ function ExecuteSidebar() {
     try {
       const updatedFiles = await window.electronAPI.executeOperation(operation, params, targetFiles);
 
+      if (updatedFiles && updatedFiles.error) {
+          const errorMsg = `Execution failed: ${updatedFiles.error}`;
+          if (updatedFiles.errorCode === 'ETIMEDOUT') {
+              Toastify({
+                  text: errorMsg,
+                  duration: 5000,
+                  close: true,
+                  gravity: "top",
+                  position: "right",
+                  style: {
+                      background: "#EF4444",
+                      color: "#FFFFFF",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                  }
+              }).showToast();
+          } else {
+              dispatch(addNotification({ message: errorMsg, type: "error" }));
+          }
+          return;
+      }
+
       // Update local state with new file names
       if (updatedFiles && Array.isArray(updatedFiles)) {
          const newFiles = files.map(f => {
@@ -89,7 +112,8 @@ function ExecuteSidebar() {
       }
     } catch (error) {
       console.error("Execution error:", error);
-      dispatch(addNotification({ message: "Execution failed", type: "error" }));
+      const errorMsg = `Execution failed: ${error.message || error}`;
+      dispatch(addNotification({ message: errorMsg, type: "error" }));
     } finally {
       setIsExecuting(false);
     }
