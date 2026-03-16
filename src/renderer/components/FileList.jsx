@@ -92,7 +92,7 @@ function FileList() {
     try {
       const data = await window.electronAPI.getFiles(folderId, pageToken);
       if (data.error) {
-          if (data.errorCode === 'ETIMEDOUT') {
+          if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               Toastify({
                   text: data.error,
                   duration: 5000,
@@ -109,6 +109,7 @@ function FileList() {
           } else {
               dispatch(addNotification({ message: data.error, type: 'error' }));
           }
+          return;
       }
       if (append) {
           dispatch(appendFiles(data));

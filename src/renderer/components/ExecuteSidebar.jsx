@@ -81,7 +81,7 @@ function ExecuteSidebar() {
 
       if (updatedFiles && updatedFiles.error) {
           const errorMsg = `Execution failed: ${updatedFiles.error}`;
-          if (updatedFiles.errorCode === 'ETIMEDOUT') {
+          if (updatedFiles.errorCode === 'ETIMEDOUT' || updatedFiles.errorCode === 'NETWORK_ERROR') {
               Toastify({
                   text: errorMsg,
                   duration: 5000,

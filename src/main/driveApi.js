@@ -54,6 +54,23 @@ async function saveCredentials(client) {
     await fs.writeFile(TOKEN_PATH, payload);
 }
 
+// Helper to detect network errors
+function isNetworkError(error) {
+    if (!error) return false;
+    const msg = error.message || '';
+    const code = error.code || '';
+    return msg.includes('ETIMEDOUT') || code === 'ETIMEDOUT' ||
+           msg.includes('ENOTFOUND') || code === 'ENOTFOUND' ||
+           msg.includes('ECONNREFUSED') || code === 'ECONNREFUSED' ||
+           msg.includes('ECONNRESET') || code === 'ECONNRESET';
+}
+
+function throwNetworkError(contextMsg) {
+    const err = new Error(`${contextMsg} Please check your internet connection.`);
+    err.code = 'NETWORK_ERROR';
+    throw err;
+}
+
 // Keep an active client instance so we don't have to re-auth on every request
 let _driveClient = null;
 
@@ -63,10 +80,8 @@ async function authorize(event) {
     try {
         client = await loadSavedCredentialsIfExist();
     } catch (error) {
-        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
-             const err = new Error("Connection timed out while loading saved credentials. Please check your network connection.");
-             err.code = 'ETIMEDOUT';
-             throw err;
+        if (isNetworkError(error)) {
+             throwNetworkError("Connection failed while loading saved credentials.");
         }
         throw error;
     }
@@ -85,10 +100,8 @@ async function authorize(event) {
                 client: { force_new_consent: true }
             });
         } catch (error) {
-            if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
-                const err = new Error("Connection timed out while authenticating. Please check your network connection.");
-                err.code = 'ETIMEDOUT';
-                throw err;
+            if (isNetworkError(error)) {
+                throwNetworkError("Connection failed while authenticating.");
             }
             throw error;
         }
@@ -121,10 +134,8 @@ async function getFolders(parentId = 'root', pageToken = null) {
             nextPageToken: response.data.nextPageToken || null
         };
     } catch (error) {
-        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
-            const err = new Error("Connection timed out while fetching folders. Please check your network connection.");
-            err.code = 'ETIMEDOUT';
-            throw err;
+        if (isNetworkError(error)) {
+            throwNetworkError("Connection failed while fetching folders.");
         }
         throw error;
     }
@@ -148,10 +159,8 @@ async function getFiles(parentId = 'root', pageToken = null) {
             nextPageToken: response.data.nextPageToken || null
         };
     } catch (error) {
-        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
-            const err = new Error("Connection timed out while fetching files. Please check your network connection.");
-            err.code = 'ETIMEDOUT';
-            throw err;
+        if (isNetworkError(error)) {
+            throwNetworkError("Connection failed while fetching files.");
         }
         throw error;
     }
@@ -169,10 +178,8 @@ async function renameFile(fileId, newTitle) {
 
         return response.data;
     } catch (error) {
-        if (error.code === 'ETIMEDOUT' || (error.message && error.message.includes('ETIMEDOUT'))) {
-            const err = new Error(`Connection timed out while renaming file. Please check your network connection.`);
-            err.code = 'ETIMEDOUT';
-            throw err;
+        if (isNetworkError(error)) {
+            throwNetworkError("Connection failed while renaming file.");
         }
         throw error;
     }

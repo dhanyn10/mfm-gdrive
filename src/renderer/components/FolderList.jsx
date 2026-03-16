@@ -23,7 +23,7 @@ function FolderList() {
     try {
       const data = await window.electronAPI.getFolders(parentId, pageToken);
       if (data.error) {
-          if (data.errorCode === 'ETIMEDOUT') {
+          if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               Toastify({
                   text: data.error,
                   duration: 5000,
@@ -40,6 +40,7 @@ function FolderList() {
           } else {
               dispatch(addNotification({ message: data.error, type: 'error' }));
           }
+          return;
       }
       if (append) {
           dispatch(appendFolders(data));
