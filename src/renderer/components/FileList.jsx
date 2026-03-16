@@ -94,9 +94,9 @@ function FileList() {
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               Toastify({
-                  text: `<div style="max-width: 250px; overflow-x: auto; white-space: nowrap;">${data.error}</div>`,
+                  text: `<details style="max-width: 250px;"><summary style="cursor: pointer; font-weight: bold;">Network Error</summary><div style="margin-top: 8px; white-space: normal; word-break: break-word; overflow-y: auto; max-height: 100px;">${data.error}</div></details>`,
                   escapeMarkup: false,
-                  duration: 5000,
+                  duration: 10000, // Increase duration so user has time to read accordion
                   close: true,
                   gravity: "bottom",
                   position: "right",
