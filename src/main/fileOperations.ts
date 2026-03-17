@@ -1,4 +1,4 @@
-function sliceText(originalName, startNum, endNum) {
+function sliceText(originalName: string, startNum: number | undefined | null, endNum: number | undefined | null) {
     if (startNum === undefined || startNum === null) return originalName;
     // Original behavior: remove characters between startNum and endNum
     if (endNum === undefined || endNum === null) {
@@ -7,11 +7,11 @@ function sliceText(originalName, startNum, endNum) {
     return originalName.slice(0, startNum) + originalName.slice(endNum);
 }
 
-function padText(originalName, targetLength, padChar, position = 'start') {
+function padText(originalName: string, targetLength: number | undefined | null, padChar: string | undefined | null, position: string = 'start') {
     if (!targetLength || !padChar) return originalName;
 
     // Original behavior: pad the first number found in the filename
-    return originalName.replace(/\d+/, (match) => {
+    return originalName.replace(/\d+/, (match: string) => {
         if (match.length >= targetLength) return match;
         if (position === 'start') {
             return match.padStart(targetLength, padChar);
@@ -21,7 +21,7 @@ function padText(originalName, targetLength, padChar, position = 'start') {
     });
 }
 
-module.exports = {
+export {
     sliceText,
     padText
 };

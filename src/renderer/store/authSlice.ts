@@ -1,6 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const initialState = {
+export interface AuthState {
+  isAuthorized: boolean;
+  isAuthorizing: boolean;
+  error: string | null;
+}
+
+const initialState: AuthState = {
   isAuthorized: false,
   isAuthorizing: false,
   error: null,
@@ -14,11 +20,11 @@ const authSlice = createSlice({
       state.isAuthorizing = true;
       state.error = null;
     },
-    setAuthorized: (state, action) => {
+    setAuthorized: (state, action: PayloadAction<boolean>) => {
       state.isAuthorized = action.payload;
       state.isAuthorizing = false;
     },
-    setAuthError: (state, action) => {
+    setAuthError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
       state.isAuthorizing = false;
     },

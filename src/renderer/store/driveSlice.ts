@@ -1,8 +1,32 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const ITEMS_PER_PAGE = 300;
 
-const initialState = {
+export interface DriveState {
+  currentParentId: string;
+  parentHistory: string[];
+
+  folders: any[];
+  nextFoldersPageToken: string | null;
+
+  files: any[];
+  nextFilesPageToken: string | null;
+
+  selectedFolderId: string | null;
+  selectedFolderObj: any | null;
+
+  isLoadingFolders: boolean;
+  isLoadingFiles: boolean;
+
+  selectedFileIds: string[];
+
+  currentPage: number;
+  itemsPerPage: number;
+
+  refreshTrigger: number;
+}
+
+const initialState: DriveState = {
   // Navigation
   currentParentId: 'root',
   parentHistory: [], // To allow going "Up"
@@ -34,33 +58,33 @@ const driveSlice = createSlice({
   initialState,
   reducers: {
     // Navigation
-    setCurrentParentId: (state, action) => {
+    setCurrentParentId: (state, action: PayloadAction<string>) => {
       state.currentParentId = action.payload;
     },
-    pushParentHistory: (state, action) => {
+    pushParentHistory: (state, action: PayloadAction<string>) => {
       state.parentHistory.push(action.payload);
     },
     popParentHistory: (state) => {
       if (state.parentHistory.length > 0) {
-          state.currentParentId = state.parentHistory.pop();
+          state.currentParentId = state.parentHistory.pop() || 'root';
       } else {
           state.currentParentId = 'root';
       }
     },
 
     // Folders
-    setLoadingFolders: (state, action) => {
+    setLoadingFolders: (state, action: PayloadAction<boolean>) => {
       state.isLoadingFolders = action.payload;
     },
-    setFolders: (state, action) => {
+    setFolders: (state, action: PayloadAction<{ folders: any[], nextPageToken: string | null }>) => {
       state.folders = action.payload.folders;
       state.nextFoldersPageToken = action.payload.nextPageToken;
     },
-    appendFolders: (state, action) => {
+    appendFolders: (state, action: PayloadAction<{ folders: any[], nextPageToken: string | null }>) => {
       state.folders = [...state.folders, ...action.payload.folders];
       state.nextFoldersPageToken = action.payload.nextPageToken;
     },
-    selectFolder: (state, action) => {
+    selectFolder: (state, action: PayloadAction<{ id: string | null, [key: string]: any }>) => {
       state.selectedFolderId = action.payload.id;
       state.selectedFolderObj = action.payload;
       state.currentPage = 1; // Reset page on folder change
@@ -72,14 +96,14 @@ const driveSlice = createSlice({
     },
 
     // Files
-    setLoadingFiles: (state, action) => {
+    setLoadingFiles: (state, action: PayloadAction<boolean>) => {
       state.isLoadingFiles = action.payload;
     },
-    setFiles: (state, action) => {
-      state.files = action.payload.files;
+    setFiles: (state, action: PayloadAction<{ files: any[], nextPageToken: string | null }>) => {
+      state.files = action.payload.files || [];
       state.nextFilesPageToken = action.payload.nextPageToken;
     },
-    appendFiles: (state, action) => {
+    appendFiles: (state, action: PayloadAction<{ files: any[], nextPageToken: string | null }>) => {
       state.files = [...state.files, ...action.payload.files];
       state.nextFilesPageToken = action.payload.nextPageToken;
     },
@@ -89,7 +113,7 @@ const driveSlice = createSlice({
     },
 
     // File Selection
-    toggleFileSelection: (state, action) => {
+    toggleFileSelection: (state, action: PayloadAction<string>) => {
       const fileId = action.payload;
       if (state.selectedFileIds.includes(fileId)) {
         state.selectedFileIds = state.selectedFileIds.filter(id => id !== fileId);
@@ -97,17 +121,17 @@ const driveSlice = createSlice({
         state.selectedFileIds.push(fileId);
       }
     },
-    selectAllFilesOnPage: (state, action) => {
+    selectAllFilesOnPage: (state, action: PayloadAction<string[]>) => {
       const pageFileIds = action.payload;
       const newSelections = new Set([...state.selectedFileIds, ...pageFileIds]);
       state.selectedFileIds = Array.from(newSelections);
     },
-    selectFileRange: (state, action) => {
+    selectFileRange: (state, action: PayloadAction<string[]>) => {
       const rangeFileIds = action.payload;
       const newSelections = new Set([...state.selectedFileIds, ...rangeFileIds]);
       state.selectedFileIds = Array.from(newSelections);
     },
-    deselectAllFilesOnPage: (state, action) => {
+    deselectAllFilesOnPage: (state, action: PayloadAction<string[]>) => {
       const pageFileIds = action.payload;
       state.selectedFileIds = state.selectedFileIds.filter(id => !pageFileIds.includes(id));
     },
@@ -116,7 +140,7 @@ const driveSlice = createSlice({
     },
 
     // Pagination
-    setPage: (state, action) => {
+    setPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
     },
   },

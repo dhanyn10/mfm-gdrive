@@ -1,18 +1,18 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { authenticate } = require('@google-cloud/local-auth');
-const { google } = require('googleapis');
-const Bottleneck = require('bottleneck');
-const { app } = require('electron');
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import { authenticate } from '@google-cloud/local-auth';
+import { google } from 'googleapis';
+import Bottleneck from 'bottleneck';
+import { app } from 'electron';
 
 // Set global timeout for Google APIs to 30 seconds
 google.options({ timeout: 10000 });
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 
-let TOKEN_PATH;
-let LOCAL_TOKEN_PATH;
-let CREDENTIALS_PATH;
+let TOKEN_PATH: string;
+let LOCAL_TOKEN_PATH: string;
+let CREDENTIALS_PATH: string;
 
 const limiter = new Bottleneck({ minTime: 110 });
 
@@ -25,14 +25,14 @@ async function initializePaths() {
     LOCAL_TOKEN_PATH = path.join(localTokenBasePath, 'token.json');
 }
 
-async function loadSavedCredentialsIfExist() {
+async function loadSavedCredentialsIfExist(): Promise<any> {
     try {
-        const content = await fs.readFile(LOCAL_TOKEN_PATH).catch(() => {
-            return fs.readFile(TOKEN_PATH);
+        const content = await fs.readFile(LOCAL_TOKEN_PATH, 'utf-8').catch(() => {
+            return fs.readFile(TOKEN_PATH, 'utf-8');
         });
 
         if (content) {
-            const credentials = JSON.parse(content);
+            const credentials = JSON.parse(content as string);
             return google.auth.fromJSON(credentials);
         }
     } catch (err) {
@@ -41,9 +41,9 @@ async function loadSavedCredentialsIfExist() {
     return null;
 }
 
-async function saveCredentials(client) {
-    const content = await fs.readFile(CREDENTIALS_PATH);
-    const keys = JSON.parse(content);
+async function saveCredentials(client: any) {
+    const content = await fs.readFile(CREDENTIALS_PATH, 'utf-8');
+    const keys = JSON.parse(content as string);
     const key = keys.installed || keys.web;
     const payload = JSON.stringify({
         type: 'authorized_user',
@@ -55,7 +55,7 @@ async function saveCredentials(client) {
 }
 
 // Helper to detect network errors
-function isNetworkError(error) {
+function isNetworkError(error: any) {
     if (!error) return false;
     const msg = error.message || '';
     const code = error.code || '';
@@ -65,16 +65,16 @@ function isNetworkError(error) {
            msg.includes('ECONNRESET') || code === 'ECONNRESET';
 }
 
-function throwNetworkError(contextMsg) {
-    const err = new Error(`${contextMsg} Please check your internet connection.`);
+function throwNetworkError(contextMsg: string) {
+    const err: any = new Error(`${contextMsg} Please check your internet connection.`);
     err.code = 'NETWORK_ERROR';
     throw err;
 }
 
 // Keep an active client instance so we don't have to re-auth on every request
-let _driveClient = null;
+let _driveClient: any = null;
 
-async function authorize(event) {
+async function authorize(event: any) {
     await initializePaths();
     let client;
     try {
@@ -96,10 +96,8 @@ async function authorize(event) {
             client = await authenticate({
                 scopes: SCOPES,
                 keyfilePath: CREDENTIALS_PATH,
-                auth: { redirect_uri_placeholder: 1 },
-                client: { force_new_consent: true }
-            });
-        } catch (error) {
+            } as any);
+        } catch (error: any) {
             if (isNetworkError(error)) {
                 throwNetworkError("Connection failed while authenticating.");
             }
@@ -108,7 +106,7 @@ async function authorize(event) {
 
         if (client.credentials) {
             await saveCredentials(client);
-            _driveClient = google.drive({ version: 'v3', auth: client });
+            _driveClient = google.drive({ version: 'v3', auth: client as any });
             return _driveClient;
         }
     }
@@ -116,7 +114,7 @@ async function authorize(event) {
     throw new Error("Not authorized");
 }
 
-async function getFolders(parentId = 'root', pageToken = null, customTimeout = null) {
+async function getFolders(parentId: string = 'root', pageToken: string | null = null, customTimeout: number | null = null) {
     if (!_driveClient) await authorize(null);
 
     try {
@@ -130,8 +128,8 @@ async function getFolders(parentId = 'root', pageToken = null, customTimeout = n
         }, customTimeout ? { timeout: customTimeout } : {}));
 
         return {
-            folders: response.data.files || [],
-            nextPageToken: response.data.nextPageToken || null
+            folders: (response as any).data.files || [],
+            nextPageToken: (response as any).data.nextPageToken || null
         };
     } catch (error) {
         if (isNetworkError(error)) {
@@ -141,7 +139,7 @@ async function getFolders(parentId = 'root', pageToken = null, customTimeout = n
     }
 }
 
-async function getFiles(parentId = 'root', pageToken = null, customTimeout = null) {
+async function getFiles(parentId: string = 'root', pageToken: string | null = null, customTimeout: number | null = null) {
     if (!_driveClient) await authorize(null);
 
     try {
@@ -155,8 +153,8 @@ async function getFiles(parentId = 'root', pageToken = null, customTimeout = nul
         }, customTimeout ? { timeout: customTimeout } : {}));
 
         return {
-            files: response.data.files || [],
-            nextPageToken: response.data.nextPageToken || null
+            files: (response as any).data.files || [],
+            nextPageToken: (response as any).data.nextPageToken || null
         };
     } catch (error) {
         if (isNetworkError(error)) {
@@ -166,7 +164,7 @@ async function getFiles(parentId = 'root', pageToken = null, customTimeout = nul
     }
 }
 
-async function renameFile(fileId, newTitle) {
+async function renameFile(fileId: string, newTitle: string) {
     if (!_driveClient) await authorize(null);
 
     const body = { 'name': newTitle };
@@ -176,7 +174,7 @@ async function renameFile(fileId, newTitle) {
             resource: body
         }));
 
-        return response.data;
+        return (response as any).data;
     } catch (error) {
         if (isNetworkError(error)) {
             throwNetworkError("Connection failed while renaming file.");
@@ -185,7 +183,7 @@ async function renameFile(fileId, newTitle) {
     }
 }
 
-module.exports = {
+export {
     authorize,
     getFolders,
     getFiles,

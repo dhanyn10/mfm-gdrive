@@ -1,11 +1,11 @@
 // main.js
 
 // Modules to control application life and create native browser window.
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
-const path = require('path');
+import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
+import * as path from 'path';
 
 // Define menu templates
-const menuTemplates = {
+const menuTemplates: Record<string, any[]> = {
     'File': [
         { role: 'quit' }
     ],
@@ -29,7 +29,6 @@ const menuTemplates = {
         {
             label: 'Learn More',
             click: async () => {
-                const { shell } = require('electron');
                 await shell.openExternal('https://electronjs.org');
             }
         }
@@ -85,31 +84,34 @@ app.whenReady().then(() => {
     });
 
     // IPC handlers for window controls
-    ipcMain.on('minimize-window', (event) => {
+    ipcMain.on('minimize-window', (event: any) => {
         const window = BrowserWindow.fromWebContents(event.sender);
-        window.minimize();
+        if (window) window.minimize();
     });
 
-    ipcMain.on('maximize-window', (event) => {
+    ipcMain.on('maximize-window', (event: any) => {
         const window = BrowserWindow.fromWebContents(event.sender);
-        if (window.isMaximized()) {
-            window.unmaximize();
-        } else {
-            window.maximize();
+        if (window) {
+            if (window.isMaximized()) {
+                window.unmaximize();
+            } else {
+                window.maximize();
+            }
         }
     });
 
-    ipcMain.on('close-window', (event) => {
+    ipcMain.on('close-window', (event: any) => {
         const window = BrowserWindow.fromWebContents(event.sender);
-        window.close();
+        if (window) window.close();
     });
 
     // Handler for specific submenu popup
-    ipcMain.on('show-submenu', (event, menuLabel, x, y) => {
+    ipcMain.on('show-submenu', (event: any, menuLabel: string, x: number, y: number) => {
         const template = menuTemplates[menuLabel];
         if (template) {
             const menu = Menu.buildFromTemplate(template);
-            menu.popup({ window: BrowserWindow.fromWebContents(event.sender), x, y });
+            const window = BrowserWindow.fromWebContents(event.sender);
+            if (window) menu.popup({ window, x, y });
         }
     });
 
@@ -132,8 +134,8 @@ app.on('window-all-closed', function () {
 // In this file, you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-const { authorize, getFolders, getFiles, renameFile } = require('./driveApi');
-const { sliceText, padText } = require('./fileOperations');
+import { authorize, getFolders, getFiles, renameFile } from './driveApi';
+import { sliceText, padText } from './fileOperations';
 
 // Drive APIs
 ipcMain.handle('check-auth', async () => {
@@ -145,45 +147,45 @@ ipcMain.handle('check-auth', async () => {
     }
 });
 
-ipcMain.on('authorize', async (event) => {
+ipcMain.on('authorize', async (event: any) => {
     try {
         await authorize(event);
         event.sender.send('auth-success');
-    } catch (error) {
+    } catch (error: any) {
         event.sender.send('update-status', `Auth Error: ${error.message}`, error.code);
     }
 });
 
-ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null, customTimeout = null) => {
+ipcMain.handle('get-folders', async (event: any, parentId: string = 'root', pageToken: string | null = null, customTimeout: number | null = null) => {
     try {
         const result = await getFolders(parentId, pageToken, customTimeout);
         return {
-             folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
+             folders: result.folders.map((f: any) => ({ id: f.id, name: f.name, parents: f.parents })),
              nextPageToken: result.nextPageToken
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error getting folders", error);
         return { folders: [], nextPageToken: null, error: error.message, errorCode: error.code };
     }
 });
 
-ipcMain.handle('get-files', async (event, folderId = 'root', pageToken = null, customTimeout = null) => {
+ipcMain.handle('get-files', async (event: any, folderId: string = 'root', pageToken: string | null = null, customTimeout: number | null = null) => {
     try {
         const result = await getFiles(folderId, pageToken, customTimeout);
         return {
-            files: result.files.map(f => ({ id: f.id, name: f.name })),
+            files: result.files.map((f: any) => ({ id: f.id, name: f.name })),
             nextPageToken: result.nextPageToken
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error getting files", error);
         return { files: [], nextPageToken: null, error: error.message, errorCode: error.code };
     }
 });
 
-ipcMain.handle('execute-operation', async (event, operation, params, files) => {
+ipcMain.handle('execute-operation', async (event: any, operation: string, params: any, files: any[]) => {
     if (!files || files.length === 0) return [];
 
-    let updatedFiles = [];
+    let updatedFiles: any[] = [];
     try {
         for (const file of files) {
             let newName = file.name;
@@ -208,20 +210,20 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
            event.sender.send('update-status', `No files needed changes.`);
         }
         return updatedFiles;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error executing operation:", error);
         return { error: error.message, errorCode: error.code };
     }
 });
 
-ipcMain.handle('undo-rename', async (event, fileId, oldName) => {
+ipcMain.handle('undo-rename', async (event: any, fileId: string, oldName: string) => {
     try {
         const renamed = await renameFile(fileId, oldName);
         if (renamed) {
             return true;
         }
         return false;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error undoing rename:", error);
         event.sender.send('update-status', `Failed to undo rename: ${error.message}`);
         return false;

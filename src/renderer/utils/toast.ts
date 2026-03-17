@@ -1,9 +1,9 @@
 import Toastify from 'toastify-js';
 
 const MAX_TOASTS = 4;
-let activeToasts = [];
+let activeToasts: any[] = [];
 
-export function showToast(options) {
+export function showToast(options: any) {
     const toastInstance = Toastify({
         ...options,
         callback: function() {

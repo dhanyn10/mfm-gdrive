@@ -3,11 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearAllSelections, setFiles } from '../store/driveSlice';
 import { addNotification, setSlicePreview, setOperationPreview } from '../store/uiSlice';
 import { showToast } from '../utils/toast';
+import { RootState } from '../store/store';
 
 function ExecuteSidebar() {
   const dispatch = useDispatch();
-  const selectedFileIds = useSelector(state => state.drive.selectedFileIds);
-  const files = useSelector(state => state.drive.files);
+  const selectedFileIds = useSelector((state: RootState) => state.drive.selectedFileIds);
+  const files = useSelector((state: RootState) => state.drive.files);
   const [operation, setOperation] = useState(''); // 'replace', 'slice', 'pad'
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -24,7 +25,7 @@ function ExecuteSidebar() {
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-  const selectOperation = (op) => {
+  const selectOperation = (op: string) => {
     setOperation(op);
     setIsDropdownOpen(false);
     if (op !== 'slice') dispatch(setSlicePreview({ active: false }));
@@ -54,15 +55,15 @@ function ExecuteSidebar() {
     }
   }, [operation, sliceStart, sliceEnd, dispatch]);
 
-  const nextFilesPageToken = useSelector(state => state.drive.nextFilesPageToken);
+  const nextFilesPageToken = useSelector((state: RootState) => state.drive.nextFilesPageToken);
 
   const handleExecute = async () => {
-    if (!window.electronAPI) return;
+    if (!(window as any).electronAPI) return;
 
-    const targetFiles = files.filter(f => selectedFileIds.includes(f.id));
+    const targetFiles = files.filter((f: any) => selectedFileIds.includes(f.id));
     if (targetFiles.length === 0) return;
 
-    let params = {};
+    let params: any = {};
     if (operation === 'replace') {
       if (!replaceTarget) return;
       params = { search: replaceTarget, replace: replaceWith };
@@ -77,7 +78,7 @@ function ExecuteSidebar() {
 
     setIsExecuting(true);
     try {
-      const updatedFiles = await window.electronAPI.executeOperation(operation, params, targetFiles);
+      const updatedFiles = await ((window as any).electronAPI as any).executeOperation(operation, params, targetFiles);
 
       if (updatedFiles && updatedFiles.error) {
           const errorMsg = `Execution failed: ${updatedFiles.error}`;
@@ -99,14 +100,14 @@ function ExecuteSidebar() {
 
       // Update local state with new file names
       if (updatedFiles && Array.isArray(updatedFiles)) {
-         const newFiles = files.map(f => {
-             const updated = updatedFiles.find(uf => uf.id === f.id);
+         const newFiles = files.map((f: any) => {
+             const updated = updatedFiles.find((uf: any) => uf.id === f.id);
              return updated ? { ...f, name: updated.newName } : f;
          });
          dispatch(setFiles({ files: newFiles, nextPageToken: nextFilesPageToken }));
          dispatch(clearAllSelections());
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Execution error:", error);
       const errorMsg = `Execution failed: ${error.message || error}`;
       dispatch(addNotification({ message: errorMsg, type: "error" }));
@@ -145,13 +146,13 @@ function ExecuteSidebar() {
           <div className="z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-full dark:bg-gray-700 absolute top-full mt-1 border border-gray-200 dark:border-gray-600">
             <ul className="py-2 text-sm text-gray-700 dark:text-gray-200 select-none">
               <li>
-                <button onClick={() => selectOperation('replace')} className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Replace Text</button>
+                <button type="button" onClick={() => selectOperation('replace')} className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Replace Text</button>
               </li>
               <li>
-                <button onClick={() => selectOperation('slice')} className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Slice Text</button>
+                <button type="button" onClick={() => selectOperation('slice')} className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Slice Text</button>
               </li>
               <li>
-                <button onClick={() => selectOperation('pad')} className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Pad Filename</button>
+                <button type="button" onClick={() => selectOperation('pad')} className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Pad Filename</button>
               </li>
             </ul>
           </div>
@@ -173,16 +174,16 @@ function ExecuteSidebar() {
         )}
 
         {operation === 'slice' && (() => {
-          const targetFiles = files.filter(f => selectedFileIds.includes(f.id));
+          const targetFiles = files.filter((f: any) => selectedFileIds.includes(f.id));
           const maxSliceLength = targetFiles.length > 0
-            ? Math.max(...targetFiles.map(f => f.name.length), 1)
+            ? Math.max(...targetFiles.map((f: any) => f.name.length), 1)
             : 100;
-          const handleSliceStart = (e) => {
+          const handleSliceStart = (e: React.ChangeEvent<HTMLInputElement>) => {
             const v = parseInt(e.target.value, 10);
             setSliceStart(v);
             if (v > sliceEnd) setSliceEnd(v);
           };
-          const handleSliceEnd = (e) => {
+          const handleSliceEnd = (e: React.ChangeEvent<HTMLInputElement>) => {
             const v = parseInt(e.target.value, 10);
             setSliceEnd(v);
             if (v < sliceStart) setSliceStart(v);
@@ -232,11 +233,11 @@ function ExecuteSidebar() {
             </div>
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Count</label>
-              <input type="number" value={padCount} onChange={e => setPadCount(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required min="1" />
+              <input type="number" value={padCount} onChange={e => setPadCount(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required min={1} />
             </div>
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Character</label>
-              <input type="text" value={padChar} onChange={e => setPadChar(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required maxLength="1" />
+              <input type="text" value={padChar} onChange={e => setPadChar(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required maxLength={1} />
             </div>
           </>
         )}

@@ -9,36 +9,36 @@
  *
  * See: https://www.electronjs.org/docs/latest/tutorial/sandbox
  */
-const { ipcRenderer } = require('electron');
+import { ipcRenderer } from 'electron';
 
 // Expose a limited set of IPC functions to the renderer process.
 // This is a secure way to allow communication between the main and renderer processes.
-window.electronAPI = {
+(window as any).electronAPI = {
   getUserDataPath: () => ipcRenderer.invoke('get-user-data-path'),
   checkAuth: () => ipcRenderer.invoke('check-auth'),
   authorize: () => ipcRenderer.send('authorize'),
-  getFolders: (parentId, pageToken, customTimeout) => ipcRenderer.invoke('get-folders', parentId, pageToken, customTimeout),
-  getFiles: (folderId, pageToken, customTimeout) => ipcRenderer.invoke('get-files', folderId, pageToken, customTimeout),
-  executeOperation: (operation, params, files) => ipcRenderer.invoke('execute-operation', operation, params, files),
-  undoRename: (fileId, oldName) => ipcRenderer.invoke('undo-rename', fileId, oldName),
+  getFolders: (parentId?: string, pageToken?: string | null, customTimeout?: number | null) => ipcRenderer.invoke('get-folders', parentId, pageToken, customTimeout),
+  getFiles: (folderId?: string, pageToken?: string | null, customTimeout?: number | null) => ipcRenderer.invoke('get-files', folderId, pageToken, customTimeout),
+  executeOperation: (operation: string, params: any, files: any[]) => ipcRenderer.invoke('execute-operation', operation, params, files),
+  undoRename: (fileId: string, oldName: string) => ipcRenderer.invoke('undo-rename', fileId, oldName),
   minimizeWindow: () => ipcRenderer.send('minimize-window'),
   maximizeWindow: () => ipcRenderer.send('maximize-window'),
   closeWindow: () => ipcRenderer.send('close-window'),
-  showSubmenu: (label, x, y) => ipcRenderer.send('show-submenu', label, x, y),
+  showSubmenu: (label: string, x: number, y: number) => ipcRenderer.send('show-submenu', label, x, y),
 
   // Event Listeners from Main to Renderer
-  onUpdateStatus: (callback) => {
-    const handler = (_event, value) => callback(value);
+  onUpdateStatus: (callback: (value: any) => void) => {
+    const handler = (_event: any, value: any) => callback(value);
     ipcRenderer.on('update-status', handler);
     return () => ipcRenderer.removeListener('update-status', handler);
   },
-  onAuthSuccess: (callback) => {
+  onAuthSuccess: (callback: () => void) => {
     const handler = () => callback();
     ipcRenderer.on('auth-success', handler);
     return () => ipcRenderer.removeListener('auth-success', handler);
   },
-  onOperationComplete: (callback) => {
-    const handler = (_event, msg) => callback(msg);
+  onOperationComplete: (callback: (msg: any) => void) => {
+    const handler = (_event: any, msg: any) => callback(msg);
     ipcRenderer.on('operation-complete', handler);
     return () => ipcRenderer.removeListener('operation-complete', handler);
   },

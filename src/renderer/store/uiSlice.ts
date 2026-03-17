@@ -1,6 +1,27 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const initialState = {
+export interface Notification {
+  id: number;
+  time: string;
+  read: boolean;
+  message: string;
+  details?: string;
+  fileId?: string;
+  type: 'success' | 'error' | 'info';
+}
+
+export interface UiState {
+  isFoldersOpen: boolean;
+  isExecuteSidebarOpen: boolean;
+  notifications: Notification[];
+  unreadCount: number;
+  slicePreview: { active: boolean; start: number; end: number };
+  operationPreview: { active: boolean; type: string; params: any };
+  isNotificationDropdownOpen: boolean;
+  hoveredFileId: string | null;
+}
+
+const initialState: UiState = {
   isFoldersOpen: true, // Initially true based on previous code rendering Folders by default
   isExecuteSidebarOpen: false,
   notifications: [],
@@ -24,7 +45,7 @@ const uiSlice = createSlice({
         state.isExecuteSidebarOpen = false;
       }
     },
-    setExecuteSidebarOpen: (state, action) => {
+    setExecuteSidebarOpen: (state, action: PayloadAction<boolean>) => {
       state.isExecuteSidebarOpen = action.payload;
       if (!action.payload) {
         state.slicePreview = { active: false, start: 0, end: 0 };
@@ -45,15 +66,14 @@ const uiSlice = createSlice({
         state.isFoldersOpen = false;
       }
     },
-    setSlicePreview: (state, action) => {
+    setSlicePreview: (state, action: PayloadAction<Partial<{ active: boolean; start: number; end: number }>>) => {
       state.slicePreview = { ...state.slicePreview, ...action.payload };
     },
-    setOperationPreview: (state, action) => {
+    setOperationPreview: (state, action: PayloadAction<Partial<{ active: boolean; type: string; params: any }>>) => {
       state.operationPreview = { ...state.operationPreview, ...action.payload };
     },
-    addNotification: (state, action) => {
-      // action.payload should be { message, details, fileId, type: 'success' | 'error' | 'info' }
-      const newNotif = {
+    addNotification: (state, action: PayloadAction<Omit<Notification, 'id' | 'time' | 'read'>>) => {
+      const newNotif: Notification = {
         id: Date.now(),
         time: new Date().toLocaleTimeString(),
         read: false,
@@ -66,16 +86,16 @@ const uiSlice = createSlice({
       state.notifications.forEach(n => { n.read = true; });
       state.unreadCount = 0;
     },
-    removeNotification: (state, action) => {
+    removeNotification: (state, action: PayloadAction<number>) => {
       state.notifications = state.notifications.filter(n => n.id !== action.payload);
     },
-    setNotificationDropdownOpen: (state, action) => {
+    setNotificationDropdownOpen: (state, action: PayloadAction<boolean>) => {
       state.isNotificationDropdownOpen = action.payload;
       if (!action.payload) {
         state.hoveredFileId = null;
       }
     },
-    setHoveredFileId: (state, action) => {
+    setHoveredFileId: (state, action: PayloadAction<string | null>) => {
       state.hoveredFileId = action.payload;
     },
   },

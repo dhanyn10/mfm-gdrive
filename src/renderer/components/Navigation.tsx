@@ -3,12 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toggleFolders, toggleExecute } from '../store/uiSlice';
 import NotificationDropdown from './NotificationDropdown';
 
+import { RootState } from '../store/store';
+
 function Navigation() {
   const dispatch = useDispatch();
-  const isFoldersOpen = useSelector(state => state.ui.isFoldersOpen);
-  const isExecuteSidebarOpen = useSelector(state => state.ui.isExecuteSidebarOpen);
-  const unreadCount = useSelector(state => state.ui.unreadCount);
-  const selectedFileIds = useSelector(state => state.drive.selectedFileIds);
+  const isFoldersOpen = useSelector((state: RootState) => state.ui.isFoldersOpen);
+  const isExecuteSidebarOpen = useSelector((state: RootState) => state.ui.isExecuteSidebarOpen);
+  const unreadCount = useSelector((state: RootState) => state.ui.unreadCount);
+  const selectedFileIds = useSelector((state: RootState) => state.drive.selectedFileIds);
 
   const hasSelections = selectedFileIds.length > 0;
 

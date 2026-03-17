@@ -5,31 +5,33 @@ import { addNotification } from '../store/uiSlice';
 import { showToast } from '../utils/toast';
 import { Spinner } from './common/Spinner';
 
+import { RootState } from '../store/store';
+
 function FolderList() {
   const dispatch = useDispatch();
-  const folders = useSelector(state => state.drive.folders);
-  const isLoading = useSelector(state => state.drive.isLoadingFolders);
-  const selectedFolderId = useSelector(state => state.drive.selectedFolderId);
-  const isAuthorized = useSelector(state => state.auth.isAuthorized);
+  const folders = useSelector((state: RootState) => state.drive.folders);
+  const isLoading = useSelector((state: RootState) => state.drive.isLoadingFolders);
+  const selectedFolderId = useSelector((state: RootState) => state.drive.selectedFolderId);
+  const isAuthorized = useSelector((state: RootState) => state.auth.isAuthorized);
 
-  const currentParentId = useSelector(state => state.drive.currentParentId);
-  const parentHistory = useSelector(state => state.drive.parentHistory);
-  const nextFoldersPageToken = useSelector(state => state.drive.nextFoldersPageToken);
+  const currentParentId = useSelector((state: RootState) => state.drive.currentParentId);
+  const parentHistory = useSelector((state: RootState) => state.drive.parentHistory);
+  const nextFoldersPageToken = useSelector((state: RootState) => state.drive.nextFoldersPageToken);
 
-  const fetchFolders = async (parentId, pageToken = null, append = false, customTimeout = null) => {
-    if (!window.electronAPI) return;
+  const fetchFolders = async (parentId: string, pageToken: string | null = null, append = false, customTimeout: number | null = null) => {
+    if (!(window as any).electronAPI) return;
 
     if (!append) dispatch(setFolders({ folders: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFolders(true));
     try {
       // Create a local timeout fallback for the spinner of 10s max
-      const timeoutFallback = new Promise(resolve => {
+      const timeoutFallback = new Promise<any>(resolve => {
         setTimeout(() => {
           resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
         }, 10000);
       });
 
-      const fetchPromise = window.electronAPI.getFolders(parentId, pageToken, customTimeout);
+      const fetchPromise = ((window as any).electronAPI as any).getFolders(parentId, pageToken, customTimeout);
       const data = await Promise.race([fetchPromise, timeoutFallback]);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
@@ -66,11 +68,11 @@ function FolderList() {
     }
   }, [isAuthorized, currentParentId]);
 
-  const handleFolderClick = (folder) => {
+  const handleFolderClick = (folder: any) => {
     dispatch(selectFolder(folder));
   };
 
-  const handleDoubleClick = (folder) => {
+  const handleDoubleClick = (folder: any) => {
       // Navigate into the folder
       dispatch(pushParentHistory(currentParentId));
       dispatch(setCurrentParentId(folder.id));
@@ -117,7 +119,7 @@ function FolderList() {
            <li className="p-4 text-center text-gray-500">No folders found in this directory</li>
         ) : (
           <>
-            {folders.map((folder) => (
+            {folders.map((folder: any) => (
               <li
                 key={folder.id}
                 onClick={() => handleFolderClick(folder)}

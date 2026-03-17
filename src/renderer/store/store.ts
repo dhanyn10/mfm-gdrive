@@ -11,7 +11,10 @@ export const store = configureStore({
   },
 });
 
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
 // Expose store for e2e tests
 if (typeof window !== 'undefined') {
-  window.__REDUX_STORE__ = store;
+  (window as any).__REDUX_STORE__ = store;
 }

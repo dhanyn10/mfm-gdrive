@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { markAllNotificationsRead, removeNotification, setHoveredFileId, setNotificationDropdownOpen } from '../store/uiSlice';
 import { triggerRefresh } from '../store/driveSlice';
+import { RootState } from '../store/store';
 
-function NotificationDropdown({ count }) {
+function NotificationDropdown({ count }: { count: number }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [swipingOutId, setSwipingOutId] = useState(null);
-  const notifications = useSelector(state => state.ui.notifications);
+  const [swipingOutId, setSwipingOutId] = useState<number | null>(null);
+  const notifications = useSelector((state: RootState) => state.ui.notifications);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -20,10 +21,10 @@ function NotificationDropdown({ count }) {
     }
   };
 
-  const handleUndo = async (e, notifId, fileId, oldName) => {
+  const handleUndo = async (e: any, notifId: number, fileId: string, oldName: string) => {
     e.stopPropagation();
-    if (window.electronAPI && window.electronAPI.undoRename) {
-       const success = await window.electronAPI.undoRename(fileId, oldName);
+    if ((window as any).electronAPI && ((window as any).electronAPI as any).undoRename) {
+       const success = await ((window as any).electronAPI as any).undoRename(fileId, oldName);
        if (success) {
            dispatch(triggerRefresh());
            setSwipingOutId(notifId);
@@ -60,7 +61,7 @@ function NotificationDropdown({ count }) {
               {notifications.length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 text-sm p-4">No new notifications.</p>
               ) : (
-                notifications.map((notif) => (
+                notifications.map((notif: any) => (
                   <div
                     key={notif.id}
                     onMouseEnter={() => {

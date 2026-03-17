@@ -2,9 +2,9 @@ import React from 'react';
 
 function AuthView() {
   const handleAuthorize = async () => {
-    if (window.electronAPI) {
+    if ((window as any).electronAPI) {
       // The main process will handle opening the OAuth window and triggering onAuthSuccess
-      window.electronAPI.authorize();
+      ((window as any).electronAPI as any).authorize();
     }
   };
 

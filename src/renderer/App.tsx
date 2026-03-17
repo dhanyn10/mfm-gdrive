@@ -9,19 +9,21 @@ import ExecuteSidebar from './components/ExecuteSidebar';
 import { setAuthorized, setAuthorizing } from './store/authSlice';
 import { addNotification } from './store/uiSlice';
 
+import { RootState } from './store/store';
+
 function App() {
   const dispatch = useDispatch();
-  const isAuthorized = useSelector((state) => state.auth.isAuthorized);
-  const isExecuteSidebarOpen = useSelector((state) => state.ui.isExecuteSidebarOpen);
-  const isFoldersOpen = useSelector((state) => state.ui.isFoldersOpen);
+  const isAuthorized = useSelector((state: RootState) => state.auth.isAuthorized);
+  const isExecuteSidebarOpen = useSelector((state: RootState) => state.ui.isExecuteSidebarOpen);
+  const isFoldersOpen = useSelector((state: RootState) => state.ui.isFoldersOpen);
 
   useEffect(() => {
     // Check initial auth status
     const checkAuth = async () => {
-      if (window.electronAPI) {
+      if ((window as any).electronAPI) {
         dispatch(setAuthorizing());
         try {
-          const authorized = await window.electronAPI.checkAuth();
+          const authorized = await ((window as any).electronAPI as any).checkAuth();
           dispatch(setAuthorized(authorized));
         } catch (error) {
           console.error("Auth check failed:", error);
@@ -33,28 +35,28 @@ function App() {
     checkAuth();
 
     // Setup global listeners (auth status updates, notifications from main)
-    let removeUpdateStatus, removeAuthSuccess, removeOperationComplete;
+    let removeUpdateStatus: any, removeAuthSuccess: any, removeOperationComplete: any;
 
-    if (window.electronAPI) {
-      removeUpdateStatus = window.electronAPI.onUpdateStatus((status) => {
+    if ((window as any).electronAPI) {
+      removeUpdateStatus = ((window as any).electronAPI as any).onUpdateStatus((status: string) => {
         dispatch(addNotification({ message: status, type: 'info' }));
       });
 
-      removeAuthSuccess = window.electronAPI.onAuthSuccess(() => {
+      removeAuthSuccess = ((window as any).electronAPI as any).onAuthSuccess(() => {
         dispatch(setAuthorized(true));
         dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
       });
 
-      removeOperationComplete = window.electronAPI.onOperationComplete((data) => {
+      removeOperationComplete = ((window as any).electronAPI as any).onOperationComplete((data: any) => {
           if (typeof data === 'string') {
               dispatch(addNotification({ message: data, type: "success" }));
           } else if (data && data.newName && data.oldName) {
               dispatch(addNotification({
                   message: `Renamed ${data.oldName} to ${data.newName}`,
-                  oldName: data.oldName,
+                  details: `Renamed ${data.oldName} to ${data.newName}`,
                   fileId: data.fileId,
                   type: "success"
-              }));
+              } as any));
           }
       });
     }

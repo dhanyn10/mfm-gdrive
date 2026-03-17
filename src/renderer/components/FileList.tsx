@@ -14,23 +14,25 @@ import { toggleExecute, addNotification } from '../store/uiSlice';
 import { showToast } from '../utils/toast';
 import { Spinner } from './common/Spinner';
 
+import { RootState } from '../store/store';
+
 function FileList() {
   const dispatch = useDispatch();
-  const [lastSelectedIndex, setLastSelectedIndex] = React.useState(null);
-  const selectedFolderId = useSelector(state => state.drive.selectedFolderId);
+  const [lastSelectedIndex, setLastSelectedIndex] = React.useState<number | null>(null);
+  const selectedFolderId = useSelector((state: RootState) => state.drive.selectedFolderId);
 
-  const files = useSelector(state => state.drive.files);
-  const nextFilesPageToken = useSelector(state => state.drive.nextFilesPageToken);
+  const files = useSelector((state: RootState) => state.drive.files);
+  const nextFilesPageToken = useSelector((state: RootState) => state.drive.nextFilesPageToken);
 
-  const isLoading = useSelector(state => state.drive.isLoadingFiles);
-  const selectedFileIds = useSelector(state => state.drive.selectedFileIds);
-  const currentPage = useSelector(state => state.drive.currentPage);
-  const itemsPerPage = useSelector(state => state.drive.itemsPerPage);
-  const refreshTrigger = useSelector(state => state.drive.refreshTrigger);
-  const slicePreview = useSelector(state => state.ui.slicePreview);
-  const operationPreview = useSelector(state => state.ui.operationPreview);
-  const isNotificationDropdownOpen = useSelector(state => state.ui.isNotificationDropdownOpen);
-  const hoveredFileId = useSelector(state => state.ui.hoveredFileId);
+  const isLoading = useSelector((state: RootState) => state.drive.isLoadingFiles);
+  const selectedFileIds = useSelector((state: RootState) => state.drive.selectedFileIds);
+  const currentPage = useSelector((state: RootState) => state.drive.currentPage);
+  const itemsPerPage = useSelector((state: RootState) => state.drive.itemsPerPage);
+  const refreshTrigger = useSelector((state: RootState) => state.drive.refreshTrigger);
+  const slicePreview = useSelector((state: RootState) => state.ui.slicePreview);
+  const operationPreview = useSelector((state: RootState) => state.ui.operationPreview);
+  const isNotificationDropdownOpen = useSelector((state: RootState) => state.ui.isNotificationDropdownOpen);
+  const hoveredFileId = useSelector((state: RootState) => state.ui.hoveredFileId);
 
   const totalPages = Math.ceil(files.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -44,14 +46,14 @@ function FileList() {
 
   // Determine if all items on the *current page* are selected
   const allCurrentPageSelected = currentFiles.length > 0 &&
-    currentFiles.every(file => selectedFileIds.includes(file.id));
+    currentFiles.every((file: any) => selectedFileIds.includes(file.id));
 
   const hasSelections = selectedFileIds.length > 0;
 
   // Replicate logic from src/main/fileOperations.js for previewing
-  const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  const getPreviewName = (originalName) => {
+  const getPreviewName = (originalName: string) => {
     if (!operationPreview.active) return originalName;
     const { type, params } = operationPreview;
 
@@ -73,7 +75,7 @@ function FileList() {
     } else if (type === 'pad') {
       const { count, char, position } = params;
       if (!count || !char) return originalName;
-      return originalName.replace(/\d+/, (match) => {
+      return originalName.replace(/\d+/, (match: string) => {
         if (match.length >= count) return match;
         if (position === 'start') {
           return match.padStart(count, char);
@@ -86,19 +88,19 @@ function FileList() {
     return originalName;
   };
 
-  const fetchFiles = async (folderId, pageToken = null, append = false, customTimeout = null) => {
-    if (!window.electronAPI) return;
+  const fetchFiles = async (folderId: string, pageToken: string | null = null, append = false, customTimeout: number | null = null) => {
+    if (!(window as any).electronAPI) return;
     if (!append) dispatch(setFiles({ files: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFiles(true));
     try {
       // Create a local timeout fallback for the spinner of 10s max
-      const timeoutFallback = new Promise(resolve => {
+      const timeoutFallback = new Promise<any>(resolve => {
         setTimeout(() => {
           resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
         }, 10000);
       });
 
-      const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
+      const fetchPromise = ((window as any).electronAPI as any).getFiles(folderId, pageToken, customTimeout);
       const data = await Promise.race([fetchPromise, timeoutFallback]);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
@@ -138,13 +140,13 @@ function FileList() {
   }, [selectedFolderId, refreshTrigger, dispatch]);
 
   const handleLoadMore = () => {
-      if (nextFilesPageToken) {
+      if (nextFilesPageToken && selectedFolderId) {
           fetchFiles(selectedFolderId, nextFilesPageToken, true);
       }
   };
 
   const handleSelectAll = () => {
-    const pageIds = currentFiles.map(f => f.id);
+    const pageIds = currentFiles.map((f: any) => f.id);
     dispatch(selectAllFilesOnPage(pageIds));
   };
 
@@ -152,13 +154,13 @@ function FileList() {
     dispatch(clearAllSelections());
   };
 
-  const handleFileClick = (e, index, fileId) => {
+  const handleFileClick = (e: any, index: number, fileId: string) => {
     if (e.shiftKey && lastSelectedIndex !== null) {
       // Shift+Click logic
       const start = Math.min(lastSelectedIndex, index);
       const end = Math.max(lastSelectedIndex, index);
       const rangeFiles = currentFiles.slice(start, end + 1);
-      const rangeFileIds = rangeFiles.map(f => f.id);
+      const rangeFileIds = rangeFiles.map((f: any) => f.id);
       dispatch(selectFileRange(rangeFileIds));
     } else {
       // Normal click logic
@@ -231,7 +233,7 @@ function FileList() {
           <div className="p-8 text-center text-gray-500">No files found in this folder</div>
         ) : (
           <ul className="overflow-y-auto h-full divide-y divide-gray-100 dark:divide-gray-700">
-            {currentFiles.map((file, index) => {
+            {currentFiles.map((file: any, index: number) => {
               const actuallySelected = selectedFileIds.includes(file.id);
               const isSelected = !isNotificationDropdownOpen && actuallySelected;
               const isHoveredNotif = isNotificationDropdownOpen && file.id === hoveredFileId;
