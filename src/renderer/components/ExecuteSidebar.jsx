@@ -16,9 +16,7 @@ function ExecuteSidebar() {
   const [replaceWith, setReplaceWith] = useState('');
   const [sliceStart, setSliceStart] = useState(0);
   const [sliceEnd, setSliceEnd] = useState(0);
-  const [padPosition, setPadPosition] = useState('start');
   const [padCount, setPadCount] = useState('');
-  const [padChar, setPadChar] = useState('');
 
   const [isExecuting, setIsExecuting] = useState(false);
 
@@ -39,13 +37,13 @@ function ExecuteSidebar() {
       } else if (operation === 'slice') {
         params = { start: sliceStart, end: sliceEnd || undefined };
       } else if (operation === 'pad') {
-        params = { position: padPosition, count: parseInt(padCount, 10), char: padChar };
+        params = { position: 'start', count: parseInt(padCount, 10), char: '0' };
       }
       dispatch(setOperationPreview({ active: true, type: operation, params }));
     } else {
       dispatch(setOperationPreview({ active: false, type: '', params: {} }));
     }
-  }, [operation, replaceTarget, replaceWith, sliceStart, sliceEnd, padPosition, padCount, padChar, dispatch]);
+  }, [operation, replaceTarget, replaceWith, sliceStart, sliceEnd, padCount, dispatch]);
 
   // Sync slice indices to Redux so FileList can show position cursors
   useEffect(() => {
@@ -69,8 +67,8 @@ function ExecuteSidebar() {
     } else if (operation === 'slice') {
       params = { start: sliceStart, end: sliceEnd || undefined };
     } else if (operation === 'pad') {
-      if (!padCount || !padChar) return;
-      params = { position: padPosition, count: parseInt(padCount, 10), char: padChar };
+      if (!padCount) return;
+      params = { position: 'start', count: parseInt(padCount, 10), char: '0' };
     } else {
       return;
     }
@@ -224,19 +222,8 @@ function ExecuteSidebar() {
         {operation === 'pad' && (
           <>
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Position</label>
-              <select value={padPosition} onChange={e => setPadPosition(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-                <option value="start">Start (Left)</option>
-                <option value="end">End (Right)</option>
-              </select>
-            </div>
-            <div>
               <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Count</label>
               <input type="number" value={padCount} onChange={e => setPadCount(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required min="1" />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Character</label>
-              <input type="text" value={padChar} onChange={e => setPadChar(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required maxLength="1" />
             </div>
           </>
         )}
