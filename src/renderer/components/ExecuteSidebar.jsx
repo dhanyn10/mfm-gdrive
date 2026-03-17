@@ -83,20 +83,13 @@ function ExecuteSidebar() {
           const errorMsg = `Execution failed: ${updatedFiles.error}`;
           if (updatedFiles.errorCode === 'ETIMEDOUT' || updatedFiles.errorCode === 'NETWORK_ERROR') {
               Toastify({
-                  text: `<details style="max-width: 250px;"><summary style="cursor: pointer; font-weight: bold;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px;">${errorMsg}</div></details>`,
+                  text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${errorMsg}</div></details></div>`,
                   escapeMarkup: false,
                   duration: 10000, // Increase duration so user has time to read accordion
                   close: true,
                   gravity: "bottom",
                   position: "right",
-                  style: {
-                      background: "#EF4444",
-                      color: "#FFFFFF",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                      fontSize: "14px",
-                      padding: "10px 15px"
-                  }
+                  className: "error-toast"
               }).showToast();
           } else {
               dispatch(addNotification({ message: errorMsg, type: "error" }));
