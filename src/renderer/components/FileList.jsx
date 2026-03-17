@@ -86,12 +86,12 @@ function FileList() {
     return originalName;
   };
 
-  const fetchFiles = async (folderId, pageToken = null, append = false) => {
+  const fetchFiles = async (folderId, pageToken = null, append = false, customTimeout = null) => {
     if (!window.electronAPI) return;
     if (!append) dispatch(setFiles({ files: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFiles(true));
     try {
-      const data = await window.electronAPI.getFiles(folderId, pageToken);
+      const data = await window.electronAPI.getFiles(folderId, pageToken, customTimeout);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               Toastify({
@@ -121,9 +121,19 @@ function FileList() {
     }
   };
 
+  const initialMountRef = React.useRef(true);
+  const prevFolderIdRef = React.useRef(selectedFolderId);
+
   useEffect(() => {
     if (selectedFolderId) {
-       fetchFiles(selectedFolderId);
+       const isFolderChange = prevFolderIdRef.current !== selectedFolderId;
+       const isManualRefresh = !isFolderChange && !initialMountRef.current;
+
+       initialMountRef.current = false;
+       prevFolderIdRef.current = selectedFolderId;
+
+       // Apply 5s timeout only if triggered by manual refresh (refreshTrigger change)
+       fetchFiles(selectedFolderId, null, false, isManualRefresh ? 5000 : null);
     }
   }, [selectedFolderId, refreshTrigger, dispatch]);
 

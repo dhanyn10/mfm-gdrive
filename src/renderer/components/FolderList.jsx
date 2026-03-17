@@ -16,13 +16,13 @@ function FolderList() {
   const parentHistory = useSelector(state => state.drive.parentHistory);
   const nextFoldersPageToken = useSelector(state => state.drive.nextFoldersPageToken);
 
-  const fetchFolders = async (parentId, pageToken = null, append = false) => {
+  const fetchFolders = async (parentId, pageToken = null, append = false, customTimeout = null) => {
     if (!window.electronAPI) return;
 
     if (!append) dispatch(setFolders({ folders: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFolders(true));
     try {
-      const data = await window.electronAPI.getFolders(parentId, pageToken);
+      const data = await window.electronAPI.getFolders(parentId, pageToken, customTimeout);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               Toastify({
@@ -88,7 +88,7 @@ function FolderList() {
            </button>
         )}
         <button
-          onClick={() => fetchFolders(currentParentId)}
+          onClick={() => fetchFolders(currentParentId, null, false, 5000)}
           data-testid="refresh-button"
           className="ml-2 px-2 py-1 flex items-center justify-center min-w-[32px] min-h-[28px] text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
           title="Refresh"

@@ -154,9 +154,9 @@ ipcMain.on('authorize', async (event) => {
     }
 });
 
-ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null) => {
+ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null, customTimeout = null) => {
     try {
-        const result = await getFolders(parentId, pageToken);
+        const result = await getFolders(parentId, pageToken, customTimeout);
         return {
              folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
              nextPageToken: result.nextPageToken
@@ -167,9 +167,9 @@ ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null)
     }
 });
 
-ipcMain.handle('get-files', async (event, folderId = 'root', pageToken = null) => {
+ipcMain.handle('get-files', async (event, folderId = 'root', pageToken = null, customTimeout = null) => {
     try {
-        const result = await getFiles(folderId, pageToken);
+        const result = await getFiles(folderId, pageToken, customTimeout);
         return {
             files: result.files.map(f => ({ id: f.id, name: f.name })),
             nextPageToken: result.nextPageToken
