@@ -6,7 +6,7 @@ const Bottleneck = require('bottleneck');
 const { app } = require('electron');
 
 // Set global timeout for Google APIs to 30 seconds
-google.options({ timeout: 30000 });
+google.options({ timeout: 10000 });
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata'];
 
@@ -116,7 +116,7 @@ async function authorize(event) {
     throw new Error("Not authorized");
 }
 
-async function getFolders(parentId = 'root', pageToken = null) {
+async function getFolders(parentId = 'root', pageToken = null, customTimeout = null) {
     if (!_driveClient) await authorize(null);
 
     try {
@@ -127,7 +127,7 @@ async function getFolders(parentId = 'root', pageToken = null) {
             fields: 'nextPageToken, files(id, name, parents)',
             orderBy: 'name',
             pageToken: pageToken
-        }));
+        }, customTimeout ? { timeout: customTimeout } : {}));
 
         return {
             folders: response.data.files || [],
@@ -141,7 +141,7 @@ async function getFolders(parentId = 'root', pageToken = null) {
     }
 }
 
-async function getFiles(parentId = 'root', pageToken = null) {
+async function getFiles(parentId = 'root', pageToken = null, customTimeout = null) {
     if (!_driveClient) await authorize(null);
 
     try {
@@ -152,7 +152,7 @@ async function getFiles(parentId = 'root', pageToken = null) {
             fields: 'nextPageToken, files(id, name)',
             orderBy: 'name',
             pageToken: pageToken
-        }));
+        }, customTimeout ? { timeout: customTimeout } : {}));
 
         return {
             files: response.data.files || [],

@@ -11,7 +11,7 @@ import {
   setPage
 } from '../store/driveSlice';
 import { toggleExecute, addNotification } from '../store/uiSlice';
-import Toastify from 'toastify-js';
+import { showToast } from '../utils/toast';
 import { Spinner } from './common/Spinner';
 
 function FileList() {
@@ -86,15 +86,23 @@ function FileList() {
     return originalName;
   };
 
-  const fetchFiles = async (folderId, pageToken = null, append = false) => {
+  const fetchFiles = async (folderId, pageToken = null, append = false, customTimeout = null) => {
     if (!window.electronAPI) return;
     if (!append) dispatch(setFiles({ files: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFiles(true));
     try {
-      const data = await window.electronAPI.getFiles(folderId, pageToken);
+      // Create a local timeout fallback for the spinner of 10s max
+      const timeoutFallback = new Promise(resolve => {
+        setTimeout(() => {
+          resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
+        }, 10000);
+      });
+
+      const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
+      const data = await Promise.race([fetchPromise, timeoutFallback]);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
-              Toastify({
+              showToast({
                   text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${data.error}</div></details></div>`,
                   escapeMarkup: false,
                   duration: 10000, // Increase duration so user has time to read accordion
@@ -102,7 +110,7 @@ function FileList() {
                   gravity: "bottom",
                   position: "right",
                   className: "error-toast"
-              }).showToast();
+              });
           } else {
               dispatch(addNotification({ message: data.error, type: 'error' }));
           }
@@ -123,6 +131,8 @@ function FileList() {
 
   useEffect(() => {
     if (selectedFolderId) {
+       // Only fetch if it's a folder change or regular refresh,
+       // but don't apply custom timeout automatically here
        fetchFiles(selectedFolderId);
     }
   }, [selectedFolderId, refreshTrigger, dispatch]);
