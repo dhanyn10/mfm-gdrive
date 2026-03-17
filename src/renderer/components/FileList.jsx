@@ -121,19 +121,11 @@ function FileList() {
     }
   };
 
-  const initialMountRef = React.useRef(true);
-  const prevFolderIdRef = React.useRef(selectedFolderId);
-
   useEffect(() => {
     if (selectedFolderId) {
-       const isFolderChange = prevFolderIdRef.current !== selectedFolderId;
-       const isManualRefresh = !isFolderChange && !initialMountRef.current;
-
-       initialMountRef.current = false;
-       prevFolderIdRef.current = selectedFolderId;
-
-       // Apply 5s timeout only if triggered by manual refresh (refreshTrigger change)
-       fetchFiles(selectedFolderId, null, false, isManualRefresh ? 5000 : null);
+       // Only fetch if it's a folder change or regular refresh,
+       // but don't apply custom timeout automatically here
+       fetchFiles(selectedFolderId);
     }
   }, [selectedFolderId, refreshTrigger, dispatch]);
 
