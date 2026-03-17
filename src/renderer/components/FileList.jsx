@@ -91,7 +91,15 @@ function FileList() {
     if (!append) dispatch(setFiles({ files: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFiles(true));
     try {
-      const data = await window.electronAPI.getFiles(folderId, pageToken, customTimeout);
+      // Create a local timeout fallback for the spinner of 10s max
+      const timeoutFallback = new Promise(resolve => {
+        setTimeout(() => {
+          resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
+        }, 10000);
+      });
+
+      const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
+      const data = await Promise.race([fetchPromise, timeoutFallback]);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               showToast({

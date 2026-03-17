@@ -22,7 +22,15 @@ function FolderList() {
     if (!append) dispatch(setFolders({ folders: [], nextPageToken: null })); // clear before retry
     dispatch(setLoadingFolders(true));
     try {
-      const data = await window.electronAPI.getFolders(parentId, pageToken, customTimeout);
+      // Create a local timeout fallback for the spinner of 10s max
+      const timeoutFallback = new Promise(resolve => {
+        setTimeout(() => {
+          resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
+        }, 10000);
+      });
+
+      const fetchPromise = window.electronAPI.getFolders(parentId, pageToken, customTimeout);
+      const data = await Promise.race([fetchPromise, timeoutFallback]);
       if (data.error) {
           if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
               showToast({
