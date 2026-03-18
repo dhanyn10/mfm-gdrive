@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TitleBar from './components/TitleBar';
 import AuthView from './components/AuthView';
@@ -6,6 +6,7 @@ import Navigation from './components/Navigation';
 import FolderList from './components/FolderList';
 import FileList from './components/FileList';
 import ExecuteSidebar from './components/ExecuteSidebar';
+import SidebarResizer from './components/SidebarResizer';
 import { setAuthorized, setAuthorizing } from './store/authSlice';
 import { addNotification } from './store/uiSlice';
 
@@ -14,6 +15,9 @@ function App() {
   const isAuthorized = useSelector((state) => state.auth.isAuthorized);
   const isExecuteSidebarOpen = useSelector((state) => state.ui.isExecuteSidebarOpen);
   const isFoldersOpen = useSelector((state) => state.ui.isFoldersOpen);
+
+  // Default sidebar width 33.33vw (1/3 of screen)
+  const [sidebarWidth, setSidebarWidth] = useState(() => window.innerWidth / 3);
 
   useEffect(() => {
     // Check initial auth status
@@ -91,12 +95,12 @@ function App() {
 
             {/* Resizer */}
             {isExecuteSidebarOpen && (
-               <div className="w-px cursor-col-resize bg-gray-300 hover:bg-blue-500 transition-colors mx-2"></div>
+               <SidebarResizer sidebarWidth={sidebarWidth} setSidebarWidth={setSidebarWidth} />
             )}
 
-            {/* Execute Sidebar - Fixed width when open */}
+            {/* Execute Sidebar - Dynamic width when open */}
             {isExecuteSidebarOpen && (
-               <div className="w-1/3 min-w-[300px] h-full">
+               <div style={{ width: sidebarWidth, flexShrink: 0 }} className="h-full">
                   <ExecuteSidebar />
                </div>
             )}
