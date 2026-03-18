@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addNotification } from './uiSlice';
 import { showToast } from '../utils/toast';
 
-const ITEMS_PER_PAGE = 300;
+const ITEMS_PER_PAGE = 20;
 
 export const fetchFolders = createAsyncThunk(
   'drive/fetchFolders',

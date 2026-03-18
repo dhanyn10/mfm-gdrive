@@ -299,10 +299,6 @@ function FileList() {
             Previous
           </button>
 
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Page {currentPage} of {totalPages || 1} ({files.length} items)
-          </span>
-
           <button
             onClick={handleNextPage}
             disabled={currentPage >= totalPages}
