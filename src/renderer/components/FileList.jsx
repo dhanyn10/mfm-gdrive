@@ -131,6 +131,38 @@ function FileList() {
     if (currentPage > 1) dispatch(setPage(currentPage - 1));
   };
 
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    return pages;
+  };
+
   if (!selectedFolderId) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
@@ -298,6 +330,26 @@ function FileList() {
             </svg>
             Previous
           </button>
+
+          <div className="flex space-x-1">
+            {getPageNumbers().map((page, index) => (
+              <button
+                key={index}
+                onClick={() => typeof page === 'number' && dispatch(setPage(page))}
+                disabled={page === '...'}
+                type="button"
+                className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                  page === currentPage
+                    ? 'bg-blue-600 text-white dark:bg-blue-500'
+                    : page === '...'
+                    ? 'bg-transparent text-gray-500 cursor-default'
+                    : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
 
           <button
             onClick={handleNextPage}
