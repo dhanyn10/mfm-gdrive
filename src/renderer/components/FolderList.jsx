@@ -83,7 +83,7 @@ function FolderList() {
   };
 
   return (
-    <div className="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y flex flex-col h-full">
+    <div className="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y flex flex-col max-h-full h-fit">
       <div className="flex justify-between items-center px-6 py-2 bg-gray-50 dark:bg-gray-700">
         <p className="text-gray-900 dark:text-white">Folders</p>
         {parentHistory.length > 0 && (

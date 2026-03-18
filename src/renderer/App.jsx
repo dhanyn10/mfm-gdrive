@@ -83,7 +83,7 @@ function App() {
           <div className="container mx-auto px-4 flex-1 min-h-0 pb-4 flex h-full">
             {/* Folders List - Fixed width */}
             {isFoldersOpen && (
-              <div className="w-1/4 min-w-[250px] mr-2 h-full">
+              <div className="w-1/4 min-w-[250px] mr-2">
                  <FolderList />
               </div>
             )}
