@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TitleBar from './components/TitleBar';
 import AuthView from './components/AuthView';
@@ -19,10 +19,13 @@ function App() {
   const [sidebarWidth, setSidebarWidth] = useState(() => window.innerWidth / 3);
   const [isResizing, setIsResizing] = useState(false);
 
+  const resizeRef = useRef({ startX: 0, startWidth: 0 });
+
   const startResizing = useCallback((e) => {
     e.preventDefault();
     setIsResizing(true);
-  }, []);
+    resizeRef.current = { startX: e.clientX, startWidth: sidebarWidth };
+  }, [sidebarWidth]);
 
   const stopResizing = useCallback(() => {
     setIsResizing(false);
@@ -30,8 +33,10 @@ function App() {
 
   const resize = useCallback((e) => {
     if (isResizing) {
-      // Calculate new width based on mouse position from the right side of the window
-      const newWidth = window.innerWidth - e.clientX;
+      // Calculate delta from the initial drag point.
+      // Dragging left (negative delta) increases width, dragging right (positive delta) decreases width.
+      const delta = resizeRef.current.startX - e.clientX;
+      const newWidth = resizeRef.current.startWidth + delta;
 
       // Constraints:
       // min width 30% of viewport
