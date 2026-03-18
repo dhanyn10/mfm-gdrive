@@ -140,10 +140,10 @@ function App() {
             {/* Resizer */}
             {isExecuteSidebarOpen && (
                <div
-                 className="w-2 cursor-col-resize hover:bg-blue-500 transition-colors mx-2 flex justify-center"
+                 className="w-2 cursor-col-resize group transition-colors mx-2 flex justify-center"
                  onMouseDown={startResizing}
                >
-                 <div className="w-px h-full bg-gray-300 pointer-events-none"></div>
+                 <div className="w-px h-full bg-gray-300 group-hover:bg-blue-500 pointer-events-none"></div>
                </div>
             )}
 
