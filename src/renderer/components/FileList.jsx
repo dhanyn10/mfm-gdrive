@@ -1,18 +1,18 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  setLoadingFiles,
-  setFiles,
-  appendFiles,
+  fetchFiles,
   toggleFileSelection,
   selectAllFilesOnPage,
   selectFileRange,
   clearAllSelections,
   setPage
 } from '../store/driveSlice';
-import { toggleExecute, addNotification } from '../store/uiSlice';
-import { showToast } from '../utils/toast';
+import { toggleExecute } from '../store/uiSlice';
 import { Spinner } from './common/Spinner';
+import GoogleDriveIcon from '../../../assets/google-drive.svg?react';
+import CheckSquareIcon from '../../../assets/check-square.svg?react';
+import MinusSquareIcon from '../../../assets/minus-square.svg?react';
 
 function FileList() {
   const dispatch = useDispatch();
@@ -87,60 +87,15 @@ function FileList() {
     return originalName;
   };
 
-  const fetchFiles = async (folderId, pageToken = null, append = false, customTimeout = null) => {
-    if (!window.electronAPI) return;
-    if (!append) dispatch(setFiles({ files: [], nextPageToken: null })); // clear before retry
-    dispatch(setLoadingFiles(true));
-    try {
-      // Create a local timeout fallback for the spinner of 10s max
-      const timeoutFallback = new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
-        }, 10000);
-      });
-
-      const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
-      const data = await Promise.race([fetchPromise, timeoutFallback]);
-      if (data.error) {
-          if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
-              showToast({
-                  text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${data.error}</div></details></div>`,
-                  escapeMarkup: false,
-                  duration: 10000, // Increase duration so user has time to read accordion
-                  close: true,
-                  gravity: "bottom",
-                  position: "right",
-                  className: "error-toast"
-              });
-          } else {
-              dispatch(addNotification({ message: data.error, type: 'error' }));
-          }
-          return;
-      }
-      if (append) {
-          dispatch(appendFiles(data));
-      } else {
-          dispatch(setFiles(data));
-      }
-    } catch (error) {
-      console.error("Failed to fetch files:", error);
-      dispatch(addNotification({ message: "An unexpected error occurred while fetching files.", type: 'error' }));
-    } finally {
-      dispatch(setLoadingFiles(false));
-    }
-  };
-
   useEffect(() => {
     if (selectedFolderId) {
-       // Only fetch if it's a folder change or regular refresh,
-       // but don't apply custom timeout automatically here
-       fetchFiles(selectedFolderId);
+       dispatch(fetchFiles({ folderId: selectedFolderId }));
     }
   }, [selectedFolderId, refreshTrigger, dispatch]);
 
   const handleLoadMore = () => {
       if (nextFilesPageToken) {
-          fetchFiles(selectedFolderId, nextFilesPageToken, true);
+          dispatch(fetchFiles({ folderId: selectedFolderId, pageToken: nextFilesPageToken, append: true }));
       }
   };
 
@@ -179,7 +134,7 @@ function FileList() {
   if (!selectedFolderId) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
-        <i className="fab fa-google-drive fa-5x mb-4 opacity-50"></i>
+        <GoogleDriveIcon className="w-20 h-20 mb-4 opacity-50" aria-label="Google Drive" />
         <p>Select a folder to view files</p>
       </div>
     );
@@ -194,18 +149,18 @@ function FileList() {
             <button
               onClick={handleSelectAll}
               type="button"
-              className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+              className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 flex items-center"
             >
-              <i className="far fa-check-square mr-2"></i>
+              <CheckSquareIcon className="w-4 h-4 mr-2" aria-label="Select All" />
               Select All
             </button>
             {hasSelections && (
               <button
                 onClick={handleSelectNone}
                 type="button"
-                className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+                className="px-3 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 flex items-center"
               >
-                <i className="far fa-minus-square mr-2"></i>
+                <MinusSquareIcon className="w-4 h-4 mr-2" aria-label="Select None" />
                 Select None
               </button>
             )}

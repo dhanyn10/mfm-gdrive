@@ -1,6 +1,110 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { addNotification } from './uiSlice';
+import { showToast } from '../utils/toast';
 
 const ITEMS_PER_PAGE = 300;
+
+export const fetchFolders = createAsyncThunk(
+  'drive/fetchFolders',
+  async ({ parentId, pageToken = null, append = false, customTimeout = null }, { dispatch }) => {
+    if (!window.electronAPI) return null;
+
+    if (!append) dispatch(setFolders({ folders: [], nextPageToken: null }));
+    dispatch(setLoadingFolders(true));
+
+    try {
+      const timeoutFallback = new Promise(resolve => {
+        setTimeout(() => {
+          resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
+        }, 10000);
+      });
+
+      const fetchPromise = window.electronAPI.getFolders(parentId, pageToken, customTimeout);
+      const data = await Promise.race([fetchPromise, timeoutFallback]);
+
+      if (data.error) {
+        if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
+            showToast({
+                text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${data.error}</div></details></div>`,
+                escapeMarkup: false,
+                duration: 10000,
+                close: true,
+                gravity: "bottom",
+                position: "right",
+                className: "error-toast"
+            });
+        } else {
+            dispatch(addNotification({ message: data.error, type: 'error' }));
+        }
+        return null;
+      }
+
+      if (append) {
+        dispatch(appendFolders(data));
+      } else {
+        dispatch(setFolders(data));
+      }
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch folders:", error);
+      dispatch(addNotification({ message: "An unexpected error occurred while fetching folders.", type: 'error' }));
+      return null;
+    } finally {
+      dispatch(setLoadingFolders(false));
+    }
+  }
+);
+
+export const fetchFiles = createAsyncThunk(
+  'drive/fetchFiles',
+  async ({ folderId, pageToken = null, append = false, customTimeout = null }, { dispatch }) => {
+    if (!window.electronAPI) return null;
+
+    if (!append) dispatch(setFiles({ files: [], nextPageToken: null }));
+    dispatch(setLoadingFiles(true));
+
+    try {
+      const timeoutFallback = new Promise(resolve => {
+        setTimeout(() => {
+          resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
+        }, 10000);
+      });
+
+      const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
+      const data = await Promise.race([fetchPromise, timeoutFallback]);
+
+      if (data.error) {
+        if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
+            showToast({
+                text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${data.error}</div></details></div>`,
+                escapeMarkup: false,
+                duration: 10000,
+                close: true,
+                gravity: "bottom",
+                position: "right",
+                className: "error-toast"
+            });
+        } else {
+            dispatch(addNotification({ message: data.error, type: 'error' }));
+        }
+        return null;
+      }
+
+      if (append) {
+        dispatch(appendFiles(data));
+      } else {
+        dispatch(setFiles(data));
+      }
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch files:", error);
+      dispatch(addNotification({ message: "An unexpected error occurred while fetching files.", type: 'error' }));
+      return null;
+    } finally {
+      dispatch(setLoadingFiles(false));
+    }
+  }
+);
 
 const initialState = {
   // Navigation
