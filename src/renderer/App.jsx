@@ -140,9 +140,11 @@ function App() {
             {/* Resizer */}
             {isExecuteSidebarOpen && (
                <div
-                 className="w-1 cursor-col-resize bg-gray-300 hover:bg-blue-500 transition-colors mx-2"
+                 className="w-2 cursor-col-resize hover:bg-blue-500 transition-colors mx-2 flex justify-center"
                  onMouseDown={startResizing}
-               ></div>
+               >
+                 <div className="w-px h-full bg-gray-300 pointer-events-none"></div>
+               </div>
             )}
 
             {/* Execute Sidebar - Dynamic width when open */}
