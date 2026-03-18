@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setFolders, selectFolder, setLoadingFolders, appendFolders, setCurrentParentId, pushParentHistory, popParentHistory } from '../store/driveSlice';
-import { addNotification } from '../store/uiSlice';
-import { showToast } from '../utils/toast';
+import { selectFolder, setCurrentParentId, pushParentHistory, popParentHistory, fetchFolders } from '../store/driveSlice';
 import { Spinner } from './common/Spinner';
+import LevelUpIcon from '../../../assets/level-up-alt.svg?react';
+import FolderIcon from '../../../assets/folder.svg?react';
 
 function FolderList() {
   const dispatch = useDispatch();
@@ -15,56 +15,13 @@ function FolderList() {
   const currentParentId = useSelector(state => state.drive.currentParentId);
   const parentHistory = useSelector(state => state.drive.parentHistory);
   const nextFoldersPageToken = useSelector(state => state.drive.nextFoldersPageToken);
-
-  const fetchFolders = async (parentId, pageToken = null, append = false, customTimeout = null) => {
-    if (!window.electronAPI) return;
-
-    if (!append) dispatch(setFolders({ folders: [], nextPageToken: null })); // clear before retry
-    dispatch(setLoadingFolders(true));
-    try {
-      // Create a local timeout fallback for the spinner of 10s max
-      const timeoutFallback = new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ error: "Request timed out", errorCode: "ETIMEDOUT" });
-        }, 10000);
-      });
-
-      const fetchPromise = window.electronAPI.getFolders(parentId, pageToken, customTimeout);
-      const data = await Promise.race([fetchPromise, timeoutFallback]);
-      if (data.error) {
-          if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
-              showToast({
-                  text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${data.error}</div></details></div>`,
-                  escapeMarkup: false,
-                  duration: 10000, // Increase duration so user has time to read accordion
-                  close: true,
-                  gravity: "bottom",
-                  position: "right",
-                  className: "error-toast"
-              });
-          } else {
-              dispatch(addNotification({ message: data.error, type: 'error' }));
-          }
-          return;
-      }
-      if (append) {
-          dispatch(appendFolders(data));
-      } else {
-          dispatch(setFolders(data));
-      }
-    } catch (error) {
-      console.error("Failed to fetch folders:", error);
-      dispatch(addNotification({ message: "An unexpected error occurred while fetching folders.", type: 'error' }));
-    } finally {
-      dispatch(setLoadingFolders(false));
-    }
-  };
+  const refreshTrigger = useSelector(state => state.drive.refreshTrigger);
 
   useEffect(() => {
     if (isAuthorized) {
-      fetchFolders(currentParentId);
+      dispatch(fetchFolders({ parentId: currentParentId }));
     }
-  }, [isAuthorized, currentParentId]);
+  }, [isAuthorized, currentParentId, refreshTrigger, dispatch]);
 
   const handleFolderClick = (folder) => {
     dispatch(selectFolder(folder));
@@ -89,24 +46,12 @@ function FolderList() {
         {parentHistory.length > 0 && (
            <button
              onClick={handleUpDirectory}
-             className="ml-2 px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
+             className="ml-2 px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center justify-center min-w-[32px] min-h-[28px]"
              title="Go Up"
            >
-             <i className="fas fa-level-up-alt"></i>
+             <LevelUpIcon className="w-4 h-4" aria-label="Go Up" />
            </button>
         )}
-        <button
-          onClick={() => fetchFolders(currentParentId, null, false, 5000)}
-          data-testid="refresh-button"
-          className="ml-2 px-2 py-1 flex items-center justify-center min-w-[32px] min-h-[28px] text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
-          title="Refresh"
-        >
-          {isLoading ? (
-            <Spinner className="h-4 w-4 text-blue-500" />
-          ) : (
-            <i className="fas fa-sync-alt"></i>
-          )}
-        </button>
       </div>
       <ul id="folder-list" className="overflow-y-auto select-none max-h-[calc(100vh-240px)] flex-1">
         {isLoading && folders.length === 0 ? (
@@ -127,14 +72,14 @@ function FolderList() {
                 }`}
               >
                 <div className="flex items-center">
-                  <i className="fas fa-folder mr-3 text-gray-400 dark:text-gray-500"></i>
+                  <FolderIcon className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" aria-label="Folder" />
                   <span className="truncate" title={folder.name}>{folder.name}</span>
                 </div>
               </li>
             ))}
             {nextFoldersPageToken && (
                <li
-                 onClick={() => fetchFolders(currentParentId, nextFoldersPageToken, true)}
+                 onClick={() => dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }))}
                  className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm"
                >
                  {isLoading ? 'Loading more...' : 'Load more folders'}

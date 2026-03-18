@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { markAllNotificationsRead, removeNotification, setHoveredFileId, setNotificationDropdownOpen } from '../store/uiSlice';
 import { triggerRefresh } from '../store/driveSlice';
+import BellIcon from '../../../assets/bell.svg?react';
 
 function NotificationDropdown({ count }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,10 +40,10 @@ function NotificationDropdown({ count }) {
     <div className="relative">
       <button
         onClick={toggleDropdown}
-        className="relative px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
+        className="relative px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center justify-center min-w-[32px] min-h-[28px]"
         title="Notifications"
       >
-        <i className="fas fa-bell"></i>
+        <BellIcon className="w-4 h-4" aria-label="Notifications" />
         {count > 0 && (
           <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
             {count}
