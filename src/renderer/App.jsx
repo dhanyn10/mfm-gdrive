@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TitleBar from './components/TitleBar';
 import AuthView from './components/AuthView';
@@ -14,6 +14,54 @@ function App() {
   const isAuthorized = useSelector((state) => state.auth.isAuthorized);
   const isExecuteSidebarOpen = useSelector((state) => state.ui.isExecuteSidebarOpen);
   const isFoldersOpen = useSelector((state) => state.ui.isFoldersOpen);
+
+  // Default sidebar width 33.33vw (1/3 of screen)
+  const [sidebarWidth, setSidebarWidth] = useState(() => window.innerWidth / 3);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = useCallback((e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((e) => {
+    if (isResizing) {
+      // Calculate new width based on mouse position from the right side of the window
+      const newWidth = window.innerWidth - e.clientX;
+
+      // Constraints:
+      // min width 30% of viewport
+      const minWidth = window.innerWidth * 0.3;
+      // max width 50% of viewport
+      const maxWidth = window.innerWidth * 0.5;
+
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setSidebarWidth(newWidth);
+      } else if (newWidth < minWidth) {
+        setSidebarWidth(minWidth);
+      } else if (newWidth > maxWidth) {
+        setSidebarWidth(maxWidth);
+      }
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    } else {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
 
   useEffect(() => {
     // Check initial auth status
@@ -91,12 +139,15 @@ function App() {
 
             {/* Resizer */}
             {isExecuteSidebarOpen && (
-               <div className="w-px cursor-col-resize bg-gray-300 hover:bg-blue-500 transition-colors mx-2"></div>
+               <div
+                 className="w-1 cursor-col-resize bg-gray-300 hover:bg-blue-500 transition-colors mx-2"
+                 onMouseDown={startResizing}
+               ></div>
             )}
 
-            {/* Execute Sidebar - Fixed width when open */}
+            {/* Execute Sidebar - Dynamic width when open */}
             {isExecuteSidebarOpen && (
-               <div className="w-1/3 min-w-[300px] h-full">
+               <div style={{ width: sidebarWidth, flexShrink: 0 }} className="h-full">
                   <ExecuteSidebar />
                </div>
             )}
