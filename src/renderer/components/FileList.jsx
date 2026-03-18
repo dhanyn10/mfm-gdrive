@@ -31,6 +31,7 @@ function FileList() {
   const operationPreview = useSelector(state => state.ui.operationPreview);
   const isNotificationDropdownOpen = useSelector(state => state.ui.isNotificationDropdownOpen);
   const hoveredFileId = useSelector(state => state.ui.hoveredFileId);
+  const isExecuteSidebarOpen = useSelector(state => state.ui.isExecuteSidebarOpen);
 
   const totalPages = Math.ceil(files.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -209,7 +210,7 @@ function FileList() {
               </button>
             )}
           </div>
-          {hasSelections && (
+          {hasSelections && !isExecuteSidebarOpen && (
             <button
               onClick={() => dispatch(toggleExecute())}
               type="button"
