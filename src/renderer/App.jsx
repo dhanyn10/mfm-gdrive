@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TitleBar from './components/TitleBar';
 import AuthView from './components/AuthView';
@@ -6,6 +6,7 @@ import Navigation from './components/Navigation';
 import FolderList from './components/FolderList';
 import FileList from './components/FileList';
 import ExecuteSidebar from './components/ExecuteSidebar';
+import SidebarResizer from './components/SidebarResizer';
 import { setAuthorized, setAuthorizing } from './store/authSlice';
 import { addNotification } from './store/uiSlice';
 
@@ -17,56 +18,6 @@ function App() {
 
   // Default sidebar width 33.33vw (1/3 of screen)
   const [sidebarWidth, setSidebarWidth] = useState(() => window.innerWidth / 3);
-  const [isResizing, setIsResizing] = useState(false);
-
-  const resizeRef = useRef({ startX: 0, startWidth: 0 });
-
-  const startResizing = useCallback((e) => {
-    e.preventDefault();
-    setIsResizing(true);
-    resizeRef.current = { startX: e.clientX, startWidth: sidebarWidth };
-  }, [sidebarWidth]);
-
-  const stopResizing = useCallback(() => {
-    setIsResizing(false);
-  }, []);
-
-  const resize = useCallback((e) => {
-    if (isResizing) {
-      // Calculate delta from the initial drag point.
-      // Dragging left (negative delta) increases width, dragging right (positive delta) decreases width.
-      const delta = resizeRef.current.startX - e.clientX;
-      const newWidth = resizeRef.current.startWidth + delta;
-
-      // Constraints:
-      // min width 30% of viewport
-      const minWidth = window.innerWidth * 0.3;
-      // max width 50% of viewport
-      const maxWidth = window.innerWidth * 0.5;
-
-      if (newWidth >= minWidth && newWidth <= maxWidth) {
-        setSidebarWidth(newWidth);
-      } else if (newWidth < minWidth) {
-        setSidebarWidth(minWidth);
-      } else if (newWidth > maxWidth) {
-        setSidebarWidth(maxWidth);
-      }
-    }
-  }, [isResizing]);
-
-  useEffect(() => {
-    if (isResizing) {
-      window.addEventListener('mousemove', resize);
-      window.addEventListener('mouseup', stopResizing);
-    } else {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
-    }
-    return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
-    };
-  }, [isResizing, resize, stopResizing]);
 
   useEffect(() => {
     // Check initial auth status
@@ -144,12 +95,7 @@ function App() {
 
             {/* Resizer */}
             {isExecuteSidebarOpen && (
-               <div
-                 className="w-2 cursor-col-resize group transition-colors mx-2 flex justify-center"
-                 onMouseDown={startResizing}
-               >
-                 <div className="w-px h-full bg-gray-300 group-hover:bg-blue-500 pointer-events-none"></div>
-               </div>
+               <SidebarResizer sidebarWidth={sidebarWidth} setSidebarWidth={setSidebarWidth} />
             )}
 
             {/* Execute Sidebar - Dynamic width when open */}
