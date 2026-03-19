@@ -2,7 +2,7 @@
 
 // Modules to control application life and create native browser window.
 const { app, BrowserWindow, ipcMain, Menu } = require('electron');
-const path = require('path');
+const path = require('node:path');
 
 // Define menu templates
 const menuTemplates = {
