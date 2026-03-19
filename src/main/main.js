@@ -2,7 +2,7 @@
 
 // Modules to control application life and create native browser window.
 const { app, BrowserWindow, ipcMain, Menu } = require('electron');
-const path = require('path');
+const path = require('node:path');
 
 // Define menu templates
 const menuTemplates = {
@@ -58,13 +58,10 @@ function createWindow() {
     // Load the UI
     if (process.env.VITE_DEV_SERVER_URL) {
         mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-        // mainWindow.webContents.openDevTools();
     } else {
         mainWindow.loadFile(path.join(__dirname, '../../dist-vite/index.html'));
     }
 
-    // Uncomment to open the DevTools automatically.
-    // mainWindow.webContents.openDevTools({ mode: 'bottom' });
 }
 
 // This method will be called when Electron has finished
