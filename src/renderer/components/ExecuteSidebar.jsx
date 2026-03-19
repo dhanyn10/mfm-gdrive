@@ -202,7 +202,7 @@ function ExecuteSidebar() {
                 </div>
               </div>
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End index (optional)</label>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End index</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="range"
