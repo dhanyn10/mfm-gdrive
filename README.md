@@ -17,13 +17,13 @@ Easy rename your files in Google Drive
     ```
 
 ## Usage
-- Generate CSS (optional)
-    ```bash
-    npm run css-gen
-    ```
 - Run the application
     ```bash
     npm start
+    ```
+- Run in development mode
+    ```bash
+    npm run dev
     ```
 
 ## How to Use
