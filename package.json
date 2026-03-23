@@ -84,7 +84,7 @@
     "playwright": "^1.58.2",
     "postcss-cli": "^11.0.0",
     "tailwindcss": "^4.1.18",
-    "vite": "^6.4.1",
+    "vite": "^8.0.2",
     "vite-plugin-svgr": "^4.5.0",
     "wait-on": "^9.0.4",
     "wdio-electron-service": "^9.1.0"
