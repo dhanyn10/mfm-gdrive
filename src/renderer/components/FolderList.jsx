@@ -24,6 +24,7 @@ function FolderList() {
   const searchResults = useSelector(state => state.drive.searchResults);
   const isSearching = useSelector(state => state.drive.isSearchingFolders);
   const dropdownRef = useRef(null);
+  const [scrollRequestTimestamp, setScrollRequestTimestamp] = useState(0);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -42,12 +43,16 @@ function FolderList() {
   // Auto-scroll to selected folder
   useEffect(() => {
     if (selectedFolderId) {
-      const element = document.getElementById(`folder-${selectedFolderId}`);
-      if (element) {
-        element.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      }
+      // Small timeout ensures the DOM has updated and search dropdown has closed
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`folder-${selectedFolderId}`);
+        if (element) {
+          element.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  }, [selectedFolderId]);
+  }, [selectedFolderId, scrollRequestTimestamp]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -78,8 +83,8 @@ function FolderList() {
       <span className="truncate" title={name}>
         {parts.map((part, i) => 
           part.toLowerCase() === query.toLowerCase() 
-            ? <span key={i} className="text-blue-600 dark:text-blue-400 font-bold underline decoration-blue-200 dark:decoration-blue-800">{part}</span> 
-            : <span key={i}>{part}</span>
+            ? <span key={`match-${i}`} className="text-blue-600 dark:text-blue-400 font-bold underline decoration-blue-200 dark:decoration-blue-800">{part}</span> 
+            : <span key={`text-${i}`}>{part}</span>
         )}
       </span>
     );
@@ -167,6 +172,7 @@ function FolderList() {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         dispatch(selectFolder(folder));
+                        setScrollRequestTimestamp(Date.now());
                         setSearchQuery('');
                         setShowSearchDropdown(false);
                         setIsSearchOpen(false);
@@ -174,6 +180,7 @@ function FolderList() {
                     }}
                     onClick={() => {
                       dispatch(selectFolder(folder));
+                      setScrollRequestTimestamp(Date.now());
                       setSearchQuery('');
                       setShowSearchDropdown(false);
                       setIsSearchOpen(false);
