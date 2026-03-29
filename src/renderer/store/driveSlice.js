@@ -156,7 +156,6 @@ const initialState = {
   itemsPerPage: ITEMS_PER_PAGE,
 
   refreshTrigger: 0,
-  folderCache: {}, // { id: folderObj }
 };
 
 const driveSlice = createSlice({
@@ -191,16 +190,10 @@ const driveSlice = createSlice({
     setFolders: (state, action) => {
       state.folders = action.payload.folders;
       state.nextFoldersPageToken = action.payload.nextPageToken;
-      action.payload.folders.forEach(f => {
-        state.folderCache[f.id] = f;
-      });
     },
     appendFolders: (state, action) => {
       state.folders = [...state.folders, ...action.payload.folders];
       state.nextFoldersPageToken = action.payload.nextPageToken;
-      action.payload.folders.forEach(f => {
-        state.folderCache[f.id] = f;
-      });
     },
     selectFolder: (state, action) => {
       state.selectedFolderId = action.payload.id;

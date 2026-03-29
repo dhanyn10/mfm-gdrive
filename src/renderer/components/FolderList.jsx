@@ -11,7 +11,7 @@ function FolderList() {
   const isLoading = useSelector(state => state.drive.isLoadingFolders);
   const selectedFolderId = useSelector(state => state.drive.selectedFolderId);
   const isAuthorized = useSelector(state => state.auth.isAuthorized);
-  const folderCache = useSelector(state => state.drive.folderCache);
+  // Removed folderCache as per user request to stick to current directory
 
   const currentParentId = useSelector(state => state.drive.currentParentId);
   const parentHistory = useSelector(state => state.drive.parentHistory);
@@ -27,8 +27,8 @@ function FolderList() {
 
   useEffect(() => {
     if (searchQuery.trim()) {
-      const allFolders = Object.values(folderCache);
-      const filtered = allFolders.filter(f => 
+      // Direct filtering of current directory folders
+      const filtered = folders.filter(f => 
         f.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       dispatch(setSearchResults({ folders: filtered }));
@@ -37,7 +37,17 @@ function FolderList() {
       dispatch(setSearchResults({ folders: [] }));
       setShowSearchDropdown(false);
     }
-  }, [searchQuery, folderCache, dispatch]);
+  }, [searchQuery, folders, dispatch]);
+
+  // Auto-scroll to selected folder
+  useEffect(() => {
+    if (selectedFolderId) {
+      const element = document.getElementById(`folder-${selectedFolderId}`);
+      if (element) {
+        element.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+  }, [selectedFolderId]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -181,6 +191,7 @@ function FolderList() {
             {folders.map((folder) => (
               <li
                 key={folder.id}
+                id={`folder-${folder.id}`}
                 onClick={() => handleFolderClick(folder)}
                 onDoubleClick={() => handleDoubleClick(folder)}
                 className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 ${
