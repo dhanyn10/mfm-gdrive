@@ -58,19 +58,18 @@ function createWindow() {
     // Load the UI
     if (process.env.VITE_DEV_SERVER_URL) {
         mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-        // mainWindow.webContents.openDevTools();
     } else {
         mainWindow.loadFile(path.join(__dirname, '../../dist-vite/index.html'));
     }
 
-    // Uncomment to open the DevTools automatically.
-    // mainWindow.webContents.openDevTools({ mode: 'bottom' });
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+(async () => {
+    await app.whenReady();
+
     // IPC handler to provide the user data path to the renderer process.
     // This is used for storing persistent data like authentication tokens.
     ipcMain.handle('get-user-data-path', () => {
@@ -120,7 +119,7 @@ app.whenReady().then(() => {
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
-});
+})();
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
