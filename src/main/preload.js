@@ -18,6 +18,7 @@ window.electronAPI = {
   checkAuth: () => ipcRenderer.invoke('check-auth'),
   authorize: () => ipcRenderer.send('authorize'),
   getFolders: (parentId, pageToken, customTimeout) => ipcRenderer.invoke('get-folders', parentId, pageToken, customTimeout),
+  searchFolders: (query, pageToken) => ipcRenderer.invoke('search-folders', query, pageToken),
   getFiles: (folderId, pageToken, customTimeout) => ipcRenderer.invoke('get-files', folderId, pageToken, customTimeout),
   executeOperation: (operation, params, files) => ipcRenderer.invoke('execute-operation', operation, params, files),
   undoRename: (fileId, oldName) => ipcRenderer.invoke('undo-rename', fileId, oldName),

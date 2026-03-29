@@ -141,6 +141,31 @@ async function getFolders(parentId = 'root', pageToken = null, customTimeout = n
     }
 }
 
+async function searchFolders(query, pageToken = null) {
+    if (!_driveClient) await authorize(null);
+
+    try {
+        const response = await limiter.schedule(() => _driveClient.files.list({
+            pageSize: 50,
+            q: `name contains '${query}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+            spaces: 'drive',
+            fields: 'nextPageToken, files(id, name, parents)',
+            orderBy: 'name',
+            pageToken: pageToken
+        }));
+
+        return {
+            folders: response.data.files || [],
+            nextPageToken: response.data.nextPageToken || null
+        };
+    } catch (error) {
+        if (isNetworkError(error)) {
+            throwNetworkError("Connection failed while searching folders.");
+        }
+        throw error;
+    }
+}
+
 async function getFiles(parentId = 'root', pageToken = null, customTimeout = null) {
     if (!_driveClient) await authorize(null);
 
@@ -189,5 +214,6 @@ module.exports = {
     authorize,
     getFolders,
     getFiles,
+    searchFolders,
     renameFile
 };

@@ -106,6 +106,28 @@ export const fetchFiles = createAsyncThunk(
   }
 );
 
+export const searchFolders = createAsyncThunk(
+  'drive/searchFolders',
+  async ({ query, pageToken = null }, { dispatch }) => {
+    if (!window.electronAPI || !query) return { folders: [], nextPageToken: null };
+
+    dispatch(setSearchingFolders(true));
+    try {
+      const data = await window.electronAPI.searchFolders(query, pageToken);
+      if (data.error) {
+        dispatch(addNotification({ message: data.error, type: 'error' }));
+        return { folders: [], nextPageToken: null };
+      }
+      return data;
+    } catch (error) {
+      console.error("Failed to search folders:", error);
+      return { folders: [], nextPageToken: null };
+    } finally {
+      dispatch(setSearchingFolders(false));
+    }
+  }
+);
+
 const initialState = {
   // Navigation
   currentParentId: 'root',
@@ -116,6 +138,9 @@ const initialState = {
 
   files: [],
   nextFilesPageToken: null,
+
+  searchResults: [],
+  isSearchingFolders: false,
 
   selectedFolderId: null,
   selectedFolderObj: null,
@@ -131,6 +156,7 @@ const initialState = {
   itemsPerPage: ITEMS_PER_PAGE,
 
   refreshTrigger: 0,
+  folderCache: {}, // { id: folderObj }
 };
 
 const driveSlice = createSlice({
@@ -156,13 +182,25 @@ const driveSlice = createSlice({
     setLoadingFolders: (state, action) => {
       state.isLoadingFolders = action.payload;
     },
+    setSearchingFolders: (state, action) => {
+      state.isSearchingFolders = action.payload;
+    },
+    setSearchResults: (state, action) => {
+      state.searchResults = action.payload.folders;
+    },
     setFolders: (state, action) => {
       state.folders = action.payload.folders;
       state.nextFoldersPageToken = action.payload.nextPageToken;
+      action.payload.folders.forEach(f => {
+        state.folderCache[f.id] = f;
+      });
     },
     appendFolders: (state, action) => {
       state.folders = [...state.folders, ...action.payload.folders];
       state.nextFoldersPageToken = action.payload.nextPageToken;
+      action.payload.folders.forEach(f => {
+        state.folderCache[f.id] = f;
+      });
     },
     selectFolder: (state, action) => {
       state.selectedFolderId = action.payload.id;
@@ -231,6 +269,8 @@ export const {
   pushParentHistory,
   popParentHistory,
   setLoadingFolders,
+  setSearchingFolders,
+  setSearchResults,
   setFolders,
   appendFolders,
   selectFolder,
