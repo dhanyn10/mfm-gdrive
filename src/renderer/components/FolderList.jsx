@@ -161,13 +161,24 @@ function FolderList() {
                 {sortedSearchResults.map(folder => (
                   <li 
                     key={folder.id}
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        dispatch(selectFolder(folder));
+                        setSearchQuery('');
+                        setShowSearchDropdown(false);
+                        setIsSearchOpen(false);
+                      }
+                    }}
                     onClick={() => {
                       dispatch(selectFolder(folder));
                       setSearchQuery('');
                       setShowSearchDropdown(false);
                       setIsSearchOpen(false);
                     }}
-                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white border-b border-gray-50 dark:border-gray-700 last:border-0 flex items-center"
+                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white border-b border-gray-50 dark:border-gray-700 last:border-0 flex items-center outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
                   >
                     <FolderIcon className="w-4 h-4 mr-2 text-gray-400" />
                     {renderHighlightedName(folder.name, searchQuery)}
@@ -192,9 +203,17 @@ function FolderList() {
               <li
                 key={folder.id}
                 id={`folder-${folder.id}`}
+                tabIndex={0}
+                role="button"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleFolderClick(folder);
+                  }
+                }}
                 onClick={() => handleFolderClick(folder)}
                 onDoubleClick={() => handleDoubleClick(folder)}
-                className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 ${
+                className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 outline-none focus:bg-gray-100 dark:focus:bg-gray-700 ${
                   selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
                 }`}
               >
@@ -206,8 +225,16 @@ function FolderList() {
             ))}
             {nextFoldersPageToken && (
                <li
+                 tabIndex={0}
+                 role="button"
+                 onKeyDown={(e) => {
+                   if (e.key === 'Enter' || e.key === ' ') {
+                     e.preventDefault();
+                     dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }));
+                   }
+                 }}
                  onClick={() => dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }))}
-                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm"
+                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
                >
                  {isLoading ? 'Loading more...' : 'Load more folders'}
                </li>
