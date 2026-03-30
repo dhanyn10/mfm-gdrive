@@ -81,7 +81,8 @@ function FolderList() {
     // Highlight logic using regex to find matches and offsets
     const parts = [];
     let lastIndex = 0;
-    const regex = new RegExp(`(${query.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)})`, 'gi');
+    const escapedQuery = query.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
     let match;
 
     while ((match = regex.exec(name)) !== null) {
