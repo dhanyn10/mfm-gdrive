@@ -141,6 +141,40 @@ function redirectToAuth(event) {
     }
 }
 
+/**
+ * Common helper for Google Drive IPC requests to reduce duplication.
+ * @param {Electron.IpcMainInvokeEvent} event - The IPC event.
+ * @param {string} type - The key for the data in the response (e.g., 'folders', 'files').
+ * @param {Function} driveFn - The driveApi function to call.
+ * @param {Array} args - Arguments for the driveFn.
+ */
+async function handleDriveRequest(event, type, driveFn, ...args) {
+    try {
+        const result = await driveFn(...args);
+        if (!result) {
+            redirectToAuth(event);
+            return { [type]: [], nextPageToken: null, authorized: false };
+        }
+        
+        let mappedData = result[type];
+        if (type === 'folders' || type === 'files') {
+            mappedData = result[type].map(item => ({
+                id: item.id,
+                name: item.name,
+                ...(item.parents ? { parents: item.parents } : {})
+            }));
+        }
+
+        return {
+            [type]: mappedData,
+            nextPageToken: result.nextPageToken || null
+        };
+    } catch (error) {
+        console.error(`Error in ${driveFn.name}:`, error);
+        return { [type]: [], nextPageToken: null, error: error.message, errorCode: error.code };
+    }
+}
+
 // Drive APIs
 ipcMain.handle('check-auth', async () => {
     const client = await authorize(null);
@@ -164,54 +198,15 @@ ipcMain.on('authorize', async (event) => {
 });
 
 ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null, customTimeout = null) => {
-    try {
-        const result = await getFolders(parentId, pageToken, customTimeout);
-        if (!result) {
-            redirectToAuth(event);
-            return { folders: [], nextPageToken: null, authorized: false };
-        }
-        return {
-            folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
-            nextPageToken: result.nextPageToken
-        };
-    } catch (error) {
-        console.error("Error getting folders", error);
-        return { folders: [], nextPageToken: null, error: error.message, errorCode: error.code };
-    }
+    return handleDriveRequest(event, 'folders', getFolders, parentId, pageToken, customTimeout);
 });
 
 ipcMain.handle('search-folders', async (event, query, pageToken = null) => {
-    try {
-        const result = await searchFolders(query, pageToken);
-        if (!result) {
-            redirectToAuth(event);
-            return { folders: [], nextPageToken: null, authorized: false };
-        }
-        return {
-            folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
-            nextPageToken: result.nextPageToken
-        };
-    } catch (error) {
-        console.error("Error searching folders", error);
-        return { folders: [], nextPageToken: null, error: error.message, errorCode: error.code };
-    }
+    return handleDriveRequest(event, 'folders', searchFolders, query, pageToken);
 });
 
 ipcMain.handle('get-files', async (event, folderId = 'root', pageToken = null, customTimeout = null) => {
-    try {
-        const result = await getFiles(folderId, pageToken, customTimeout);
-        if (!result) {
-            redirectToAuth(event);
-            return { files: [], nextPageToken: null, authorized: false };
-        }
-        return {
-            files: result.files.map(f => ({ id: f.id, name: f.name })),
-            nextPageToken: result.nextPageToken
-        };
-    } catch (error) {
-        console.error("Error getting files", error);
-        return { files: [], nextPageToken: null, error: error.message, errorCode: error.code };
-    }
+    return handleDriveRequest(event, 'files', getFiles, folderId, pageToken, customTimeout);
 });
 
 ipcMain.handle('execute-operation', async (event, operation, params, files) => {
