@@ -22,15 +22,15 @@ function App() {
   useEffect(() => {
     // Check initial auth status
     const checkAuth = async () => {
-      if (globalThis.electronAPI) {
-        dispatch(setAuthorizing());
-        try {
-          const authorized = await globalThis.electronAPI.checkAuth();
+      dispatch(setAuthorizing());
+      try {
+        const authorized = await globalThis.electronAPI?.checkAuth();
+        if (authorized !== undefined) {
           dispatch(setAuthorized(authorized));
-        } catch (error) {
-          console.error("Auth check failed:", error);
-          dispatch(setAuthorized(false));
         }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        dispatch(setAuthorized(false));
       }
     };
 
@@ -39,39 +39,37 @@ function App() {
     // Setup global listeners (auth status updates, notifications from main)
     let removeUpdateStatus, removeAuthSuccess, removeAuthRequired, removeOperationComplete;
 
-    if (globalThis.electronAPI) {
-      removeUpdateStatus = globalThis.electronAPI.onUpdateStatus((status) => {
-        dispatch(addNotification({ message: status, type: 'info' }));
-      });
+    removeUpdateStatus = globalThis.electronAPI?.onUpdateStatus((status) => {
+      dispatch(addNotification({ message: status, type: 'info' }));
+    });
 
-      removeAuthSuccess = globalThis.electronAPI.onAuthSuccess(() => {
-        dispatch(setAuthorized(true));
-        dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
-      });
+    removeAuthSuccess = globalThis.electronAPI?.onAuthSuccess(() => {
+      dispatch(setAuthorized(true));
+      dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
+    });
 
-      removeAuthRequired = globalThis.electronAPI.onAuthRequired(() => {
-        dispatch(setAuthorized(false));
-      });
+    removeAuthRequired = globalThis.electronAPI?.onAuthRequired(() => {
+      dispatch(setAuthorized(false));
+    });
 
-      removeOperationComplete = globalThis.electronAPI.onOperationComplete((data) => {
-          if (typeof data === 'string') {
-              dispatch(addNotification({ message: data, type: "success" }));
-          } else if (data && data.newName && data.oldName) {
-              dispatch(addNotification({
-                  message: `Renamed ${data.oldName} to ${data.newName}`,
-                  oldName: data.oldName,
-                  fileId: data.fileId,
-                  type: "success"
-              }));
-          }
-      });
-    }
+    removeOperationComplete = globalThis.electronAPI?.onOperationComplete((data) => {
+        if (typeof data === 'string') {
+            dispatch(addNotification({ message: data, type: "success" }));
+        } else if (data && data.newName && data.oldName) {
+            dispatch(addNotification({
+                message: `Renamed ${data.oldName} to ${data.newName}`,
+                oldName: data.oldName,
+                fileId: data.fileId,
+                type: "success"
+            }));
+        }
+    });
 
     return () => {
-      if (removeUpdateStatus) removeUpdateStatus();
-      if (removeAuthSuccess) removeAuthSuccess();
-      if (removeAuthRequired) removeAuthRequired();
-      if (removeOperationComplete) removeOperationComplete();
+      removeUpdateStatus?.();
+      removeAuthSuccess?.();
+      removeAuthRequired?.();
+      removeOperationComplete?.();
     };
   }, [dispatch]);
 

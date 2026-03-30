@@ -36,8 +36,6 @@ const handleDriveError = (data, dispatch) => {
 export const fetchFolders = createAsyncThunk(
   'drive/fetchFolders',
   async ({ parentId, pageToken = null, append = false, customTimeout = null }, { dispatch }) => {
-    if (!globalThis.electronAPI) return null;
-
     if (!append) dispatch(setFolders({ folders: [], nextPageToken: null }));
     dispatch(setLoadingFolders(true));
 
@@ -48,10 +46,12 @@ export const fetchFolders = createAsyncThunk(
         }, 10000);
       });
 
-      const fetchPromise = globalThis.electronAPI.getFolders(parentId, pageToken, customTimeout);
-      const data = await Promise.race([fetchPromise, timeoutFallback]);
+      const data = await Promise.race([
+        globalThis.electronAPI?.getFolders(parentId, pageToken, customTimeout),
+        timeoutFallback
+      ]);
 
-      if (handleDriveError(data, dispatch)) {
+      if (!data || handleDriveError(data, dispatch)) {
         return null;
       }
 
@@ -74,8 +74,6 @@ export const fetchFolders = createAsyncThunk(
 export const fetchFiles = createAsyncThunk(
   'drive/fetchFiles',
   async ({ folderId, pageToken = null, append = false, customTimeout = null }, { dispatch }) => {
-    if (!globalThis.electronAPI) return null;
-
     if (!append) dispatch(setFiles({ files: [], nextPageToken: null }));
     dispatch(setLoadingFiles(true));
 
@@ -86,10 +84,12 @@ export const fetchFiles = createAsyncThunk(
         }, 10000);
       });
 
-      const fetchPromise = globalThis.electronAPI.getFiles(folderId, pageToken, customTimeout);
-      const data = await Promise.race([fetchPromise, timeoutFallback]);
+      const data = await Promise.race([
+        globalThis.electronAPI?.getFiles(folderId, pageToken, customTimeout),
+        timeoutFallback
+      ]);
 
-      if (handleDriveError(data, dispatch)) {
+      if (!data || handleDriveError(data, dispatch)) {
         return null;
       }
 
@@ -112,12 +112,11 @@ export const fetchFiles = createAsyncThunk(
 export const searchFolders = createAsyncThunk(
   'drive/searchFolders',
   async ({ query, pageToken = null }, { dispatch }) => {
-    if (!globalThis.electronAPI || !query) return { folders: [], nextPageToken: null };
-
+    if (!query) return { folders: [], nextPageToken: null };
     dispatch(setSearchingFolders(true));
     try {
-      const data = await globalThis.electronAPI.searchFolders(query, pageToken);
-      if (handleDriveError(data, dispatch)) {
+      const data = await globalThis.electronAPI?.searchFolders(query, pageToken);
+      if (!data || handleDriveError(data, dispatch)) {
         return { folders: [], nextPageToken: null };
       }
       return data;

@@ -3,10 +3,8 @@ import GoogleDriveIcon from '../../../assets/google-drive.svg?react';
 
 function AuthView() {
   const handleAuthorize = async () => {
-    if (globalThis.electronAPI) {
-      // The main process will handle opening the OAuth window and triggering onAuthSuccess
-      globalThis.electronAPI.authorize();
-    }
+    // The main process will handle opening the OAuth window and triggering onAuthSuccess
+    globalThis.electronAPI?.authorize();
   };
 
   return (

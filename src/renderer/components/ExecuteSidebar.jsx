@@ -55,8 +55,6 @@ function ExecuteSidebar() {
   const nextFilesPageToken = useSelector(state => state.drive.nextFilesPageToken);
 
   const handleExecute = async () => {
-    if (!globalThis.electronAPI) return;
-
     const targetFiles = files.filter(f => selectedFileIds.includes(f.id));
     if (targetFiles.length === 0) return;
 
@@ -75,9 +73,10 @@ function ExecuteSidebar() {
 
     setIsExecuting(true);
     try {
-      const updatedFiles = await globalThis.electronAPI.executeOperation(operation, params, targetFiles);
+      const updatedFiles = await globalThis.electronAPI?.executeOperation(operation, params, targetFiles);
+      if (!updatedFiles) return;
 
-      if (updatedFiles && updatedFiles.error) {
+      if (updatedFiles.error) {
           const errorMsg = `Execution failed: ${updatedFiles.error}`;
           if (updatedFiles.errorCode === 'ETIMEDOUT' || updatedFiles.errorCode === 'NETWORK_ERROR') {
               showToast({
@@ -96,7 +95,7 @@ function ExecuteSidebar() {
       }
 
       // Update local state with new file names
-      if (updatedFiles && Array.isArray(updatedFiles)) {
+      if (Array.isArray(updatedFiles)) {
          const newFiles = files.map(f => {
              const updated = updatedFiles.find(uf => uf.id === f.id);
              return updated ? { ...f, name: updated.newName } : f;
