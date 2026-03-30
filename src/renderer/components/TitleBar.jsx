@@ -1,4 +1,3 @@
-import React from 'react';
 import MinusIcon from '../../../assets/minus.svg?react';
 import SquareIcon from '../../../assets/square.svg?react';
 import TimesIcon from '../../../assets/times.svg?react';

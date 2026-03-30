@@ -1,4 +1,3 @@
-import React from 'react';
 import GoogleDriveIcon from '../../../assets/google-drive.svg?react';
 
 function AuthView() {

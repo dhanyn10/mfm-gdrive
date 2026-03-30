@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleFolders, toggleExecute } from '../store/uiSlice';
 import { fetchFolders, fetchFiles } from '../store/driveSlice';
