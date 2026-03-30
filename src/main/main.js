@@ -136,9 +136,7 @@ const { sliceText, padText } = require('./fileOperations');
 
 // Helper to redirect to auth view in the renderer
 function redirectToAuth(event) {
-    if (event && event.sender) {
-        event.sender.send('auth-required');
-    }
+    event?.sender?.send('auth-required');
 }
 
 /**
