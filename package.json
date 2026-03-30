@@ -1,16 +1,17 @@
 {
   "name": "mfm-gdrive",
   "version": "3.0.0",
+  "packageManager": "pnpm@10.32.1",
   "main": "src/main/main.js",
   "scripts": {
-    "dev": "npm-run-all --parallel dev:vite dev:electron",
+    "dev": "pnpm-run-all --parallel dev:vite dev:electron",
     "dev:vite": "vite",
     "dev:electron": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron . --remote-debugging-port=9222",
     "build": "vite build",
-    "start": "npm run build && electron .",
-    "app:build": "npm run build && electron-builder",
+    "start": "pnpm run build && electron .",
+    "app:build": "pnpm run build && electron-builder",
     "postinstall": "electron-builder install-app-deps",
-    "app:dist": "npm run build && electron-builder --publish=never",
+    "app:dist": "pnpm run build && electron-builder --publish=never",
     "wdio": "wdio run ./wdio.conf.ts",
     "test": "vitest",
     "coverage": "vitest run --coverage"
