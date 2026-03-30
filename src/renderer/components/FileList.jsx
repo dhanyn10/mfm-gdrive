@@ -48,7 +48,6 @@ function FileList() {
   const hasSelections = selectedFileIds.length > 0;
 
   // Replicate logic from src/main/fileOperations.js for previewing
-  const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   const getPreviewName = (originalName) => {
     if (!operationPreview.active) return originalName;
@@ -56,12 +55,7 @@ function FileList() {
 
     if (type === 'replace') {
       if (!params.search) return originalName;
-      try {
-        const regex = new RegExp(escapeRegExp(params.search), 'g');
-        return originalName.replace(regex, params.replace || '');
-      } catch (e) {
-        return originalName;
-      }
+        return originalName.replaceAll(params.search, params.replace || '');
     } else if (type === 'slice') {
       const { start, end } = params;
       if (start === undefined || start === null) return originalName;
