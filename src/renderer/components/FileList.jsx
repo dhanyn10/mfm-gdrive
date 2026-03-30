@@ -182,26 +182,24 @@ function FileList() {
                         className="font-medium text-gray-900 dark:text-gray-300 flex flex-row items-stretch flex-nowrap overflow-hidden min-w-0"
                         style={{ height: '1.25em', lineHeight: 1.25 }}
                       >
-                        {[...file.name].map((char, i) => {
-                          const inRange = i >= slicePreview.start && i < slicePreview.end;
-                          return (
-                            <Fragment key={`${file.id}-char-${i}`}>
-                              {i === slicePreview.start && (
-                                <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
-                              )}
-                              {i === slicePreview.end && slicePreview.end !== slicePreview.start && (
-                                <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
-                              )}
-                              {inRange ? (
-                                <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
-                              ) : (
-                                <span className="flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
-                              )}
-                            </Fragment>
-                          );
-                        })}
-                        {file.name.length === slicePreview.end && slicePreview.end !== slicePreview.start && (
-                          <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                        {slicePreview.start > 0 && (
+                          <span key="before" className="flex items-center shrink-0 whitespace-pre">
+                            {file.name.substring(0, slicePreview.start)}
+                          </span>
+                        )}
+                        <span key="start-ind" className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
+                        {slicePreview.end > slicePreview.start && (
+                          <span key="slice" className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center shrink-0 whitespace-pre">
+                            {file.name.substring(slicePreview.start, slicePreview.end)}
+                          </span>
+                        )}
+                        {slicePreview.end !== slicePreview.start && (
+                          <span key="end-ind" className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                        )}
+                        {slicePreview.end < file.name.length && (
+                          <span key="after" className="flex items-center shrink-0 whitespace-pre">
+                            {file.name.substring(slicePreview.end)}
+                          </span>
                         )}
                       </span>
                     ) : (

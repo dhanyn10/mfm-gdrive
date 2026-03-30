@@ -12,22 +12,27 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
    * Generates the array of page numbers and ellipses based on the current state.
    */
   const getPageNumbers = () => {
+    const items = [];
     if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+      for (let i = 1; i <= totalPages; i++) items.push({ value: i, id: `page-${i}` });
+    } else if (currentPage <= 4) {
+      for (let i = 1; i <= 5; i++) items.push({ value: i, id: `page-${i}` });
+      items.push({ value: '...', id: 'ellipsis-end' });
+      items.push({ value: totalPages, id: `page-${totalPages}` });
+    } else if (currentPage >= totalPages - 3) {
+      items.push({ value: 1, id: 'page-1' });
+      items.push({ value: '...', id: 'ellipsis-start' });
+      for (let i = totalPages - 4; i <= totalPages; i++) items.push({ value: i, id: `page-${i}` });
+    } else {
+      items.push({ value: 1, id: 'page-1' });
+      items.push({ value: '...', id: 'ellipsis-start' });
+      items.push({ value: currentPage - 1, id: `page-${currentPage - 1}` });
+      items.push({ value: currentPage, id: `page-${currentPage}` });
+      items.push({ value: currentPage + 1, id: `page-${currentPage + 1}` });
+      items.push({ value: '...', id: 'ellipsis-end' });
+      items.push({ value: totalPages, id: `page-${totalPages}` });
     }
-
-    // Near start: 1, 2, 3, 4, 5, ..., total
-    if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, '...', totalPages];
-    }
-
-    // Near end: 1, ..., total-4, total-3, total-2, total-1, total
-    if (currentPage >= totalPages - 3) {
-      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-    }
-
-    // Middle: 1, ..., cur-1, cur, cur+1, ..., total
-    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+    return items;
   };
 
   const handlePrevPage = () => {
@@ -53,9 +58,9 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
       </button>
 
       <div className="flex space-x-1">
-        {getPageNumbers().map((page, index) => {
-          const isCurrent = page === currentPage;
-          const isEllipsis = page === '...';
+        {getPageNumbers().map((item) => {
+          const isCurrent = item.value === currentPage;
+          const isEllipsis = item.value === '...';
           
           let btnClass = "px-3 py-2 text-sm font-medium rounded-lg ";
           if (isCurrent) {
@@ -68,13 +73,13 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
           return (
             <button
-              key={`${page}-${index}`}
-              onClick={() => !isEllipsis && onPageChange(Number(page))}
+              key={item.id}
+              onClick={() => !isEllipsis && onPageChange(Number(item.value))}
               disabled={isEllipsis}
               type="button"
               className={btnClass}
             >
-              {page}
+              {item.value}
             </button>
           );
         })}

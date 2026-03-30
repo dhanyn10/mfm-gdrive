@@ -78,14 +78,33 @@ function FolderList() {
 
   const renderHighlightedName = (name, query) => {
     if (!query) return <span>{name}</span>;
-    const parts = name.split(new RegExp(`(${query})`, 'gi'));
+    // Highlight logic using regex to find matches and offsets
+    const parts = [];
+    let lastIndex = 0;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    let match;
+
+    while ((match = regex.exec(name)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push({ text: name.substring(lastIndex, match.index), isMatch: false, offset: lastIndex });
+      }
+      parts.push({ text: match[0], isMatch: true, offset: match.index });
+      lastIndex = regex.lastIndex;
+    }
+    if (lastIndex < name.length) {
+      parts.push({ text: name.substring(lastIndex), isMatch: false, offset: lastIndex });
+    }
+
     return (
       <span className="truncate" title={name}>
-        {parts.map((part, i) => 
-          part.toLowerCase() === query.toLowerCase() 
-            ? <span key={`match-${i}`} className="text-blue-600 dark:text-blue-400 font-bold underline decoration-blue-200 dark:decoration-blue-800">{part}</span> 
-            : <span key={`text-${i}`}>{part}</span>
-        )}
+        {parts.map((p) => (
+          <span 
+            key={`${p.offset}-${p.isMatch}`} 
+            className={p.isMatch ? "text-blue-600 dark:text-blue-400 font-bold underline decoration-blue-200 dark:decoration-blue-800" : ""}
+          >
+            {p.text}
+          </span>
+        ))}
       </span>
     );
   };
