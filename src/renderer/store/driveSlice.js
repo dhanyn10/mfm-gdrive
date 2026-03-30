@@ -1,11 +1,10 @@
-import React from 'react';
+import { createElement } from 'react';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addNotification } from './uiSlice';
 import { showToast } from '../utils/toast';
 import ErrorToastContent from '../components/common/ErrorToastContent';
 
 const ITEMS_PER_PAGE = 20;
-const TIMEOUT_MS = 10000;
 
 /**
  * Common error handler for Google Drive API responses.
@@ -17,7 +16,7 @@ const handleDriveError = (data, dispatch) => {
 
   if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
     showToast({
-      component: React.createElement(ErrorToastContent, { error: data.error }),
+      component: createElement(ErrorToastContent, { error: data.error }),
       duration: 10000,
       close: true,
       gravity: "bottom",

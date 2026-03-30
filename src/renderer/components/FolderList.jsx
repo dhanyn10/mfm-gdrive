@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectFolder, setCurrentParentId, pushParentHistory, popParentHistory, fetchFolders, setSearchResults } from '../store/driveSlice';
 import { Spinner } from './common/Spinner';

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 const SidebarResizer = ({ sidebarWidth, setSidebarWidth }) => {
   const [isResizing, setIsResizing] = useState(false);

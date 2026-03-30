@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-import React from 'react';
 
 /**
  * A reusable component for the Drive network error toast.

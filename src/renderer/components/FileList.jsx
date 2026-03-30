@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchFiles,
@@ -17,7 +17,7 @@ import MinusSquareIcon from '../../../assets/minus-square.svg?react';
 
 function FileList() {
   const dispatch = useDispatch();
-  const [lastSelectedIndex, setLastSelectedIndex] = React.useState(null);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
   const selectedFolderId = useSelector(state => state.drive.selectedFolderId);
 
   const files = useSelector(state => state.drive.files);
@@ -44,9 +44,6 @@ function FileList() {
     setLastSelectedIndex(null);
   }, [currentPage, selectedFolderId]);
 
-  // Determine if all items on the *current page* are selected
-  const allCurrentPageSelected = currentFiles.length > 0 &&
-    currentFiles.every(file => selectedFileIds.includes(file.id));
 
   const hasSelections = selectedFileIds.length > 0;
 
@@ -226,7 +223,7 @@ function FileList() {
                           {[...file.name].map((char, i) => {
                             const inRange = i >= slicePreview.start && i < slicePreview.end;
                             return (
-                              <React.Fragment key={i}>
+                              <Fragment key={i}>
                                 {i === slicePreview.start && (
                                   <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
                                 )}
@@ -238,7 +235,7 @@ function FileList() {
                                 ) : (
                                   <span className="flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
                                 )}
-                              </React.Fragment>
+                              </Fragment>
                             );
                           })}
                           {file.name.length === slicePreview.end && slicePreview.end !== slicePreview.start && (
