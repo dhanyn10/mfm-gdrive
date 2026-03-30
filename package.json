@@ -11,7 +11,9 @@
     "app:build": "npm run build && electron-builder",
     "postinstall": "electron-builder install-app-deps",
     "app:dist": "npm run build && electron-builder --publish=never",
-    "wdio": "wdio run ./wdio.conf.ts"
+    "wdio": "wdio run ./wdio.conf.ts",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "build": {
     "appId": "com.dhanyn.mfmgdrive",
@@ -71,7 +73,10 @@
     "@playwright/test": "^1.58.2",
     "@tailwindcss/cli": "^4.1.16",
     "@tailwindcss/vite": "^4.2.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/coverage-v8": "^4.1.2",
     "@wdio/cli": "^9.16.2",
     "@wdio/local-runner": "^9.16.2",
     "@wdio/mocha-framework": "^9.16.2",
@@ -80,12 +85,14 @@
     "electron": "^40.4.1",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
+    "jsdom": "^29.0.1",
     "npm-run-all": "^4.1.5",
     "playwright": "^1.58.2",
     "postcss-cli": "^11.0.0",
     "tailwindcss": "^4.1.18",
     "vite": "^6.4.1",
     "vite-plugin-svgr": "^4.5.0",
+    "vitest": "^4.1.2",
     "wait-on": "^9.0.4",
     "wdio-electron-service": "^9.1.0"
   },
