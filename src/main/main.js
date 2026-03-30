@@ -131,7 +131,7 @@ app.on('window-all-closed', function () {
 // In this file, you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-const { authorize, getFolders, getFiles, renameFile } = require('./driveApi');
+const { authorize, getFolders, getFiles, searchFolders, renameFile } = require('./driveApi');
 const { sliceText, padText } = require('./fileOperations');
 
 // Drive APIs
@@ -162,6 +162,19 @@ ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null,
         };
     } catch (error) {
         console.error("Error getting folders", error);
+        return { folders: [], nextPageToken: null, error: error.message, errorCode: error.code };
+    }
+});
+
+ipcMain.handle('search-folders', async (event, query, pageToken = null) => {
+    try {
+        const result = await searchFolders(query, pageToken);
+        return {
+             folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
+             nextPageToken: result.nextPageToken
+        };
+    } catch (error) {
+        console.error("Error searching folders", error);
         return { folders: [], nextPageToken: null, error: error.message, errorCode: error.code };
     }
 });

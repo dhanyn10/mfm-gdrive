@@ -36,4 +36,15 @@ export default defineConfig({
       '@': resolve(__dirname, 'src/renderer'),
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/renderer/__tests__/setup.js'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['src/renderer/**/*.jsx', 'src/renderer/**/*.js'],
+      exclude: ['src/renderer/main.jsx', 'src/renderer/__tests__/**'],
+    },
+  },
 });
