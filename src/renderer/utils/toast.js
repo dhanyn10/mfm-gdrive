@@ -28,11 +28,7 @@ export function showToast(options) {
             if (reactRoot) {
                 // Short timeout to allow any CSS transitions to finish before unmounting
                 setTimeout(() => {
-                    try {
-                        reactRoot.unmount();
-                    } catch (e) {
-                         // Already unmounted or other cleanup issues
-                    }
+                    reactRoot.unmount();
                 }, 300);
             }
             // Remove from active array when it closes naturally
