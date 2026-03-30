@@ -13,12 +13,12 @@ import { useOperationManager } from '../hooks/useOperationManager';
 const ReplaceParams = ({ replaceTarget, setReplaceTarget, replaceWith, setReplaceWith }) => (
   <>
     <div>
-      <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Target text</label>
-      <input type="text" value={replaceTarget} onChange={e => setReplaceTarget(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required />
+      <label htmlFor="replaceTarget" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Target text</label>
+      <input id="replaceTarget" type="text" value={replaceTarget} onChange={e => setReplaceTarget(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required />
     </div>
     <div>
-      <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Replace with</label>
-      <input type="text" value={replaceWith} onChange={e => setReplaceWith(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+      <label htmlFor="replaceWith" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Replace with</label>
+      <input id="replaceWith" type="text" value={replaceWith} onChange={e => setReplaceWith(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
     </div>
   </>
 );
@@ -41,9 +41,10 @@ const SliceParams = ({ sliceStart, setSliceStart, sliceEnd, setSliceEnd, maxSlic
   return (
     <>
       <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start index</label>
-        <div className="flex items-center gap-2">
+        <label htmlFor="sliceStart" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start index</label>
+        <div className="flex items-center gap-1">
           <input
+            id="sliceStart"
             type="range"
             min={0}
             max={maxSliceLength}
@@ -55,9 +56,10 @@ const SliceParams = ({ sliceStart, setSliceStart, sliceEnd, setSliceEnd, maxSlic
         </div>
       </div>
       <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End index</label>
-        <div className="flex items-center gap-2">
+        <label htmlFor="sliceEnd" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End index</label>
+        <div className="flex items-center gap-1">
           <input
+            id="sliceEnd"
             type="range"
             min={0}
             max={maxSliceLength}
@@ -77,8 +79,8 @@ const SliceParams = ({ sliceStart, setSliceStart, sliceEnd, setSliceEnd, maxSlic
  */
 const PadParams = ({ padCount, setPadCount }) => (
   <div>
-    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Count</label>
-    <input type="number" value={padCount} onChange={e => setPadCount(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required min="1" />
+    <label htmlFor="padCount" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Count</label>
+    <input id="padCount" type="number" value={padCount} onChange={e => setPadCount(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required min="1" />
   </div>
 );
 
@@ -157,9 +159,10 @@ function ExecuteSidebar() {
       </div>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Target: {selectedFileIds.length} file(s)</p>
       
-      <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none">Select Operation</label>
+      <label htmlFor="operationDropdown" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white select-none">Select Operation</label>
       <div className="relative mb-4">
         <button
+          id="operationDropdown"
           onClick={toggleDropdown}
           className="text-gray-900 bg-gray-50 border border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-800 select-none"
           type="button"
