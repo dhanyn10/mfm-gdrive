@@ -152,6 +152,13 @@ function ExecuteSidebar() {
     }
   };
 
+  const operationLabels = {
+    replace: 'Replace Text',
+    slice: 'Slice Text',
+    pad: 'Pad Filename',
+  };
+  const currentOperationLabel = operationLabels[operation] || 'Choose an operation';
+
   return (
     <div className="block p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 h-full overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
@@ -167,9 +174,7 @@ function ExecuteSidebar() {
           className="text-gray-900 bg-gray-50 border border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-800 select-none"
           type="button"
         >
-          {operation === 'replace' ? 'Replace Text' :
-           operation === 'slice' ? 'Slice Text' :
-           operation === 'pad' ? 'Pad Filename' : 'Choose an operation'}
+          {currentOperationLabel}
           <svg className="w-2.5 h-2.5 ms-3" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4"/>
           </svg>
