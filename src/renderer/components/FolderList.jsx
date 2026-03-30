@@ -157,8 +157,9 @@ function FolderList() {
                 setIsSearchOpen(false);
               }}
               className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white flex items-center outline-none focus:bg-gray-100 dark:focus:bg-gray-700 text-left"
+              aria-label={`Select folder: ${folder.name}`}
             >
-              <FolderIcon className="w-4 h-4 mr-2 text-gray-400" />
+              <FolderIcon className="w-4 h-4 mr-2 text-gray-400" aria-hidden="true" />
               {renderHighlightedName(folder.name, searchQuery)}
             </button>
           </li>
@@ -189,9 +190,10 @@ function FolderList() {
               className={`w-full px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 outline-none focus:bg-gray-100 dark:focus:bg-gray-700 text-left ${
                 selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
               }`}
+              aria-label={`Select folder: ${folder.name}`}
             >
               <div className="flex items-center">
-                <FolderIcon className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" aria-label="Folder" />
+                <FolderIcon className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" aria-hidden="true" />
                 <span className="truncate" title={folder.name}>{folder.name}</span>
               </div>
             </button>
@@ -225,8 +227,9 @@ function FolderList() {
                 : 'text-gray-500 hover:text-blue-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-gray-600'
             }`}
             title="Search folders"
+            aria-label="Search folders"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
@@ -235,8 +238,9 @@ function FolderList() {
                onClick={handleUpDirectory}
                className="px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center justify-center min-w-[32px] min-h-[28px]"
                title="Go Up"
+               aria-label="Go Up"
              >
-               <LevelUpIcon className="w-4 h-4" aria-label="Go Up" />
+               <LevelUpIcon className="w-4 h-4" aria-hidden="true" />
              </button>
           )}
         </div>
