@@ -10,8 +10,8 @@ jobs:
       - run:
           name: Enable pnpm
           command: |
-            corepack enable
-            corepack prepare pnpm@10.32.1 --activate
+            sudo corepack enable
+            sudo corepack prepare pnpm@10.32.1 --activate
       - restore_cache:
           name: Restore pnpm cache
           keys:
@@ -30,12 +30,6 @@ jobs:
           command: |
             # Build for Linux since we are in a Linux environment
             pnpm run app:dist -- --linux
-      - run:
-          name: Put token.json
-          # In the new setup, token.json is read from user data or app executable path.
-          # The tests mock out the interactive auth, so we don't strictly need a valid token to pass the UI tests.
-          # But we leave this here just in case the backend tests need it.
-          command: echo $TOKEN > ./dist/linux-unpacked/token.json
       - run:
           name: Run WebdriverIO tests
           command: xvfb-run -a pnpm run wdio
