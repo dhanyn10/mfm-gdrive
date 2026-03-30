@@ -23,8 +23,8 @@ function NotificationDropdown({ count }) {
 
   const handleUndo = async (e, notifId, fileId, oldName) => {
     e.stopPropagation();
-    if (window.electronAPI && window.electronAPI.undoRename) {
-       const success = await window.electronAPI.undoRename(fileId, oldName);
+    if (globalThis.electronAPI && globalThis.electronAPI.undoRename) {
+       const success = await globalThis.electronAPI.undoRename(fileId, oldName);
        if (success) {
            dispatch(triggerRefresh());
            setSwipingOutId(notifId);
