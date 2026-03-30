@@ -58,7 +58,7 @@ export const useOperationManager = () => {
     }
     if (operation === 'pad') {
       if (!padCount) return null;
-      return { position: 'start', count: parseInt(padCount, 10), char: '0' };
+      return { position: 'start', count: Number.parseInt(padCount, 10), char: '0' };
     }
     return null;
   };

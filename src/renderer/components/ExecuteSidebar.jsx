@@ -28,12 +28,12 @@ const ReplaceParams = ({ replaceTarget, setReplaceTarget, replaceWith, setReplac
  */
 const SliceParams = ({ sliceStart, setSliceStart, sliceEnd, setSliceEnd, maxSliceLength }) => {
   const handleSliceStart = (e) => {
-    const v = parseInt(e.target.value, 10);
+    const v = Number.parseInt(e.target.value, 10);
     setSliceStart(v);
     if (v > sliceEnd) setSliceEnd(v);
   };
   const handleSliceEnd = (e) => {
-    const v = parseInt(e.target.value, 10);
+    const v = Number.parseInt(e.target.value, 10);
     setSliceEnd(v);
     if (v < sliceStart) setSliceStart(v);
   };
