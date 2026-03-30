@@ -1,8 +1,8 @@
+import React from 'react';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addNotification } from './uiSlice';
 import { setAuthorized } from './authSlice';
 import { showToast } from '../utils/toast';
-import { renderToString } from 'react-dom/server';
 import ErrorToastContent from '../components/common/ErrorToastContent';
 
 const ITEMS_PER_PAGE = 20;
@@ -18,8 +18,7 @@ const handleDriveError = (data, dispatch) => {
 
   if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
     showToast({
-      text: renderToString(<ErrorToastContent error={data.error} />),
-      escapeMarkup: false,
+      component: React.createElement(ErrorToastContent, { error: data.error }),
       duration: 10000,
       close: true,
       gravity: "bottom",
