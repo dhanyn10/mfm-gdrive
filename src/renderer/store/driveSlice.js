@@ -1,8 +1,37 @@
+import React from 'react';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addNotification } from './uiSlice';
+import { setAuthorized } from './authSlice';
 import { showToast } from '../utils/toast';
+import ErrorToastContent from '../components/common/ErrorToastContent';
 
 const ITEMS_PER_PAGE = 20;
+const TIMEOUT_MS = 10000;
+
+/**
+ * Common error handler for Google Drive API responses.
+ * Detects network errors, authorization issues, and general errors.
+ * Returns true if an error was handled.
+ */
+const handleDriveError = (data, dispatch) => {
+  if (!data?.error) return false;
+
+  if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
+    showToast({
+      component: React.createElement(ErrorToastContent, { error: data.error }),
+      duration: 10000,
+      close: true,
+      gravity: "bottom",
+      position: "right",
+      className: "error-toast"
+    });
+  } else if (data.error === "Not authorized") {
+    dispatch(setAuthorized(false));
+  } else {
+    dispatch(addNotification({ message: data.error, type: 'error' }));
+  }
+  return true;
+};
 
 export const fetchFolders = createAsyncThunk(
   'drive/fetchFolders',
@@ -21,21 +50,8 @@ export const fetchFolders = createAsyncThunk(
 
       const fetchPromise = window.electronAPI.getFolders(parentId, pageToken, customTimeout);
       const data = await Promise.race([fetchPromise, timeoutFallback]);
-
-      if (data.error) {
-        if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
-            showToast({
-                text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${data.error}</div></details></div>`,
-                escapeMarkup: false,
-                duration: 10000,
-                close: true,
-                gravity: "bottom",
-                position: "right",
-                className: "error-toast"
-            });
-        } else {
-            dispatch(addNotification({ message: data.error, type: 'error' }));
-        }
+      
+      if (handleDriveError(data, dispatch)) {
         return null;
       }
 
@@ -72,21 +88,8 @@ export const fetchFiles = createAsyncThunk(
 
       const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
       const data = await Promise.race([fetchPromise, timeoutFallback]);
-
-      if (data.error) {
-        if (data.errorCode === 'ETIMEDOUT' || data.errorCode === 'NETWORK_ERROR') {
-            showToast({
-                text: `<div style="display: flex; align-items: flex-start; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; color: #EF4444; flex-shrink: 0; margin-top: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><details style="max-width: 250px; flex-grow: 1;"><summary style="cursor: pointer; font-weight: bold; color: #111827; list-style: none; display: flex; align-items: center;">Network Error</summary><div style="margin-top: 8px; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; color: #374151;">${data.error}</div></details></div>`,
-                escapeMarkup: false,
-                duration: 10000,
-                close: true,
-                gravity: "bottom",
-                position: "right",
-                className: "error-toast"
-            });
-        } else {
-            dispatch(addNotification({ message: data.error, type: 'error' }));
-        }
+      
+      if (handleDriveError(data, dispatch)) {
         return null;
       }
 
@@ -114,8 +117,7 @@ export const searchFolders = createAsyncThunk(
     dispatch(setSearchingFolders(true));
     try {
       const data = await window.electronAPI.searchFolders(query, pageToken);
-      if (data.error) {
-        dispatch(addNotification({ message: data.error, type: 'error' }));
+      if (handleDriveError(data, dispatch)) {
         return { folders: [], nextPageToken: null };
       }
       return data;
