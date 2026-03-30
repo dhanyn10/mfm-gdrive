@@ -197,7 +197,16 @@ function FileList() {
                 <li
                   key={file.id}
                   onClick={(e) => handleFileClick(e, index, file.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleFileClick(e, index, file.id);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   className={liClass}
+                  aria-label={`Select file: ${file.name}`}
                 >
                   <div className="flex items-center w-full">
                     <div className="flex items-center h-5 hidden">
@@ -263,7 +272,15 @@ function FileList() {
             {nextFilesPageToken && (
                <li
                  onClick={handleLoadMore}
-                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm"
+                 onKeyDown={(e) => {
+                   if (e.key === 'Enter' || e.key === ' ') {
+                     e.preventDefault();
+                     handleLoadMore();
+                   }
+                 }}
+                 role="button"
+                 tabIndex={0}
+                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                >
                  {isLoading ? 'Loading more from Google Drive...' : 'Load more files'}
                </li>

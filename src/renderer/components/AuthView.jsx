@@ -8,7 +8,8 @@ function AuthView() {
 
   return (
     <div className="flex justify-center items-center h-[calc(100vh-2rem)]">
-      <div
+      <button
+        type="button"
         onClick={handleAuthorize}
         data-testid="auth-button"
         className="flex justify-center items-center w-full max-w-sm mx-auto cursor-pointer"
@@ -22,7 +23,7 @@ function AuthView() {
             </p>
           </div>
         </div>
-      </div>
+      </button>
     </div>
   );
 }
