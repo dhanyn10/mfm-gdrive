@@ -244,10 +244,7 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
 ipcMain.handle('undo-rename', async (event, fileId, oldName) => {
     try {
         const renamed = await renameFile(fileId, oldName);
-        if (renamed) {
-            return true;
-        }
-        return false;
+        return !!renamed;
     } catch (error) {
         console.error("Error undoing rename:", error);
         event.sender.send('update-status', `Failed to undo rename: ${error.message}`);
