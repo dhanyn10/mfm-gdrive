@@ -37,7 +37,7 @@ function ExecuteSidebar() {
       } else if (operation === 'slice') {
         params = { start: sliceStart, end: sliceEnd || undefined };
       } else if (operation === 'pad') {
-        params = { position: 'start', count: parseInt(padCount, 10), char: '0' };
+        params = { position: 'start', count: Number.parseInt(padCount, 10), char: '0' };
       }
       dispatch(setOperationPreview({ active: true, type: operation, params }));
     } else {
