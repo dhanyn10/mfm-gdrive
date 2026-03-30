@@ -17,15 +17,15 @@ function App() {
   const isFoldersOpen = useSelector((state) => state.ui.isFoldersOpen);
 
   // Default sidebar width 33.33vw (1/3 of screen)
-  const [sidebarWidth, setSidebarWidth] = useState(() => window.innerWidth / 3);
+  const [sidebarWidth, setSidebarWidth] = useState(() => globalThis.innerWidth / 3);
 
   useEffect(() => {
     // Check initial auth status
     const checkAuth = async () => {
-      if (window.electronAPI) {
+      if (globalThis.electronAPI) {
         dispatch(setAuthorizing());
         try {
-          const authorized = await window.electronAPI.checkAuth();
+          const authorized = await globalThis.electronAPI.checkAuth();
           dispatch(setAuthorized(authorized));
         } catch (error) {
           console.error("Auth check failed:", error);
@@ -39,21 +39,21 @@ function App() {
     // Setup global listeners (auth status updates, notifications from main)
     let removeUpdateStatus, removeAuthSuccess, removeAuthRequired, removeOperationComplete;
 
-    if (window.electronAPI) {
-      removeUpdateStatus = window.electronAPI.onUpdateStatus((status) => {
+    if (globalThis.electronAPI) {
+      removeUpdateStatus = globalThis.electronAPI.onUpdateStatus((status) => {
         dispatch(addNotification({ message: status, type: 'info' }));
       });
 
-      removeAuthSuccess = window.electronAPI.onAuthSuccess(() => {
+      removeAuthSuccess = globalThis.electronAPI.onAuthSuccess(() => {
         dispatch(setAuthorized(true));
         dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
       });
 
-      removeAuthRequired = window.electronAPI.onAuthRequired(() => {
+      removeAuthRequired = globalThis.electronAPI.onAuthRequired(() => {
         dispatch(setAuthorized(false));
       });
 
-      removeOperationComplete = window.electronAPI.onOperationComplete((data) => {
+      removeOperationComplete = globalThis.electronAPI.onOperationComplete((data) => {
           if (typeof data === 'string') {
               dispatch(addNotification({ message: data, type: "success" }));
           } else if (data && data.newName && data.oldName) {
