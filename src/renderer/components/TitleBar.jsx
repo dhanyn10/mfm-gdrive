@@ -6,22 +6,22 @@ import appIcon from '../../../assets/icon.png';
 
 function TitleBar() {
   const handleMinimize = () => {
-    window.electronAPI?.minimizeWindow();
+    globalThis.electronAPI?.minimizeWindow();
   };
 
   const handleMaximize = () => {
-    window.electronAPI?.maximizeWindow();
+    globalThis.electronAPI?.maximizeWindow();
   };
 
   const handleClose = () => {
-    window.electronAPI?.closeWindow();
+    globalThis.electronAPI?.closeWindow();
   };
 
   const handleMenuClick = (menuLabel, e) => {
       // In a real implementation, you'd calculate exact x/y or just let main process handle it via a custom event
       // This is a simplified version of the native context menu approach
       const rect = e.currentTarget.getBoundingClientRect();
-      window.electronAPI?.showSubmenu(menuLabel, Math.round(rect.left), Math.round(rect.bottom));
+      globalThis.electronAPI?.showSubmenu(menuLabel, Math.round(rect.left), Math.round(rect.bottom));
   };
 
   return (

@@ -17,56 +17,59 @@ function App() {
   const isFoldersOpen = useSelector((state) => state.ui.isFoldersOpen);
 
   // Default sidebar width 33.33vw (1/3 of screen)
-  const [sidebarWidth, setSidebarWidth] = useState(() => window.innerWidth / 3);
+  const [sidebarWidth, setSidebarWidth] = useState(() => globalThis.innerWidth / 3);
 
   useEffect(() => {
     // Check initial auth status
     const checkAuth = async () => {
-      if (window.electronAPI) {
-        dispatch(setAuthorizing());
-        try {
-          const authorized = await window.electronAPI.checkAuth();
+      dispatch(setAuthorizing());
+      try {
+        const authorized = await globalThis.electronAPI?.checkAuth();
+        if (authorized !== undefined) {
           dispatch(setAuthorized(authorized));
-        } catch (error) {
-          console.error("Auth check failed:", error);
-          dispatch(setAuthorized(false));
         }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        dispatch(setAuthorized(false));
       }
     };
 
     checkAuth();
 
     // Setup global listeners (auth status updates, notifications from main)
-    let removeUpdateStatus, removeAuthSuccess, removeOperationComplete;
+    let removeUpdateStatus, removeAuthSuccess, removeAuthRequired, removeOperationComplete;
 
-    if (window.electronAPI) {
-      removeUpdateStatus = window.electronAPI.onUpdateStatus((status) => {
-        dispatch(addNotification({ message: status, type: 'info' }));
-      });
+    removeUpdateStatus = globalThis.electronAPI?.onUpdateStatus((status) => {
+      dispatch(addNotification({ message: status, type: 'info' }));
+    });
 
-      removeAuthSuccess = window.electronAPI.onAuthSuccess(() => {
-        dispatch(setAuthorized(true));
-        dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
-      });
+    removeAuthSuccess = globalThis.electronAPI?.onAuthSuccess(() => {
+      dispatch(setAuthorized(true));
+      dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
+    });
 
-      removeOperationComplete = window.electronAPI.onOperationComplete((data) => {
-          if (typeof data === 'string') {
-              dispatch(addNotification({ message: data, type: "success" }));
-          } else if (data && data.newName && data.oldName) {
-              dispatch(addNotification({
-                  message: `Renamed ${data.oldName} to ${data.newName}`,
-                  oldName: data.oldName,
-                  fileId: data.fileId,
-                  type: "success"
-              }));
-          }
-      });
-    }
+    removeAuthRequired = globalThis.electronAPI?.onAuthRequired(() => {
+      dispatch(setAuthorized(false));
+    });
+
+    removeOperationComplete = globalThis.electronAPI?.onOperationComplete((data) => {
+        if (typeof data === 'string') {
+            dispatch(addNotification({ message: data, type: "success" }));
+        } else if (data && data.newName && data.oldName) {
+            dispatch(addNotification({
+                message: `Renamed ${data.oldName} to ${data.newName}`,
+                oldName: data.oldName,
+                fileId: data.fileId,
+                type: "success"
+            }));
+        }
+    });
 
     return () => {
-      if (removeUpdateStatus) removeUpdateStatus();
-      if (removeAuthSuccess) removeAuthSuccess();
-      if (removeOperationComplete) removeOperationComplete();
+      removeUpdateStatus?.();
+      removeAuthSuccess?.();
+      removeAuthRequired?.();
+      removeOperationComplete?.();
     };
   }, [dispatch]);
 

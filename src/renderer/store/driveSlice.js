@@ -1,7 +1,6 @@
 import React from 'react';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addNotification } from './uiSlice';
-import { setAuthorized } from './authSlice';
 import { showToast } from '../utils/toast';
 import ErrorToastContent from '../components/common/ErrorToastContent';
 
@@ -25,8 +24,9 @@ const handleDriveError = (data, dispatch) => {
       position: "right",
       className: "error-toast"
     });
-  } else if (data.error === "Not authorized") {
-    dispatch(setAuthorized(false));
+  } else if (data.authorized === false) {
+    // Silently handled by onAuthRequired listener or check-auth
+    return true;
   } else {
     dispatch(addNotification({ message: data.error, type: 'error' }));
   }
@@ -36,8 +36,6 @@ const handleDriveError = (data, dispatch) => {
 export const fetchFolders = createAsyncThunk(
   'drive/fetchFolders',
   async ({ parentId, pageToken = null, append = false, customTimeout = null }, { dispatch }) => {
-    if (!window.electronAPI) return null;
-
     if (!append) dispatch(setFolders({ folders: [], nextPageToken: null }));
     dispatch(setLoadingFolders(true));
 
@@ -48,10 +46,12 @@ export const fetchFolders = createAsyncThunk(
         }, 10000);
       });
 
-      const fetchPromise = window.electronAPI.getFolders(parentId, pageToken, customTimeout);
-      const data = await Promise.race([fetchPromise, timeoutFallback]);
-      
-      if (handleDriveError(data, dispatch)) {
+      const data = await Promise.race([
+        globalThis.electronAPI?.getFolders(parentId, pageToken, customTimeout),
+        timeoutFallback
+      ]);
+
+      if (!data || handleDriveError(data, dispatch)) {
         return null;
       }
 
@@ -74,8 +74,6 @@ export const fetchFolders = createAsyncThunk(
 export const fetchFiles = createAsyncThunk(
   'drive/fetchFiles',
   async ({ folderId, pageToken = null, append = false, customTimeout = null }, { dispatch }) => {
-    if (!window.electronAPI) return null;
-
     if (!append) dispatch(setFiles({ files: [], nextPageToken: null }));
     dispatch(setLoadingFiles(true));
 
@@ -86,10 +84,12 @@ export const fetchFiles = createAsyncThunk(
         }, 10000);
       });
 
-      const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
-      const data = await Promise.race([fetchPromise, timeoutFallback]);
-      
-      if (handleDriveError(data, dispatch)) {
+      const data = await Promise.race([
+        globalThis.electronAPI?.getFiles(folderId, pageToken, customTimeout),
+        timeoutFallback
+      ]);
+
+      if (!data || handleDriveError(data, dispatch)) {
         return null;
       }
 
@@ -112,12 +112,11 @@ export const fetchFiles = createAsyncThunk(
 export const searchFolders = createAsyncThunk(
   'drive/searchFolders',
   async ({ query, pageToken = null }, { dispatch }) => {
-    if (!window.electronAPI || !query) return { folders: [], nextPageToken: null };
-
+    if (!query) return { folders: [], nextPageToken: null };
     dispatch(setSearchingFolders(true));
     try {
-      const data = await window.electronAPI.searchFolders(query, pageToken);
-      if (handleDriveError(data, dispatch)) {
+      const data = await globalThis.electronAPI?.searchFolders(query, pageToken);
+      if (!data || handleDriveError(data, dispatch)) {
         return { folders: [], nextPageToken: null };
       }
       return data;
@@ -173,9 +172,9 @@ const driveSlice = createSlice({
     },
     popParentHistory: (state) => {
       if (state.parentHistory.length > 0) {
-          state.currentParentId = state.parentHistory.pop();
+        state.currentParentId = state.parentHistory.pop();
       } else {
-          state.currentParentId = 'root';
+        state.currentParentId = 'root';
       }
     },
 
@@ -203,8 +202,8 @@ const driveSlice = createSlice({
       state.currentPage = 1; // Reset page on folder change
       state.selectedFileIds = []; // Reset selection on folder change
       if (action.payload.id) {
-          state.files = []; // Clear files immediately when selecting a new folder
-          state.nextFilesPageToken = null;
+        state.files = []; // Clear files immediately when selecting a new folder
+        state.nextFilesPageToken = null;
       }
     },
 

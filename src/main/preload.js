@@ -13,7 +13,7 @@ const { ipcRenderer } = require('electron');
 
 // Expose a limited set of IPC functions to the renderer process.
 // This is a secure way to allow communication between the main and renderer processes.
-window.electronAPI = {
+globalThis.electronAPI = {
   getUserDataPath: () => ipcRenderer.invoke('get-user-data-path'),
   checkAuth: () => ipcRenderer.invoke('check-auth'),
   authorize: () => ipcRenderer.send('authorize'),
@@ -37,6 +37,11 @@ window.electronAPI = {
     const handler = () => callback();
     ipcRenderer.on('auth-success', handler);
     return () => ipcRenderer.removeListener('auth-success', handler);
+  },
+  onAuthRequired: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on('auth-required', handler);
+    return () => ipcRenderer.removeListener('auth-required', handler);
   },
   onOperationComplete: (callback) => {
     const handler = (_event, msg) => callback(msg);
