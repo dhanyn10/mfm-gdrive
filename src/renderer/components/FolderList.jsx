@@ -146,31 +146,21 @@ function FolderList() {
     renderSearchContent = (
       <ul>
         {sortedSearchResults.map(folder => (
-          <li 
-            key={folder.id}
-            tabIndex={0}
-            role="button"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
+          <li key={folder.id} className="border-b border-gray-50 dark:border-gray-700 last:border-0">
+            <button 
+              type="button"
+              onClick={() => {
                 dispatch(selectFolder(folder));
                 setScrollRequestTimestamp(Date.now());
                 setSearchQuery('');
                 setShowSearchDropdown(false);
                 setIsSearchOpen(false);
-              }
-            }}
-            onClick={() => {
-              dispatch(selectFolder(folder));
-              setScrollRequestTimestamp(Date.now());
-              setSearchQuery('');
-              setShowSearchDropdown(false);
-              setIsSearchOpen(false);
-            }}
-            className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white border-b border-gray-50 dark:border-gray-700 last:border-0 flex items-center outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
-          >
-            <FolderIcon className="w-4 h-4 mr-2 text-gray-400" />
-            {renderHighlightedName(folder.name, searchQuery)}
+              }}
+              className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white flex items-center outline-none focus:bg-gray-100 dark:focus:bg-gray-700 text-left"
+            >
+              <FolderIcon className="w-4 h-4 mr-2 text-gray-400" />
+              {renderHighlightedName(folder.name, searchQuery)}
+            </button>
           </li>
         ))}
       </ul>
@@ -191,43 +181,31 @@ function FolderList() {
     renderFolderListContent = (
       <>
         {folders.map((folder) => (
-          <li
-            key={folder.id}
-            id={`folder-${folder.id}`}
-            tabIndex={0}
-            role="button"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleFolderClick(folder);
-              }
-            }}
-            onClick={() => handleFolderClick(folder)}
-            onDoubleClick={() => handleDoubleClick(folder)}
-            className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 outline-none focus:bg-gray-100 dark:focus:bg-gray-700 ${
-              selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            <div className="flex items-center">
-              <FolderIcon className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" aria-label="Folder" />
-              <span className="truncate" title={folder.name}>{folder.name}</span>
-            </div>
+          <li key={folder.id} id={`folder-${folder.id}`} className="border-b border-gray-100 dark:border-gray-700">
+            <button
+              type="button"
+              onClick={() => handleFolderClick(folder)}
+              onDoubleClick={() => handleDoubleClick(folder)}
+              className={`w-full px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 outline-none focus:bg-gray-100 dark:focus:bg-gray-700 text-left ${
+                selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <FolderIcon className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" />
+                <span className="truncate" title={folder.name}>{folder.name}</span>
+              </div>
+            </button>
           </li>
         ))}
         {nextFoldersPageToken && (
-           <li
-             tabIndex={0}
-             role="button"
-             onKeyDown={(e) => {
-               if (e.key === 'Enter' || e.key === ' ') {
-                 e.preventDefault();
-                 dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }));
-               }
-             }}
-             onClick={() => dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }))}
-             className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
-           >
-             {isLoading ? 'Loading more...' : 'Load more folders'}
+           <li>
+             <button
+               type="button"
+               onClick={() => dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }))}
+               className="w-full px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
+             >
+               {isLoading ? 'Loading more...' : 'Load more folders'}
+             </button>
            </li>
         )}
       </>
@@ -253,13 +231,13 @@ function FolderList() {
             </svg>
           </button>
           {parentHistory.length > 0 && (
-             <button
-               onClick={handleUpDirectory}
-               className="px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center justify-center min-w-[32px] min-h-[28px]"
-               title="Go Up"
-             >
-               <LevelUpIcon className="w-4 h-4" aria-label="Go Up" />
-             </button>
+              <button
+                onClick={handleUpDirectory}
+                className="px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center justify-center min-w-[32px] min-h-[28px]"
+                title="Go Up"
+              >
+                <LevelUpIcon className="w-4 h-4" />
+              </button>
           )}
         </div>
       </div>

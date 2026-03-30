@@ -29,7 +29,7 @@ function Navigation() {
     <nav className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 mb-4 flex-none">
       <div className="container mx-auto flex items-center p-4 relative">
         <div className="flex-grow flex justify-center">
-          <div className="inline-flex rounded-md" role="group">
+          <fieldset className="inline-flex rounded-md border-none p-0 m-0 min-w-0">
             <button
               onClick={() => dispatch(toggleFolders())}
               type="button"
@@ -59,7 +59,7 @@ function Navigation() {
             >
               Execute
             </button>
-          </div>
+          </fieldset>
         </div>
 
         <div className="absolute right-4 flex items-center space-x-2">
