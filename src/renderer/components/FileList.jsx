@@ -223,7 +223,7 @@ function FileList() {
                           {[...file.name].map((char, i) => {
                             const inRange = i >= slicePreview.start && i < slicePreview.end;
                             return (
-                              <Fragment key={i}>
+                              <Fragment key={`${file.id}-char-${i}`}>
                                 {i === slicePreview.start && (
                                   <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
                                 )}
