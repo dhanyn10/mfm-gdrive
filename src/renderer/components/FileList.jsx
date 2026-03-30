@@ -55,7 +55,7 @@ function FileList() {
 
     if (type === 'replace') {
       if (!params.search) return originalName;
-        return originalName.replaceAll(params.search, params.replace || '');
+      return originalName.replaceAll(params.search, params.replace || '');
     } else if (type === 'slice') {
       const { start, end } = params;
       if (start === undefined || start === null) return originalName;
