@@ -112,6 +112,108 @@ function FolderList() {
       dispatch(selectFolder({id: null}));
   };
 
+  // 1. Search Result Dropdown content
+  let renderSearchContent = null;
+  if (isSearching) {
+    renderSearchContent = (
+      <div className="p-4 flex justify-center">
+        <Spinner className="h-5 w-5 text-blue-500" />
+      </div>
+    );
+  } else if (searchResults.length === 0) {
+    renderSearchContent = <div className="p-4 text-sm text-gray-500 text-center">No matches found</div>;
+  } else {
+    renderSearchContent = (
+      <ul>
+        {sortedSearchResults.map(folder => (
+          <li 
+            key={folder.id}
+            tabIndex={0}
+            role="button"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch(selectFolder(folder));
+                setScrollRequestTimestamp(Date.now());
+                setSearchQuery('');
+                setShowSearchDropdown(false);
+                setIsSearchOpen(false);
+              }
+            }}
+            onClick={() => {
+              dispatch(selectFolder(folder));
+              setScrollRequestTimestamp(Date.now());
+              setSearchQuery('');
+              setShowSearchDropdown(false);
+              setIsSearchOpen(false);
+            }}
+            className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white border-b border-gray-50 dark:border-gray-700 last:border-0 flex items-center outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
+          >
+            <FolderIcon className="w-4 h-4 mr-2 text-gray-400" />
+            {renderHighlightedName(folder.name, searchQuery)}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  // 2. Main Folder List content
+  let renderFolderListContent;
+  if (isLoading && folders.length === 0) {
+    renderFolderListContent = (
+      <li className="p-4 flex justify-center items-center">
+        <Spinner className="h-8 w-8 text-blue-500" />
+      </li>
+    );
+  } else if (folders.length === 0) {
+    renderFolderListContent = <li className="p-4 text-center text-gray-500">No folders found in this directory</li>;
+  } else {
+    renderFolderListContent = (
+      <>
+        {folders.map((folder) => (
+          <li
+            key={folder.id}
+            id={`folder-${folder.id}`}
+            tabIndex={0}
+            role="button"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleFolderClick(folder);
+              }
+            }}
+            onClick={() => handleFolderClick(folder)}
+            onDoubleClick={() => handleDoubleClick(folder)}
+            className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 outline-none focus:bg-gray-100 dark:focus:bg-gray-700 ${
+              selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            <div className="flex items-center">
+              <FolderIcon className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" aria-label="Folder" />
+              <span className="truncate" title={folder.name}>{folder.name}</span>
+            </div>
+          </li>
+        ))}
+        {nextFoldersPageToken && (
+           <li
+             tabIndex={0}
+             role="button"
+             onKeyDown={(e) => {
+               if (e.key === 'Enter' || e.key === ' ') {
+                 e.preventDefault();
+                 dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }));
+               }
+             }}
+             onClick={() => dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }))}
+             className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
+           >
+             {isLoading ? 'Loading more...' : 'Load more folders'}
+           </li>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="block bg-white rounded-lg shadow-sm dark:bg-gray-800 divide-y flex flex-col max-h-full h-fit">
       <div className="flex justify-between items-center px-6 py-2 bg-gray-50 dark:bg-gray-700">
@@ -157,97 +259,13 @@ function FolderList() {
               ref={dropdownRef}
               className="absolute left-0 right-0 top-full mt-1 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
             >
-              {isSearching ? (
-                <div className="p-4 flex justify-center"><Spinner className="h-5 w-5 text-blue-500" /></div>
-              ) : searchResults.length === 0 ? (
-                <div className="p-4 text-sm text-gray-500 text-center">No matches found</div>
-              ) : (
-                <ul>
-                {sortedSearchResults.map(folder => (
-                  <li 
-                    key={folder.id}
-                    tabIndex={0}
-                    role="button"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        dispatch(selectFolder(folder));
-                        setScrollRequestTimestamp(Date.now());
-                        setSearchQuery('');
-                        setShowSearchDropdown(false);
-                        setIsSearchOpen(false);
-                      }
-                    }}
-                    onClick={() => {
-                      dispatch(selectFolder(folder));
-                      setScrollRequestTimestamp(Date.now());
-                      setSearchQuery('');
-                      setShowSearchDropdown(false);
-                      setIsSearchOpen(false);
-                    }}
-                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white border-b border-gray-50 dark:border-gray-700 last:border-0 flex items-center outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
-                  >
-                    <FolderIcon className="w-4 h-4 mr-2 text-gray-400" />
-                    {renderHighlightedName(folder.name, searchQuery)}
-                  </li>
-                ))}
-              </ul>
-              )}
+              {renderSearchContent}
             </div>
           )}
         </div>
       )}
       <ul id="folder-list" className="overflow-y-auto select-none max-h-[calc(100vh-240px)] flex-1">
-        {isLoading && folders.length === 0 ? (
-           <li className="p-4 flex justify-center items-center">
-             <Spinner className="h-8 w-8 text-blue-500" />
-           </li>
-        ) : folders.length === 0 ? (
-           <li className="p-4 text-center text-gray-500">No folders found in this directory</li>
-        ) : (
-          <>
-            {folders.map((folder) => (
-              <li
-                key={folder.id}
-                id={`folder-${folder.id}`}
-                tabIndex={0}
-                role="button"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleFolderClick(folder);
-                  }
-                }}
-                onClick={() => handleFolderClick(folder)}
-                onDoubleClick={() => handleDoubleClick(folder)}
-                className={`px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 outline-none focus:bg-gray-100 dark:focus:bg-gray-700 ${
-                  selectedFolderId === folder.id ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                <div className="flex items-center">
-                  <FolderIcon className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" aria-label="Folder" />
-                  <span className="truncate" title={folder.name}>{folder.name}</span>
-                </div>
-              </li>
-            ))}
-            {nextFoldersPageToken && (
-               <li
-                 tabIndex={0}
-                 role="button"
-                 onKeyDown={(e) => {
-                   if (e.key === 'Enter' || e.key === ' ') {
-                     e.preventDefault();
-                     dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }));
-                   }
-                 }}
-                 onClick={() => dispatch(fetchFolders({ parentId: currentParentId, pageToken: nextFoldersPageToken, append: true }))}
-                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
-               >
-                 {isLoading ? 'Loading more...' : 'Load more folders'}
-               </li>
-            )}
-          </>
-        )}
+        {renderFolderListContent}
       </ul>
     </div>
   );

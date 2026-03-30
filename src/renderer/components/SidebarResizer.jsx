@@ -23,9 +23,9 @@ const SidebarResizer = ({ sidebarWidth, setSidebarWidth }) => {
 
       // Constraints:
       // min width 30% of viewport
-      const minWidth = window.innerWidth * 0.3;
+      const minWidth = globalThis.innerWidth * 0.3;
       // max width 50% of viewport
-      const maxWidth = window.innerWidth * 0.5;
+      const maxWidth = globalThis.innerWidth * 0.5;
 
       if (newWidth >= minWidth && newWidth <= maxWidth) {
         setSidebarWidth(newWidth);
@@ -39,15 +39,15 @@ const SidebarResizer = ({ sidebarWidth, setSidebarWidth }) => {
 
   useEffect(() => {
     if (isResizing) {
-      window.addEventListener('mousemove', resize);
-      window.addEventListener('mouseup', stopResizing);
+      globalThis.addEventListener('mousemove', resize);
+      globalThis.addEventListener('mouseup', stopResizing);
     } else {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
+      globalThis.removeEventListener('mousemove', resize);
+      globalThis.removeEventListener('mouseup', stopResizing);
     }
     return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
+      globalThis.removeEventListener('mousemove', resize);
+      globalThis.removeEventListener('mouseup', stopResizing);
     };
   }, [isResizing, resize, stopResizing]);
 
