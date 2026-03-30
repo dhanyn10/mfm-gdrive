@@ -37,7 +37,7 @@ function App() {
     checkAuth();
 
     // Setup global listeners (auth status updates, notifications from main)
-    let removeUpdateStatus, removeAuthSuccess, removeOperationComplete;
+    let removeUpdateStatus, removeAuthSuccess, removeAuthRequired, removeOperationComplete;
 
     if (window.electronAPI) {
       removeUpdateStatus = window.electronAPI.onUpdateStatus((status) => {
@@ -47,6 +47,10 @@ function App() {
       removeAuthSuccess = window.electronAPI.onAuthSuccess(() => {
         dispatch(setAuthorized(true));
         dispatch(addNotification({ message: "Successfully authorized with Google Drive", type: "success" }));
+      });
+
+      removeAuthRequired = window.electronAPI.onAuthRequired(() => {
+        dispatch(setAuthorized(false));
       });
 
       removeOperationComplete = window.electronAPI.onOperationComplete((data) => {
@@ -66,6 +70,7 @@ function App() {
     return () => {
       if (removeUpdateStatus) removeUpdateStatus();
       if (removeAuthSuccess) removeAuthSuccess();
+      if (removeAuthRequired) removeAuthRequired();
       if (removeOperationComplete) removeOperationComplete();
     };
   }, [dispatch]);

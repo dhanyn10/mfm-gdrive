@@ -25,8 +25,9 @@ const handleDriveError = (data, dispatch) => {
       position: "right",
       className: "error-toast"
     });
-  } else if (data.error === "Not authorized") {
-    dispatch(setAuthorized(false));
+  } else if (data.authorized === false) {
+    // Silently handled by onAuthRequired listener or check-auth
+    return true;
   } else {
     dispatch(addNotification({ message: data.error, type: 'error' }));
   }

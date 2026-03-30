@@ -38,6 +38,11 @@ window.electronAPI = {
     ipcRenderer.on('auth-success', handler);
     return () => ipcRenderer.removeListener('auth-success', handler);
   },
+  onAuthRequired: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on('auth-required', handler);
+    return () => ipcRenderer.removeListener('auth-required', handler);
+  },
   onOperationComplete: (callback) => {
     const handler = (_event, msg) => callback(msg);
     ipcRenderer.on('operation-complete', handler);

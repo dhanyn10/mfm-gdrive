@@ -134,31 +134,45 @@ app.on('window-all-closed', function () {
 const { authorize, getFolders, getFiles, searchFolders, renameFile } = require('./driveApi');
 const { sliceText, padText } = require('./fileOperations');
 
+// Helper to redirect to auth view in the renderer
+function redirectToAuth(event) {
+    if (event && event.sender) {
+        event.sender.send('auth-required');
+    }
+}
+
 // Drive APIs
 ipcMain.handle('check-auth', async () => {
-    try {
-        await authorize(null);
-        return true;
-    } catch (error) {
-        return false;
-    }
+    const client = await authorize(null);
+    return !!client;
 });
 
 ipcMain.on('authorize', async (event) => {
     try {
-        await authorize(event);
-        event.sender.send('auth-success');
+        const client = await authorize(event);
+        if (client) {
+            event.sender.send('auth-success');
+        } else {
+            redirectToAuth(event);
+        }
     } catch (error) {
-        event.sender.send('update-status', `Auth Error: ${error.message}`, error.code);
+        // Unexpected auth failure
+        if (error.message !== "Not authorized") {
+            console.error("Auth error:", error);
+        }
     }
 });
 
 ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null, customTimeout = null) => {
     try {
         const result = await getFolders(parentId, pageToken, customTimeout);
+        if (!result) {
+            redirectToAuth(event);
+            return { folders: [], nextPageToken: null, authorized: false };
+        }
         return {
-             folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
-             nextPageToken: result.nextPageToken
+            folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
+            nextPageToken: result.nextPageToken
         };
     } catch (error) {
         console.error("Error getting folders", error);
@@ -169,9 +183,13 @@ ipcMain.handle('get-folders', async (event, parentId = 'root', pageToken = null,
 ipcMain.handle('search-folders', async (event, query, pageToken = null) => {
     try {
         const result = await searchFolders(query, pageToken);
+        if (!result) {
+            redirectToAuth(event);
+            return { folders: [], nextPageToken: null, authorized: false };
+        }
         return {
-             folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
-             nextPageToken: result.nextPageToken
+            folders: result.folders.map(f => ({ id: f.id, name: f.name, parents: f.parents })),
+            nextPageToken: result.nextPageToken
         };
     } catch (error) {
         console.error("Error searching folders", error);
@@ -182,6 +200,10 @@ ipcMain.handle('search-folders', async (event, query, pageToken = null) => {
 ipcMain.handle('get-files', async (event, folderId = 'root', pageToken = null, customTimeout = null) => {
     try {
         const result = await getFiles(folderId, pageToken, customTimeout);
+        if (!result) {
+            redirectToAuth(event);
+            return { files: [], nextPageToken: null, authorized: false };
+        }
         return {
             files: result.files.map(f => ({ id: f.id, name: f.name })),
             nextPageToken: result.nextPageToken
@@ -217,7 +239,7 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
         }
 
         if (updatedFiles.length === 0) {
-           event.sender.send('update-status', `No files needed changes.`);
+            event.sender.send('update-status', `No files needed changes.`);
         }
         return updatedFiles;
     } catch (error) {

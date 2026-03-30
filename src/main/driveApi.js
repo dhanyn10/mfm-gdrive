@@ -26,17 +26,15 @@ async function initializePaths() {
 }
 
 async function loadSavedCredentialsIfExist() {
-    try {
-        const content = await fs.readFile(LOCAL_TOKEN_PATH).catch(() => {
-            return fs.readFile(TOKEN_PATH);
-        });
+    const content = await fs.readFile(LOCAL_TOKEN_PATH).catch(() => {
+        return fs.readFile(TOKEN_PATH).catch(() => null);
+    });
 
-        if (content) {
-            const credentials = JSON.parse(content);
-            return google.auth.fromJSON(credentials);
-        }
-    } catch (err) {
-        console.log('No valid token found in user data or local directory.');
+    if (content) {
+        return Promise.resolve(content)
+            .then(JSON.parse)
+            .then(credentials => google.auth.fromJSON(credentials))
+            .catch(() => null);
     }
     return null;
 }
@@ -60,9 +58,9 @@ function isNetworkError(error) {
     const msg = error.message || '';
     const code = error.code || '';
     return msg.includes('ETIMEDOUT') || code === 'ETIMEDOUT' ||
-           msg.includes('ENOTFOUND') || code === 'ENOTFOUND' ||
-           msg.includes('ECONNREFUSED') || code === 'ECONNREFUSED' ||
-           msg.includes('ECONNRESET') || code === 'ECONNRESET';
+        msg.includes('ENOTFOUND') || code === 'ENOTFOUND' ||
+        msg.includes('ECONNREFUSED') || code === 'ECONNREFUSED' ||
+        msg.includes('ECONNRESET') || code === 'ECONNRESET';
 }
 
 function throwNetworkError(contextMsg) {
@@ -76,17 +74,9 @@ let _driveClient = null;
 
 async function authorize(event) {
     await initializePaths();
-    
+
     // Always attempt to load credentials from disk to verify existence and validity
-    let client;
-    try {
-        client = await loadSavedCredentialsIfExist();
-    } catch (error) {
-        if (isNetworkError(error)) {
-             throwNetworkError("Connection failed while loading saved credentials.");
-        }
-        throw error;
-    }
+    let client = await loadSavedCredentialsIfExist();
 
     if (client) {
         _driveClient = google.drive({ version: 'v3', auth: client });
@@ -118,11 +108,11 @@ async function authorize(event) {
         }
     }
 
-    throw new Error("Not authorized");
+    return null;
 }
 
 async function getFolders(parentId = 'root', pageToken = null, customTimeout = null) {
-    await authorize(null);
+    if (!await authorize(null)) return null;
 
     try {
         const response = await limiter.schedule(() => _driveClient.files.list({
@@ -147,7 +137,7 @@ async function getFolders(parentId = 'root', pageToken = null, customTimeout = n
 }
 
 async function searchFolders(query, pageToken = null) {
-    await authorize(null);
+    if (!await authorize(null)) return null;
 
     try {
         const response = await limiter.schedule(() => _driveClient.files.list({
@@ -172,7 +162,7 @@ async function searchFolders(query, pageToken = null) {
 }
 
 async function getFiles(parentId = 'root', pageToken = null, customTimeout = null) {
-    await authorize(null);
+    if (!await authorize(null)) return null;
 
     try {
         const response = await limiter.schedule(() => _driveClient.files.list({
@@ -197,7 +187,7 @@ async function getFiles(parentId = 'root', pageToken = null, customTimeout = nul
 }
 
 async function renameFile(fileId, newTitle) {
-    await authorize(null);
+    if (!await authorize(null)) return null;
 
     const body = { 'name': newTitle };
     try {
