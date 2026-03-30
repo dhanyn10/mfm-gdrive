@@ -55,7 +55,7 @@ function App() {
     removeOperationComplete = globalThis.electronAPI?.onOperationComplete((data) => {
         if (typeof data === 'string') {
             dispatch(addNotification({ message: data, type: "success" }));
-        } else if (data && data.newName && data.oldName) {
+        } else if (data?.newName && data?.oldName) {
             dispatch(addNotification({
                 message: `Renamed ${data.oldName} to ${data.newName}`,
                 oldName: data.oldName,
