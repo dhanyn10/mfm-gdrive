@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchFiles,
@@ -66,7 +66,7 @@ function FileList() {
     } else if (type === 'pad') {
       const { count, char, position } = params;
       if (!count || !char) return originalName;
-      return originalName.replace(/\d+/, (match) => {
+      return originalName.replaceAll(/\d+/g, (match) => {
         if (match.length >= count) return match;
         if (position === 'start') {
           return match.padStart(count, char);

@@ -12,27 +12,38 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
    * Generates the array of page numbers and ellipses based on the current state.
    */
   const getPageNumbers = () => {
-    const items = [];
     if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) items.push({ value: i, id: `page-${i}` });
-    } else if (currentPage <= 4) {
-      for (let i = 1; i <= 5; i++) items.push({ value: i, id: `page-${i}` });
-      items.push({ value: '...', id: 'ellipsis-end' });
-      items.push({ value: totalPages, id: `page-${totalPages}` });
-    } else if (currentPage >= totalPages - 3) {
-      items.push({ value: 1, id: 'page-1' });
-      items.push({ value: '...', id: 'ellipsis-start' });
-      for (let i = totalPages - 4; i <= totalPages; i++) items.push({ value: i, id: `page-${i}` });
-    } else {
-      items.push({ value: 1, id: 'page-1' });
-      items.push({ value: '...', id: 'ellipsis-start' });
-      items.push({ value: currentPage - 1, id: `page-${currentPage - 1}` });
-      items.push({ value: currentPage, id: `page-${currentPage}` });
-      items.push({ value: currentPage + 1, id: `page-${currentPage + 1}` });
-      items.push({ value: '...', id: 'ellipsis-end' });
-      items.push({ value: totalPages, id: `page-${totalPages}` });
+      return Array.from({ length: totalPages }, (_, i) => ({ value: i + 1, id: `page-${i + 1}` }));
     }
-    return items;
+    
+    if (currentPage <= 4) {
+      return [
+        ...Array.from({ length: 5 }, (_, i) => ({ value: i + 1, id: `page-${i + 1}` })),
+        { value: '...', id: 'ellipsis-end' },
+        { value: totalPages, id: `page-${totalPages}` }
+      ];
+    }
+    
+    if (currentPage >= totalPages - 3) {
+      return [
+        { value: 1, id: 'page-1' },
+        { value: '...', id: 'ellipsis-start' },
+        ...Array.from({ length: 5 }, (_, i) => {
+          const val = totalPages - 4 + i;
+          return { value: val, id: `page-${val}` };
+        })
+      ];
+    }
+    
+    return [
+      { value: 1, id: 'page-1' },
+      { value: '...', id: 'ellipsis-start' },
+      { value: currentPage - 1, id: `page-${currentPage - 1}` },
+      { value: currentPage, id: `page-${currentPage}` },
+      { value: currentPage + 1, id: `page-${currentPage + 1}` },
+      { value: '...', id: 'ellipsis-end' },
+      { value: totalPages, id: `page-${totalPages}` }
+    ];
   };
 
   const handlePrevPage = () => {

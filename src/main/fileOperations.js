@@ -11,7 +11,7 @@ function padText(originalName, targetLength, padChar, position = 'start') {
     if (!targetLength || !padChar) return originalName;
 
     // Original behavior: pad the first number found in the filename
-    return originalName.replace(/\d+/, (match) => {
+    return originalName.replaceAll(/\d+/g, (match) => {
         if (match.length >= targetLength) return match;
         if (position === 'start') {
             return match.padStart(targetLength, padChar);
