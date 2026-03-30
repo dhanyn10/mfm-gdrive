@@ -1,36 +1,33 @@
 import React from 'react';
 
+/**
+ * Pagination component for navigating through file pages.
+ * @param {Object} props
+ * @param {number} props.currentPage
+ * @param {number} props.totalPages
+ * @param {function} props.onPageChange
+ */
 function Pagination({ currentPage, totalPages, onPageChange }) {
+  /**
+   * Generates the array of page numbers and ellipses based on the current state.
+   */
   const getPageNumbers = () => {
-    const pages = [];
     if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 4) {
-        for (let i = 1; i <= 5; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 3) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      }
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    return pages;
+
+    // Near start: 1, 2, 3, 4, 5, ..., total
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+
+    // Near end: 1, ..., total-4, total-3, total-2, total-1, total
+    if (currentPage >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    // Middle: 1, ..., cur-1, cur, cur+1, ..., total
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
   };
 
   const handlePrevPage = () => {
@@ -56,23 +53,31 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
       </button>
 
       <div className="flex space-x-1">
-        {getPageNumbers().map((page, index) => (
-          <button
-            key={index}
-            onClick={() => typeof page === 'number' && onPageChange(page)}
-            disabled={page === '...'}
-            type="button"
-            className={`px-3 py-2 text-sm font-medium rounded-lg ${
-              page === currentPage
-                ? 'bg-blue-600 text-white dark:bg-blue-500'
-                : page === '...'
-                ? 'bg-transparent text-gray-500 cursor-default'
-                : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
+        {getPageNumbers().map((page, index) => {
+          const isCurrent = page === currentPage;
+          const isEllipsis = page === '...';
+          
+          let btnClass = "px-3 py-2 text-sm font-medium rounded-lg ";
+          if (isCurrent) {
+            btnClass += "bg-blue-600 text-white dark:bg-blue-500";
+          } else if (isEllipsis) {
+            btnClass += "bg-transparent text-gray-500 cursor-default";
+          } else {
+            btnClass += "bg-white text-gray-900 border border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700";
+          }
+
+          return (
+            <button
+              key={`${page}-${index}`}
+              onClick={() => !isEllipsis && onPageChange(Number(page))}
+              disabled={isEllipsis}
+              type="button"
+              className={btnClass}
+            >
+              {page}
+            </button>
+          );
+        })}
       </div>
 
       <button
@@ -91,3 +96,4 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 }
 
 export default Pagination;
+
