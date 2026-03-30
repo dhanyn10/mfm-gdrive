@@ -55,7 +55,7 @@ function ExecuteSidebar() {
   const nextFilesPageToken = useSelector(state => state.drive.nextFilesPageToken);
 
   const handleExecute = async () => {
-    if (!window.electronAPI) return;
+    if (!globalThis.electronAPI) return;
 
     const targetFiles = files.filter(f => selectedFileIds.includes(f.id));
     if (targetFiles.length === 0) return;
@@ -75,7 +75,7 @@ function ExecuteSidebar() {
 
     setIsExecuting(true);
     try {
-      const updatedFiles = await window.electronAPI.executeOperation(operation, params, targetFiles);
+      const updatedFiles = await globalThis.electronAPI.executeOperation(operation, params, targetFiles);
 
       if (updatedFiles && updatedFiles.error) {
           const errorMsg = `Execution failed: ${updatedFiles.error}`;
