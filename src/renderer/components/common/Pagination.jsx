@@ -13,21 +13,37 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
    */
   const getPageNumbers = () => {
     if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+      return Array.from({ length: totalPages }, (_, i) => ({ value: i + 1, id: `page-${i + 1}` }));
     }
-
-    // Near start: 1, 2, 3, 4, 5, ..., total
+    
     if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, '...', totalPages];
+      return [
+        ...Array.from({ length: 5 }, (_, i) => ({ value: i + 1, id: `page-${i + 1}` })),
+        { value: '...', id: 'ellipsis-end' },
+        { value: totalPages, id: `page-${totalPages}` }
+      ];
     }
-
-    // Near end: 1, ..., total-4, total-3, total-2, total-1, total
+    
     if (currentPage >= totalPages - 3) {
-      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      return [
+        { value: 1, id: 'page-1' },
+        { value: '...', id: 'ellipsis-start' },
+        ...Array.from({ length: 5 }, (_, i) => {
+          const val = totalPages - 4 + i;
+          return { value: val, id: `page-${val}` };
+        })
+      ];
     }
-
-    // Middle: 1, ..., cur-1, cur, cur+1, ..., total
-    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+    
+    return [
+      { value: 1, id: 'page-1' },
+      { value: '...', id: 'ellipsis-start' },
+      { value: currentPage - 1, id: `page-${currentPage - 1}` },
+      { value: currentPage, id: `page-${currentPage}` },
+      { value: currentPage + 1, id: `page-${currentPage + 1}` },
+      { value: '...', id: 'ellipsis-end' },
+      { value: totalPages, id: `page-${totalPages}` }
+    ];
   };
 
   const handlePrevPage = () => {
@@ -53,9 +69,9 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
       </button>
 
       <div className="flex space-x-1">
-        {getPageNumbers().map((page, index) => {
-          const isCurrent = page === currentPage;
-          const isEllipsis = page === '...';
+        {getPageNumbers().map((item) => {
+          const isCurrent = item.value === currentPage;
+          const isEllipsis = item.value === '...';
           
           let btnClass = "px-3 py-2 text-sm font-medium rounded-lg ";
           if (isCurrent) {
@@ -68,13 +84,13 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
           return (
             <button
-              key={`${page}-${index}`}
-              onClick={() => !isEllipsis && onPageChange(Number(page))}
+              key={item.id}
+              onClick={() => !isEllipsis && onPageChange(Number(item.value))}
               disabled={isEllipsis}
               type="button"
               className={btnClass}
             >
-              {page}
+              {item.value}
             </button>
           );
         })}
