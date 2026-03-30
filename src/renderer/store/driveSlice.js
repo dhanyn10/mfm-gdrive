@@ -1,7 +1,6 @@
 import React from 'react';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addNotification } from './uiSlice';
-import { setAuthorized } from './authSlice';
 import { showToast } from '../utils/toast';
 import ErrorToastContent from '../components/common/ErrorToastContent';
 
@@ -51,7 +50,7 @@ export const fetchFolders = createAsyncThunk(
 
       const fetchPromise = window.electronAPI.getFolders(parentId, pageToken, customTimeout);
       const data = await Promise.race([fetchPromise, timeoutFallback]);
-      
+
       if (handleDriveError(data, dispatch)) {
         return null;
       }
@@ -89,7 +88,7 @@ export const fetchFiles = createAsyncThunk(
 
       const fetchPromise = window.electronAPI.getFiles(folderId, pageToken, customTimeout);
       const data = await Promise.race([fetchPromise, timeoutFallback]);
-      
+
       if (handleDriveError(data, dispatch)) {
         return null;
       }
@@ -174,9 +173,9 @@ const driveSlice = createSlice({
     },
     popParentHistory: (state) => {
       if (state.parentHistory.length > 0) {
-          state.currentParentId = state.parentHistory.pop();
+        state.currentParentId = state.parentHistory.pop();
       } else {
-          state.currentParentId = 'root';
+        state.currentParentId = 'root';
       }
     },
 
@@ -204,8 +203,8 @@ const driveSlice = createSlice({
       state.currentPage = 1; // Reset page on folder change
       state.selectedFileIds = []; // Reset selection on folder change
       if (action.payload.id) {
-          state.files = []; // Clear files immediately when selecting a new folder
-          state.nextFilesPageToken = null;
+        state.files = []; // Clear files immediately when selecting a new folder
+        state.nextFilesPageToken = null;
       }
     },
 
