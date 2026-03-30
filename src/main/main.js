@@ -215,7 +215,7 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
         for (const file of files) {
             let newName = file.name;
             if (operation === 'replace') {
-                newName = file.name.replace(new RegExp(params.search, 'g'), params.replace || '');
+                newName = file.name.replaceAll(params.search, params.replace || '');
             } else if (operation === 'slice') {
                 newName = sliceText(file.name, params.start, params.end);
             } else if (operation === 'pad') {
@@ -244,10 +244,7 @@ ipcMain.handle('execute-operation', async (event, operation, params, files) => {
 ipcMain.handle('undo-rename', async (event, fileId, oldName) => {
     try {
         const renamed = await renameFile(fileId, oldName);
-        if (renamed) {
-            return true;
-        }
-        return false;
+        return !!renamed;
     } catch (error) {
         console.error("Error undoing rename:", error);
         event.sender.send('update-status', `Failed to undo rename: ${error.message}`);

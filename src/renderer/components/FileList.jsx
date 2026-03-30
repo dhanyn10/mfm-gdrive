@@ -48,7 +48,6 @@ function FileList() {
   const hasSelections = selectedFileIds.length > 0;
 
   // Replicate logic from src/main/fileOperations.js for previewing
-  const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   const getPreviewName = (originalName) => {
     if (!operationPreview.active) return originalName;
@@ -56,12 +55,7 @@ function FileList() {
 
     if (type === 'replace') {
       if (!params.search) return originalName;
-      try {
-        const regex = new RegExp(escapeRegExp(params.search), 'g');
-        return originalName.replace(regex, params.replace || '');
-      } catch (e) {
-        return originalName;
-      }
+      return originalName.replaceAll(params.search, params.replace || '');
     } else if (type === 'slice') {
       const { start, end } = params;
       if (start === undefined || start === null) return originalName;
@@ -200,80 +194,87 @@ function FileList() {
               }
 
               return (
-                <li
-                  key={file.id}
-                  onClick={(e) => handleFileClick(e, index, file.id)}
-                  className={liClass}
-                >
-                  <div className="flex items-center w-full">
-                    <div className="flex items-center h-5 hidden">
-                      <input
-                        type="checkbox"
-                        checked={actuallySelected}
-                        onChange={(e) => handleFileClick(e.nativeEvent, index, file.id)}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                    </div>
-                    <div className="ms-3 text-sm flex-1 min-w-0">
-                      {slicePreview.active && slicePreview.start !== undefined && isSelected ? (
-                        <span
-                          className="font-medium text-gray-900 dark:text-gray-300 flex flex-row items-stretch flex-nowrap overflow-hidden min-w-0"
-                          style={{ height: '1.25em', lineHeight: 1.25 }}
-                        >
-                          {[...file.name].map((char, i) => {
-                            const inRange = i >= slicePreview.start && i < slicePreview.end;
-                            return (
-                              <Fragment key={`${file.id}-char-${i}`}>
-                                {i === slicePreview.start && (
-                                  <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
-                                )}
-                                {i === slicePreview.end && slicePreview.end !== slicePreview.start && (
-                                  <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
-                                )}
-                                {inRange ? (
-                                  <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
-                                ) : (
-                                  <span className="flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
-                                )}
-                              </Fragment>
-                            );
-                          })}
-                          {file.name.length === slicePreview.end && slicePreview.end !== slicePreview.start && (
-                            <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
-                          )}
-                        </span>
-                      ) : (
-                        <span className="font-medium text-gray-900 dark:text-gray-300 block truncate">
-                          {file.name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {hasPreview && (
-                    <>
-                      <div className="ms-3 mt-1 text-sm flex-1 min-w-0">
-                        <span className="font-medium text-green-600 dark:text-green-500 block truncate">
-                          {previewName}
-                        </span>
+                <li key={file.id}>
+                  <button
+                    type="button"
+                    onClick={(e) => handleFileClick(e, index, file.id)}
+                    className={liClass}
+                    aria-label={`Select file: ${file.name}`}
+                  >
+                    <div className="flex items-center w-full">
+                      <div className="flex items-center h-5 hidden">
+                        <input
+                          type="checkbox"
+                          checked={actuallySelected}
+                          onChange={(e) => handleFileClick(e.nativeEvent, index, file.id)}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
                       </div>
-                      <span className="absolute top-2 right-3 text-xs text-gray-400 dark:text-gray-500 italic">
-                        preview
-                      </span>
-                    </>
-                  )}
+                      <div className="ms-3 text-sm flex-1 min-w-0 text-left">
+                        {slicePreview.active && slicePreview.start !== undefined && isSelected ? (
+                          <span
+                            className="font-medium text-gray-900 dark:text-gray-300 flex flex-row items-stretch flex-nowrap overflow-hidden min-w-0"
+                            style={{ height: '1.25em', lineHeight: 1.25 }}
+                          >
+                            {[...file.name].map((char, i) => {
+                              const inRange = i >= slicePreview.start && i < slicePreview.end;
+                              return (
+                                <Fragment key={`${file.id}-char-${i}`}>
+                                  {i === slicePreview.start && (
+                                    <span className="w-0.5 shrink-0 bg-blue-500 mx-px self-stretch" title="Start" aria-hidden />
+                                  )}
+                                  {i === slicePreview.end && slicePreview.end !== slicePreview.start && (
+                                    <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                                  )}
+                                  {inRange ? (
+                                    <span className="bg-amber-200 dark:bg-amber-900/50 text-amber-900 dark:text-amber-100 flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
+                                  ) : (
+                                    <span className="flex items-center justify-center shrink-0">{char === ' ' ? '\u00A0' : char}</span>
+                                  )}
+                                </Fragment>
+                              );
+                            })}
+                            {file.name.length === slicePreview.end && slicePreview.end !== slicePreview.start && (
+                              <span className="w-0.5 shrink-0 bg-amber-500 mx-px self-stretch" title="End" aria-hidden />
+                            )}
+                          </span>
+                        ) : (
+                          <span className="font-medium text-gray-900 dark:text-gray-300 block truncate">
+                            {file.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {hasPreview && (
+                      <>
+                        <div className="ms-3 mt-1 text-sm flex-1 min-w-0 text-left">
+                          <span className="font-medium text-green-600 dark:text-green-500 block truncate">
+                            {previewName}
+                          </span>
+                        </div>
+                        <span className="absolute top-2 right-3 text-xs text-gray-400 dark:text-gray-500 italic">
+                          preview
+                        </span>
+                      </>
+                    )}
+                  </button>
                 </li>
               );
             })}
 
             {/* Server-side load more indicator */}
             {nextFilesPageToken && (
-               <li
-                 onClick={handleLoadMore}
-                 className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm"
-               >
-                 {isLoading ? 'Loading more from Google Drive...' : 'Load more files'}
+               <li>
+                 <button
+                   type="button"
+                   onClick={handleLoadMore}
+                   className="w-full px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-center text-blue-500 text-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                 >
+                   {isLoading ? 'Loading more from Google Drive...' : 'Load more files'}
+                 </button>
                </li>
             )}
+
           </ul>
         )}
       </div>

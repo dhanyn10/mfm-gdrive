@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock Electron API
-window.electronAPI = {
+globalThis.electronAPI = {
   getFolders: vi.fn().mockResolvedValue({ folders: [], nextPageToken: null }),
   getFiles: vi.fn().mockResolvedValue({ files: [], nextPageToken: null }),
   searchFolders: vi.fn().mockResolvedValue({ folders: [], nextPageToken: null }),
