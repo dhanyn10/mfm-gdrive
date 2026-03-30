@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addNotification } from './uiSlice';
+import { setAuthorized } from './authSlice';
 import { showToast } from '../utils/toast';
 
 const ITEMS_PER_PAGE = 20;
@@ -34,7 +35,11 @@ export const fetchFolders = createAsyncThunk(
                 className: "error-toast"
             });
         } else {
-            dispatch(addNotification({ message: data.error, type: 'error' }));
+            if (data.error === "Not authorized") {
+                dispatch(setAuthorized(false));
+            } else {
+                dispatch(addNotification({ message: data.error, type: 'error' }));
+            }
         }
         return null;
       }
@@ -85,7 +90,11 @@ export const fetchFiles = createAsyncThunk(
                 className: "error-toast"
             });
         } else {
-            dispatch(addNotification({ message: data.error, type: 'error' }));
+            if (data.error === "Not authorized") {
+                dispatch(setAuthorized(false));
+            } else {
+                dispatch(addNotification({ message: data.error, type: 'error' }));
+            }
         }
         return null;
       }
@@ -115,7 +124,11 @@ export const searchFolders = createAsyncThunk(
     try {
       const data = await window.electronAPI.searchFolders(query, pageToken);
       if (data.error) {
-        dispatch(addNotification({ message: data.error, type: 'error' }));
+        if (data.error === "Not authorized") {
+          dispatch(setAuthorized(false));
+        } else {
+          dispatch(addNotification({ message: data.error, type: 'error' }));
+        }
         return { folders: [], nextPageToken: null };
       }
       return data;

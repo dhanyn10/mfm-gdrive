@@ -76,6 +76,8 @@ let _driveClient = null;
 
 async function authorize(event) {
     await initializePaths();
+    
+    // Always attempt to load credentials from disk to verify existence and validity
     let client;
     try {
         client = await loadSavedCredentialsIfExist();
@@ -90,6 +92,9 @@ async function authorize(event) {
         _driveClient = google.drive({ version: 'v3', auth: client });
         return _driveClient;
     }
+
+    // If no client is loaded (file missing or invalid), reset the cached client
+    _driveClient = null;
 
     if (event) {
         try {
@@ -117,7 +122,7 @@ async function authorize(event) {
 }
 
 async function getFolders(parentId = 'root', pageToken = null, customTimeout = null) {
-    if (!_driveClient) await authorize(null);
+    await authorize(null);
 
     try {
         const response = await limiter.schedule(() => _driveClient.files.list({
@@ -142,7 +147,7 @@ async function getFolders(parentId = 'root', pageToken = null, customTimeout = n
 }
 
 async function searchFolders(query, pageToken = null) {
-    if (!_driveClient) await authorize(null);
+    await authorize(null);
 
     try {
         const response = await limiter.schedule(() => _driveClient.files.list({
@@ -167,7 +172,7 @@ async function searchFolders(query, pageToken = null) {
 }
 
 async function getFiles(parentId = 'root', pageToken = null, customTimeout = null) {
-    if (!_driveClient) await authorize(null);
+    await authorize(null);
 
     try {
         const response = await limiter.schedule(() => _driveClient.files.list({
@@ -192,7 +197,7 @@ async function getFiles(parentId = 'root', pageToken = null, customTimeout = nul
 }
 
 async function renameFile(fileId, newTitle) {
-    if (!_driveClient) await authorize(null);
+    await authorize(null);
 
     const body = { 'name': newTitle };
     try {
