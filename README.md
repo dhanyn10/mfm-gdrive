@@ -4,10 +4,8 @@
 
 **MFM GDrive** is a powerful and lightweight desktop application designed to make bulk renaming of files in your Google Drive simple, fast, and secure. Built with a modern technology stack including [Electron](https://www.electronjs.org/), [React](https://reactjs.org/), and [Tailwind CSS](https://tailwindcss.com/), it provides a seamless user experience directly from your desktop.
 
-![Electron Version](https://img.shields.io/badge/Electron-40.4.1-blue)
-![React Version](https://img.shields.io/badge/React-19.2.4-blue)
-![Tailwind Version](https://img.shields.io/badge/Tailwind-4.1.18-38B2AC)
 ![License](https://img.shields.io/badge/License-MIT-green)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dhanyn10_mfm-gdrive&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dhanyn10_mfm-gdrive)
 
 ---
 
