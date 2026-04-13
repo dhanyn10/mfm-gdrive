@@ -94,7 +94,7 @@
     "vite": "^6.4.1",
     "vite-plugin-svgr": "^4.5.0",
     "vitest": "^4.1.2",
-    "wait-on": "^9.0.4",
+    "wait-on": "^9.0.5",
     "wdio-electron-service": "^9.1.0"
   },
   "dependencies": {
